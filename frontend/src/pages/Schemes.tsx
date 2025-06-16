@@ -25,7 +25,7 @@ const Schemes = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         {/* शीर्षक */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-blue-900 mb-2">शासकीय योजना</h1>
+          <h1 className="text-3xl font-tiro-marathi text-blue-900 mb-2">शासकीय योजना</h1>
           <p className="text-lg text-gray-700 max-w-3xl mx-auto mb-4">
             ग्रामीण विकास आणि जीवनमान सुधारण्यासाठी आमच्या ग्रामपंचायतीत राबविण्यात येणाऱ्या विविध शासकीय योजनांचा अभ्यास करा.
           </p>
@@ -37,7 +37,7 @@ const Schemes = () => {
             <button
               key={cat.key}
               onClick={() => setSelectedCategory(cat.key)}
-              className={`px-5 py-2 rounded-full font-semibold shadow transition-all duration-200 border-2 border-transparent
+              className={`px-5 py-2 rounded-full font-tiro-marath shadow transition-all duration-200 border-2 border-transparent
                 ${selectedCategory === cat.key ? cat.color : 'bg-white text-blue-900 border-blue-200 hover:bg-blue-100'}`}
             >
               {cat.key === 'all' && <Filter className="inline h-4 w-4 mr-1" />}
@@ -48,7 +48,7 @@ const Schemes = () => {
 
         {/* परिचय */}
         <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-blue-800">शासकीय योजनांविषयी</h2>
+          <h2 className="text-xl font-tiro-marathi mb-4 text-blue-800">शासकीय योजनांविषयी</h2>
           <p className="text-gray-700 mb-4">
             भारत सरकार आणि राज्य सरकारांनी ग्रामीण समुदायांच्या गरजा लक्षात घेऊन विविध योजना सुरू केल्या आहेत. 
             या योजनांचा मुख्य उद्देश पायाभूत सुविधा विकास, रोजगारवाढ, सामाजिक सुरक्षा आणि ग्रामीण भागाचा एकूणच विकास करणे हा आहे.
@@ -74,13 +74,13 @@ const Schemes = () => {
               <div>
                 <div className="flex items-center mb-3">
                   <Calendar className="h-7 w-7 text-blue-600 mr-2" />
-                  <h3 className="text-xl font-bold text-blue-800">{year.year} च्या योजना</h3>
+                  <h3 className="text-xl font-tiro-marathi text-blue-800">{year.year} च्या योजना</h3>
                 </div>
                 <p className="text-gray-700 mb-4">{year.description}</p>
               </div>
               <Link
                 to={`/schemes/${year.year}`}
-                className="mt-4 inline-flex items-center justify-center px-5 py-2 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                className="mt-4 inline-flex items-center justify-center px-5 py-2 rounded-full bg-blue-600 text-white font-tiro-marathi hover:bg-blue-700 transition"
               >
                 योजना पहा <ArrowRight className="h-4 w-4 ml-2" />
               </Link>
@@ -90,7 +90,7 @@ const Schemes = () => {
 
         {/* अतिरिक्त संसाधने */}
         <div className="bg-blue-50 rounded-xl shadow-md p-6 mt-10">
-          <h2 className="text-xl font-semibold mb-4 text-blue-800">अतिरिक्त संसाधने</h2>
+          <h2 className="text-xl font-tiro-marathi mb-4 text-blue-800">अतिरिक्त संसाधने</h2>
           <p className="text-gray-700 mb-4">
             शासकीय योजनांबद्दल अधिक माहिती मिळवण्यासाठी खालील अधिकृत संकेतस्थळांना भेट द्या:
           </p>
