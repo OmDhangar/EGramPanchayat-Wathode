@@ -35,7 +35,7 @@ router.route("/marriage-certificate").post(
 );
 
 // Application retrieval routes
-router.route("/user").get(verifyJWT,getUserApplications);
+router.route("/user/:userId").get(verifyJWT,getUserApplications);
 router.route("/admin").get(verifyAdmin,getAdminApplications);
 router.route("/admin/filter").get(verifyAdmin,getApplicationsByStatus);
 router.route("/:applicationId").get(verifyJWT,getApplicationDetails);

@@ -22,10 +22,13 @@ import ManageUsers from './pages/ManageUsers';
 import UserCertificates from './pages/userCertificates';
 import UserNotifications from './pages/userNotification';
 import AboutVathode from './pages/AboutVathode';
-import Members from './pages/Members';
-import Applyforcertificates from './pages/applyforcertificates';
+
+import Members from './pages/Members'; // Import the AboutKhasala component
+// import Certificates from './pages/Certificates';
+import FormsPage from './pages/applyforcertificates';
 import PublicInfo from './pages/publicinfo';
 import Help from './pages/help';
+import { Toaster } from 'react-hot-toast';
 
 // i18n setup
 import '../src/i18n'; // Make sure the path is correct relative to your file
@@ -55,18 +58,19 @@ function AppContent() {
 
   return (
     <AuthContextProvider>
+
       <div className="flex flex-col min-h-screen">
+
         {/* Language Switcher */}
         <div className="text-right px-4 py-2 bg-gray-100 shadow-sm">
           <button onClick={() => changeLanguage('en')} className="mr-2 text-sm font-medium text-blue-600">English</button>
           <button onClick={() => changeLanguage('mr')} className="text-sm font-medium text-green-600">मराठी</button>
         </div>
-
+        <Toaster position="top-right" />
         <Navbar />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/applyforcertificates" element={<Applyforcertificates />} />
             <Route path="/schemes" element={<Schemes />} />
             <Route path="/schemes/:year" element={<SchemeDetails />} />
             <Route path="/gallery" element={<Gallery />} />
@@ -85,9 +89,10 @@ function AppContent() {
             <Route path="/home" element={<Home />} />
             <Route path="/members" element={<Members />} />
             <Route path="/notices" element={<PublicInfo />} />
-            <Route path="/contact" element={<Help />} />
-            <Route path="/apply-for-certificates" element={<Applyforcertificates />} />
             <Route path="*" element={<NotFound />} />
+
+            <Route path="/contact" element={<Help/>} />
+            <Route path="/apply-for-certificates" element={<FormsPage/>} />
           </Routes>
         </main>
         <Footer />

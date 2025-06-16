@@ -1,5 +1,4 @@
-import React from "react";
-import ApplyForCertificates from "./Applyforcertificates";
+import ApplyForCertificates from "./applyforcertificates";
 
 const Certificates = () => {
   return <ApplyForCertificates />;

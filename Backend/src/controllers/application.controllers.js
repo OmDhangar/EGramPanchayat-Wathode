@@ -78,6 +78,7 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
   // Validate date format
   const birthDate = new Date(dateOfBirth);
   if (isNaN(birthDate.getTime())) {
+    console.log(dateOfBirth)
     throw new ApiError(400, "Invalid date format for date of birth");
   }
   
@@ -121,6 +122,7 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
   
   // Create application with form data using the static method
   const application = await Application.createWithFormData(applicationData, formData);
+  console.log(application)
   
   // Create notification for user
   await createNotification(
@@ -193,13 +195,11 @@ const submitDeathCertificateApplication = asyncHandler(async (req, res) => {
     fatherAdhar:fatherAdhar || "",
     motherAdhar:motherAdhar || "",
     permanentAddress,
-    informantName,
-    informantRelation,
-    informantAddress
   };
   
   // Create application with form data using the static method
   const application = await Application.createWithFormData(applicationData, formData);
+  
   
   // Create notification for user
   await createNotification(
@@ -295,17 +295,20 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
 
 // Get user's applications
 const getUserApplications = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
-  
-  const applications = await Application.find({ applicantId: userId })
-    .sort({ createdAt: -1 })
-    .lean();
-  
+  const userId = req.params.userId; // Extract actual ID string
+
+  if (!mongoose.isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid user ID");
+  }
+
+  const applications = await Application.find({
+    applicantId: userId, // use applicantId directly
+  });
+
   return res.status(200).json(
     new ApiResponse(200, applications, "User applications retrieved successfully")
   );
 });
-
 
 
  //admin Dashboard Functionalities
