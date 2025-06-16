@@ -1,0 +1,23 @@
+{
+  "header": {
+    "title": "Gram Panchayat Vathode, Shirpur Dist.Dhule",
+    "subtitle": "Let's connect digitally",
+    "welcome": "🙏🏻 Welcome to Vathoda Gram Panchayat!",
+    "login": "Login",
+    "dashboard": "Dashboard"
+  },
+  "nav": {
+    "village": "THE VILLAGE",
+    "about": "About Vathode",
+    "gp": "GRAM PANCHAYAT",
+    "members": "Members",
+    "meetings": "Meetings",
+    "schemes": "Schemes",
+    "citizen": "CITIZEN FACILITIES",
+    "apply": "Apply for Certificates",
+    "public": "PUBLIC INFORMATION",
+    "notices": "Notices",
+    "help": "HELP",
+    "contact": "Contact"
+  }
+}
