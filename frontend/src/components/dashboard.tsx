@@ -12,8 +12,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuthContext } from "../Context/authContext";
 import { Navigate } from "react-router-dom";
 import LogoutButton from "./LogoutButton";
+import { Variants } from "framer-motion";
 
-const cardVariants = {
+const cardVariants:Variants = {
   initial: { opacity: 0, y: 30, scale: 0.97 },
   animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, type: "spring" } },
   exit: { opacity: 0, y: 30, scale: 0.97, transition: { duration: 0.3 } },
@@ -108,7 +109,7 @@ export default function Dashboard() {
                        </p>
                      </Link>
                       <Link
-                        to="/user/forms"
+                        to="/apply-for-certificates"
                         className="bg-white p-6 rounded-2xl shadow hover:bg-green-50 transition-all duration-300 hover:scale-105 flex flex-col items-center"
                       >
                         <FaCheckCircle className="text-3xl text-green-600 mb-2" />

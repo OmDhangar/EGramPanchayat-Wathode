@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaEye } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaFileAlt, FaFilePdf, FaFileImage } from 'react-icons/fa';
-import { form } from 'framer-motion/client';
-import FormDetails from './FormDetails';
 
 interface FormSubmission {
   _id: string;
@@ -54,7 +52,7 @@ const CertificateApprovals = () => {
         `http://localhost:8000/api/v1/applications/user`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Adjust as per your auth system
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`, 
           },
         } 
       );

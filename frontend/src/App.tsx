@@ -24,9 +24,10 @@ import UserNotifications from './pages/userNotification';
 import AboutVathode from './pages/AboutVathode';
 import Members from './pages/Members'; // Import the AboutKhasala component
 // import Certificates from './pages/Certificates';
-import Applyforcertificates from './pages/applyforcertificates';
+import FormsPage from './pages/applyforcertificates';
 import PublicInfo from './pages/publicinfo';
 import Help from './pages/help';
+import { Toaster } from 'react-hot-toast';
 
 
 
@@ -52,12 +53,13 @@ function AppContent() {
 
   return (
     <AuthContextProvider>
+
       <div className="flex flex-col min-h-screen">
+        <Toaster position="top-right" />
         <Navbar />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/applyforcertificates" element={<Applyforcertificates />} />
             <Route path="/schemes" element={<Schemes />} />
             <Route path="/schemes/:year" element={<SchemeDetails />} />
             <Route path="/gallery" element={<Gallery />} />
@@ -79,8 +81,7 @@ function AppContent() {
             <Route path="/members" element={<Members />} />
             <Route path="/notices" element={<PublicInfo />} />
             <Route path="/contact" element={<Help/>} />
-            
-            <Route path="/apply-for-certificates" element={<Applyforcertificates />} />
+            <Route path="/apply-for-certificates" element={<FormsPage/>} />
 
           </Routes>
         </main>

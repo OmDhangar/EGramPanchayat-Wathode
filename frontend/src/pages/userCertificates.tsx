@@ -2,6 +2,8 @@ import  { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaDownload, FaSpinner, FaClock } from 'react-icons/fa';
 import axios from 'axios';
+import { User } from 'lucide-react';
+import { useAuthContext } from '../Context/authContext';
 
 interface Certificate {
   _id: string;
@@ -21,19 +23,21 @@ const UserCertificates = () => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const {user} = useAuthContext()
 
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          'http://localhost:8000/api/v1/applications/user',
+          `http://localhost:8000/api/v1/applications/user/${user?.id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
             },
           }
         );
+        console.log(response.data.data)
         setCertificates(response.data.data);
       } catch (err) {
         setError('Failed to fetch certificates');
