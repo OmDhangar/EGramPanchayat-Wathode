@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { api } from '../api/axios';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useAuthContext } from '../Context/authContext';
 
 function Login() {
@@ -16,51 +16,28 @@ function Login() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
         setForm({...form,[e.target.name]:e.target.value});
     }
-    const handleSubmit = async (e:React.FormEvent)=>{
-        e.preventDefault();
-        // check if user is already authenticated
+    const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+        const response = await api.post('/users/login', form);
+        const { accessToken, user } = response.data.data;
+
+        console.log('Login successful:', response.data);
+        console.log('Access Token:', accessToken);
         
-        
-        console.log(form)
-        
-        await axios.post('http://localhost:8000/api/v1/users/login',form).then((response)=>{
-            if(response.status === 200){
-                //check for access token
 
-                const accessToken = response.data.data.accessToken;
-                if(accessToken){
-                  localStorage.setItem('accessToken', accessToken);
-                  console.log(accessToken)
-                }
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('user', JSON.stringify(user));
 
-                const userData ={
-                  id: response.data.data.user._id,
-                  fullName: response.data.data.user.fullName,
-                  email: response.data.data.user.email,
-                  role: response.data.data.user.role,
-                  accessToken:accessToken
-                }
-                 // set user data in local storage
-                localStorage.setItem('user', JSON.stringify(userData));
-                console.log('User data saved to localStorage:', localStorage.getItem('user'));
-                // set user data in context
-                setUser(userData);
-                // set authentication state
-                setIsAuthenticated(true);
-
-                console.log('Registration successful:', response.data);
-                // Redirect to dashboard
-                navigate('/dashboard');
-
-          
-
-            }
-        }).catch((error)=>{
-            console.error('Error during registration:', error.response?.data || error.message);
-            // Handle error (e.g., show a notification)
-            alert('Login failed. Please check your credentials and try again.');
-        })
+        setUser(user);
+        setIsAuthenticated(true);
+        navigate('/dashboard');
+    } catch (error) {
+        console.error('Login failed:', error);
+        // Handle login error
     }
+};
 
   return (
      <StyledWrapper>

@@ -4,6 +4,7 @@ import { FaEye } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaFileAlt, FaFilePdf, FaFileImage } from 'react-icons/fa';
+import { api } from '../api/axios';
 
 interface FormSubmission {
   _id: string;
@@ -47,9 +48,10 @@ const CertificateApprovals = () => {
 
   const fetchForms = async (status: string) => {
     try {
+      console.log(localStorage.getItem('accessToken'));
       setLoading(true);
-      const res = await axios.get(
-        `http://localhost:8000/api/v1/applications/user`,
+      const res = await api.get(
+        `/applications/admin`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`, 
@@ -72,7 +74,7 @@ const CertificateApprovals = () => {
   }, [activeTab]);
 
   const viewFormDetails = (formId: string) => {
-    navigate(`/admin/form-details/${formId}`);
+    navigate(`/form-details/${formId}`);
   };
 
  return (

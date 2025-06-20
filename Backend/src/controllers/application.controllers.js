@@ -348,6 +348,21 @@ const getUserApplications = asyncHandler(async (req, res) => {
   if(applicant){
     await notifyUserStatusUpdate(application,applicant);
   }
+    await Notification.findOneAndUpdate(
+  { applicationId: application._id }, // Find the existing notification
+  {
+    type: status === 'approved' ? 'application_approved' : 'application_rejected',
+    title: status === 'approved' ? 'Application Approved' : 'Application Rejected',
+    message: status === 'approved' 
+      ? `Your ${application.documentType.replace('_', ' ')} application has been approved.` 
+      : `Your ${application.documentType.replace('_', ' ')} application has been rejected. Reason: ${adminRemarks}`,
+    isRead: false,
+    emailSent: false,
+    updatedAt: new Date()
+  },
+  { new: true } // Return the updated document
+  );
+  
 
   return res.status(200).json(
     new ApiResponse(200, { application }, `Application ${status} successfully`)
@@ -400,11 +415,9 @@ const getUserApplications = asyncHandler(async (req, res) => {
   await Notification.findOneAndUpdate(
   { applicationId: application._id }, // Find the existing notification
   {
-    type: status === 'approved' ? 'application_approved' : 'application_rejected',
-    title: status === 'approved' ? 'Application Approved' : 'Application Rejected',
-    message: status === 'approved' 
-      ? `Your ${application.documentType.replace('_', ' ')} application has been approved.` 
-      : `Your ${application.documentType.replace('_', ' ')} application has been rejected. Reason: ${adminRemarks}`,
+    type: 'Certificate Generated',
+    title:'Application Approved and certificate Generated',
+    message:`Your ${application.documentType.replace('_', ' ')} application has been approved and certificate has been generated.` ,
     isRead: false,
     emailSent: false,
     updatedAt: new Date()

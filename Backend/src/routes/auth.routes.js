@@ -23,5 +23,11 @@ router.route("/login").post(
 //secured routes
 router.route("/logout").post(verifyJWT, logoutUser)
 router.route("/refresh-token").post(refreshAccessToken)
+router.route('/verify').get(verifyJWT, (req, res) => {
+  return res.status(200).json({
+    success: true,
+    user: req.user // populated by verifyJWT
+  });
+})
 
 export default router;

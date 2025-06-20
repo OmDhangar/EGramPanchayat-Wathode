@@ -2,8 +2,9 @@ import  { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaDownload, FaSpinner, FaClock } from 'react-icons/fa';
 import axios from 'axios';
-import { User } from 'lucide-react';
 import { useAuthContext } from '../Context/authContext';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../api/axios';
 
 interface Certificate {
   _id: string;
@@ -24,13 +25,15 @@ const UserCertificates = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const {user} = useAuthContext()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `http://localhost:8000/api/v1/applications/user/${user?.id}`,
+        console.log(user);
+        const response = await api.get(
+          `/applications/user/${user?._id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -76,6 +79,9 @@ const UserCertificates = () => {
       {error}
     </div>
   );
+  const viewFormDetails = (formId: string) => {
+    navigate(`/form-details/${formId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -86,6 +92,10 @@ const UserCertificates = () => {
           {certificates.map((cert) => (
             <motion.div
               key={cert._id}
+              onClick={(e)=>{
+                e.stopPropagation();
+                viewFormDetails(cert.applicationId);
+              }}
               className="bg-white rounded-lg shadow-md overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
