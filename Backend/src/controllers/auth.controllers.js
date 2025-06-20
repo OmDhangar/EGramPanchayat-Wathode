@@ -3,12 +3,12 @@ import {ApiError} from "../utils/ApiError.js"
 import {User} from "../models/user.model.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefereshTokens = async(userId) =>{
     try {
         const user = await User.findById(userId)
-        const accessToken = await user.generateAccesToken()
+        const accessToken = await user.generateAccessToken()
         const refreshToken = await user.generateRefreshToken()
 
         user.refreshToken = refreshToken
@@ -20,7 +20,7 @@ const generateAccessAndRefereshTokens = async(userId) =>{
     } catch (error) {
         throw new ApiError(500, "Something went wrong while generating referesh and access token")
     }
-}
+};
 
 const registerUser = asyncHandler(async function (req,res){
     //steps followed to register user
@@ -83,7 +83,8 @@ const registerUser = asyncHandler(async function (req,res){
     //Set the cookies for access and refresh tokens
     const options = {
         httpOnly: true,
-        secure: true
+        //secure: true,
+        secure: process.env.NODE_ENV === 'production',
     }
 
     return res
@@ -101,56 +102,66 @@ const registerUser = asyncHandler(async function (req,res){
     )  
 })
 
-const loginUser = asyncHandler(async function (req,res) {
-    //Steps to login a user
-    //0.check for the access tokens in the browser if available validate and directly login the user
-    //1.request data from body
-    //2.validate the data
-    //3.if matched login else give error
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    const {email,password} = req.body;
+  if (!email) {
+    throw new ApiError(400, "Email is required");
+  }
 
-    if(!email){
-        throw new ApiError(400," email is required")
-    }
-    if(!password){
-        throw new ApiError(400,"password is required")
-        }
-    const user = await User.findOne({
-        email
-    })
-    if(!user){
-        throw new ApiError(401,"User does not exits")
-    }
+  if (!password) {
+    throw new ApiError(400, "Password is required");
+  }
 
-     const isPasswordValid = await user.isPasswordCorrect(password)
-     if(!isPasswordValid){
-        throw new ApiError(401,"Invalid password")
-     }
-     const {accessToken, refreshToken} = await generateAccessAndRefereshTokens(user._id)
+  console.log('finding user')
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(401, "User does not exist");
+  }
 
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+   console.log('checking password of user')
+  const isPasswordValid = await user.isPasswordCorrect(password);
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid password");
+  }
 
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
+  console.log('generating access and refresh token');
+  const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id);
 
-    return res
+  const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+
+
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: "lax",
+    maxAge: 15 * 60 * 1000, // 15 minutes
+  };
+
+  const refreshOptions = {
+    ...options,
+    maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+  };
+
+  return res
     .status(200)
     .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("refreshToken", refreshToken, refreshOptions)
     .json(
-        new ApiResponse(
-            200, 
-            {
-                user: loggedInUser, accessToken, refreshToken
-            },
-            "User logged In Successfully"
-        )
-    )
-})
-    const logoutUser = asyncHandler(async (req,res) => {
+      new ApiResponse(
+        200,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken
+        },
+        "User logged in successfully"
+      )
+    );
+});
+
+
+const logoutUser = asyncHandler(async (req,res) => {
         //Steps to logout a user
         await User.findByIdAndUpdate(req.user._id,
             {
@@ -164,10 +175,12 @@ const loginUser = asyncHandler(async function (req,res) {
         )
         const options = {
             httpOnly: true,
-            secure: true
+            //secure: true,
+            secure: process.env.NODE_ENV === 'production' || false,
         }
         return res.status(200).clearCookie("accessToken",options).clearCookie("refreshToken",options).json(new ApiResponse(200,{},"User Logged Out"))
-    })
+})
+    
     const refreshAccessToken = asyncHandler(async (req,res) =>{
         const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
         if(!incomingRefreshToken){
@@ -187,7 +200,7 @@ const loginUser = asyncHandler(async function (req,res) {
             }
             const options = {
                 httpOnly: true,
-                secure:true
+                secure:false,
             }
             const {accessToken,newrefreshToken} = await generateAccessAndRefereshTokens(user._id)
             return res
@@ -209,6 +222,24 @@ const loginUser = asyncHandler(async function (req,res) {
         user.password = NewPassword
         await user.save({validateBeforeSave: false})
         return res.status(200).json(new ApiResponse(200,{},"Password changed successfully"))
+    })
+
+    //forgot Password
+    const forgotPassword = asyncHandler(async (req,res)=>{
+        const email = req.body;
+        const user = User.findOne({email});
+        if(!user){
+            return res.status(401).json(new ApiResponse(200,{},"User not Found"));
+        }
+        const {accessToken,refreshToken} = jwt.sign({userId:user._id},process.env.ACCESS_TOKEN_SECRET,{expiresIn:"15m"});
+        user.passwordResetToken = accessToken;
+        user.passwordResetExpires = Date.now()+15*60*1000;
+        await user.save();
+        const resetLink = `http://localhost:5173/reset-password?token=${accessToken}`;
+        const transporter = nodemailer.createTransport({
+            //configure mail
+        })
+
     })
 
     const getCurrentUser = asyncHandler(async(req,res)=>{
@@ -236,6 +267,7 @@ const loginUser = asyncHandler(async function (req,res) {
         .status(200)
         .json(new ApiResponse(200,{},"Account details updated successfully"))
     })
+    
     const updateAvatar = asyncHandler(async (req,res)=>{
         const avatarLocalPath = req.file?.path;
         if(!avatarLocalPath){
@@ -254,7 +286,7 @@ const loginUser = asyncHandler(async function (req,res) {
         ).select("-password")
         return res
         .status(200)
-        .json(new ApiResponse(200,{},"Avatar updated successfully"))
+        .json(new ApiResponse(200,{user},"Avatar updated successfully"))
 
     })
 

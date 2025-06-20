@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaBaby, FaSkull, FaHeart, FaSpinner } from "react-icons/fa";
 import { Variants } from "framer-motion";
 import axios from "axios";
+import { api } from "../api/axios";
 
 type CertificateType = "birth" | "death" | "marriage";
 
@@ -121,9 +122,9 @@ const FormsPage = () => {
       const mappedData = mapFormData(selected, formData);
       console.log(mappedData);
       
-      const response = await axios.post(
-        `http://localhost:8000/api/v1/applications/${selected}-certificate`,
-          formData,
+      const response = await api.post(
+        `/applications/${selected}-certificate`,
+        mappedData,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -261,8 +262,6 @@ const FormsPage = () => {
                 placeholder="Father's Occupation"
                 onChange={handleInputChange}
                 className="input_field"
-                maxLength={12}
-                pattern="\d{12}"
                 title="Enter a valid Occupation"
               />
             </div>
@@ -274,8 +273,6 @@ const FormsPage = () => {
                 placeholder="Mother's Occupation"
                 onChange={handleInputChange}
                 className="input_field"
-                maxLength={12}
-                pattern="\d{12}"
                 title="Enter a valid Occupation"
               />
             </div>
@@ -287,8 +284,6 @@ const FormsPage = () => {
                 placeholder="Name of hospital born"
                 onChange={handleInputChange}
                 className="input_field"
-                maxLength={12}
-                pattern="\d{12}"
                 title="Enter a valid Name"
               />
             </div>

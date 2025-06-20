@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -32,6 +32,7 @@ import { Toaster } from 'react-hot-toast';
 
 // i18n setup
 import '../src/i18n'; // Make sure the path is correct relative to your file
+import CertificateDownload from './pages/certificateDownload';
 
 function AppContent() {
   const location = useLocation();
@@ -79,13 +80,14 @@ function AppContent() {
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin/users" element={<ManageUsers />} />
-            <Route path="/admin/form-details/:applicationId" element={<FormDetails />} />
+            <Route path="/form-details/:applicationId" element={<FormDetails />} />
             <Route path="/admin/approvals" element={<CertificateApprovals />} />
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/admin/upload" element={<UploadCertificates />} />
             <Route path="/about-vathode" element={<AboutVathode />} />
             <Route path="/user/certificates" element={<UserCertificates />} />
             <Route path="/user/notifications" element={<UserNotifications />} />
+            <Route path="/certificate/:applicationId" element={<CertificateDownload/>}/>
             <Route path="/home" element={<Home />} />
             <Route path="/members" element={<Members />} />
             <Route path="/notices" element={<PublicInfo />} />

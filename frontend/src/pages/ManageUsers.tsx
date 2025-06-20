@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { api } from "../api/axios";
 
 type User = {
   _id: string;
@@ -15,7 +16,7 @@ export default function ManageUsers() {
 
   // Fetch all users
   useEffect(() => {
-    axios.get("/api/users")
+    api.get("/api/users")
       .then(res => {
         // If your API returns { users: [...] }
         if (Array.isArray(res.data)) {
@@ -43,7 +44,7 @@ export default function ManageUsers() {
 
   const handleSaveInfo = () => {
     if (!selectedUser) return;
-    axios.put(`/api/users/${selectedUser._id}`, { info })
+    api.put(`/api/users/${selectedUser._id}`, { info })
       .then(() => {
         setUsers(users.map(u => u._id === selectedUser._id ? { ...u, info } : u));
         alert("User info updated!");
