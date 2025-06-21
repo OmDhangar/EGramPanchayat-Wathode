@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 //import { FaLandmark, FaUsers, FaGraduationCap } from 'react-icons/fa';
 import { motion } from "framer-motion";
-
+import { Variants } from 'framer-motion';
 
 const images = [
   "/images/vathode1.jpg",
@@ -10,7 +10,7 @@ const images = [
   "/images/vathode4.jpg",
 ];
 
-const fadeInUp = {
+const fadeInUp:Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.4, 0, 0.2, 1] } },
 };

@@ -1,8 +1,9 @@
+// src/pages/CertificateForms.tsx
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import birthLogo from "../../public/utils/birthlogo.png";
 import deathLogo from "../../public/utils/deathlogo.png";
- import marriageLogo from "../../public/utils/marriagelogo.png";
+import marriageLogo from "../../public/utils/marriagelogo.png";
 
 export default function CertificateForms() {
   const navigate = useNavigate();
@@ -45,14 +46,13 @@ export default function CertificateForms() {
       bgColor: "bg-[#f0c841]",
       hoverColor: "hover:bg-[#e0b52c]",
       route: "/apply-for-certificates/marriage-certificate",
-       logo: marriageLogo,
+      logo: marriageLogo,
     },
   ];
 
-  // Animation variants
   const cardVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: (i) => ({
+    visible: (i: number) => ({
       opacity: 1,
       y: 0,
       transition: {
@@ -79,13 +79,11 @@ export default function CertificateForms() {
             animate="visible"
             className={`rounded-xl p-6 text-center shadow-lg text-white transition duration-300 ease-in-out ${card.bgColor} ${card.hoverColor}`}
           >
-            {card.logo && (
-              <img
-                src={card.logo}
-                alt="Card logo"
-                className="w-16 h-16 mx-auto mb-6 rounded-full bg-white p-1"
-              />
-            )}
+            <img
+              src={card.logo}
+              alt="Card logo"
+              className="w-16 h-16 mx-auto mb-6 rounded-full bg-white p-1"
+            />
             <h2 className="text-xl font-tiro-marathi mb-4">{card.title}</h2>
             <ul className="list-disc list-inside text-white/90 mb-6 space-y-2 text-sm text-left">
               {card.points.map((point, idx) => (

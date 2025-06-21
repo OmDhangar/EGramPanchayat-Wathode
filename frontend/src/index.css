@@ -1,14 +1,16 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Arya:wght@400;700&family=Pixelify+Sans:wght@400..700&family=Tiro+Devanagari+Marathi:ital@0;1&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&display=swap');
 .tiro-header {
   font-family: 'Tiro Devanagari Marathi', serif;
 }
 html {
   scroll-behavior: smooth;
 }
-@import url('https://fonts.googleapis.com/css2?family=Arya:wght@400;700&family=Pixelify+Sans:wght@400..700&family=Tiro+Devanagari+Marathi:ital@0;1&display=swap');
 
 
 .font-arya {

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useAuthContext } from '../Context/authContext';
+import { api } from '../api/axios';
 
 function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -19,40 +19,26 @@ function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await axios.post('http://localhost:8000/api/v1/users/login', form)
-      .then((response) => {
-        if (response.status === 200) {
-          const accessToken = response.data.data.accessToken;
-          if (accessToken) {
-            localStorage.setItem('accessToken', accessToken);
-          }
+    try {
+      const response = await api.post('/users/login', form);
+      const { accessToken, user } = response.data.data;
 
-          const userData = {
-            id: response.data.data.user._id,
-            fullName: response.data.data.user.fullName,
-            email: response.data.data.user.email,
-            role: response.data.data.user.role,
-            accessToken: accessToken,
-          };
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('user', JSON.stringify(user));
 
-          localStorage.setItem('user', JSON.stringify(userData));
-          setUser(userData);
-          setIsAuthenticated(true);
-          navigate('/dashboard');
-        }
-      })
-      .catch((error) => {
-        console.error('Error during login:', error.response?.data || error.message);
-        alert('Login failed. Please check your credentials and try again.');
-      });
+      setUser(user);
+      setIsAuthenticated(true);
+      navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Login failed:', error.response?.data || error.message);
+      alert('Login failed. Please check your credentials and try again.');
+    }
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8000/api/v1/users/forgot-password', {
-        email: resetEmail,
-      });
+      await api.post('/users/forgot-password', { email: resetEmail });
       setMessage('Reset link sent to your email.');
     } catch (err) {
       setMessage('Error sending reset link. Please try again.');
@@ -159,10 +145,7 @@ function Login() {
         {!isForgotMode && (
           <p className="text-sm text-center text-gray-600 mt-6">
             Don’t have an account?{' '}
-            <a
-              href="/register"
-              className="text-indigo-600 hover:underline"
-            >
+            <a href="/register" className="text-indigo-600 hover:underline">
               Register
             </a>
           </p>

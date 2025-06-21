@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaBell, FaSpinner, FaCheck, FaTimes, FaFile } from 'react-icons/fa';
 import axios from 'axios';
+import { api } from '../api/axios';
 
 interface Notification {
   _id: string;
@@ -22,8 +23,8 @@ const UserNotifications = () => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          'http://localhost:8000/api/v1/notifications',
+        const response = await api.get(
+          '/notifications',
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('accessToken')}`,

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaUpload, FaFileAlt, FaCheck, FaSpinner, FaDownload, FaEye } from 'react-icons/fa';
 import axios from 'axios';
+import { api } from '../api/axios';
 
 interface Application {
   _id: string;
@@ -38,13 +39,8 @@ const UploadCertificates = () => {
   const fetchApprovedApplications = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        'http://localhost:8000/api/v1/applications/admin/filter?status=approved',
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
+      const response = await api.get(
+        '/applications/admin/filter?status=approved'
       );
       setApplications(response.data.data);
     } catch (err) {
@@ -65,8 +61,8 @@ const UploadCertificates = () => {
       const formData = new FormData();
       formData.append('certificate', file);
 
-      await axios.post(
-        `http://localhost:8000/api/v1/applications/admin/certificate/${applicationId}`,
+      await api.post(
+        `/applications/admin/certificate/${applicationId}`,
         formData,
         {
           headers: {

@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import {api} from '../api/axios'; 
 
 // Interface definitions
 interface User {
-    id?: string;
+    _id?: string;
     fullName?: string;
     email?: string;
     role?: 'client' | 'admin';
@@ -51,6 +52,8 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         try {
             const savedUser = localStorage.getItem('user');
             if (!savedUser) return null;
+            
+            
             return JSON.parse(savedUser);
         } catch (error) {
             console.error('Error parsing user data:', error);
@@ -59,15 +62,34 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         }
     });
 
-    // Sync authentication state with user presence
+     // Verify token on mount and after token refresh
     useEffect(() => {
-        if (user) {
-            setIsAuthenticated(true);
-        } else {
+        const verifyToken = async () => {
+            try {
+            const response = await api.get('/users/verify');
+            const verifiedUser = response.data?.user;
+
+            if (verifiedUser) {
+                setUser(verifiedUser);
+                localStorage.setItem('user', JSON.stringify(verifiedUser));
+                setIsAuthenticated(true);
+            } else {
+                throw new Error("No user returned");
+            }
+            } catch (error) {
+            console.error("Verification failed:", error);
             setIsAuthenticated(false);
-            localStorage.removeItem('accessToken'); // Clean up token if no user
+            setUser(null);
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('user');
+            }
+        };
+
+        if (isAuthenticated) {
+            verifyToken();
         }
-    }, [user]);
+    }, [isAuthenticated]);
+
 
     return (
         <AuthContext.Provider 
@@ -82,5 +104,3 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         </AuthContext.Provider>
     );
 };
-
-export default AuthContext;

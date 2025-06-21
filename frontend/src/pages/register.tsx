@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuthContext } from '../Context/authContext';
+import { api } from '../api/axios';
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -22,8 +23,8 @@ const Register = () => {
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     // Add registration logic here
-    await axios.post('http://localhost:8000/api/v1/users/register',form).then((response)=>{
-      if(response.status === 201){
+    await api.post('/users/register', form).then((response) => {
+      if (response.status === 201) {
         setIsAuthenticated(true);
         console.log('Registration successful:', response.data);
         const userData = {
