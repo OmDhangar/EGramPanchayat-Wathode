@@ -22,6 +22,10 @@ import ManageUsers from './pages/ManageUsers';
 import UserCertificates from './pages/userCertificates';
 import UserNotifications from './pages/userNotification';
 import AboutVathode from './pages/AboutVathode';
+import BirthCertificate from './pages/BirthCertificate';
+import DeathCertificate from './pages/DeathCertificate';
+import MarriageCertificate from './pages/MarriageCertificateForm';
+
 
 import Members from './pages/Members'; // Import the AboutKhasala component
 // import Certificates from './pages/Certificates';
@@ -32,6 +36,7 @@ import { Toaster } from 'react-hot-toast';
 
 // i18n setup
 import '../src/i18n'; // Make sure the path is correct relative to your file
+import MarriageCertificateForm from './pages/MarriageCertificateForm';
 
 function AppContent() {
   const location = useLocation();
@@ -93,6 +98,9 @@ function AppContent() {
 
             <Route path="/contact" element={<Help/>} />
             <Route path="/apply-for-certificates" element={<FormsPage/>} />
+            <Route path="/apply-for-certificates/birth-certificate" element={<BirthCertificate />} />
+            <Route path="/apply-for-certificates/death-certificate" element={<DeathCertificate />} />
+            <Route path="/apply-for-certificates/marriage-certificate" element={<MarriageCertificateForm />} />
           </Routes>
         </main>
         <Footer />
