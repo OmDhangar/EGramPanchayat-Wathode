@@ -21,7 +21,7 @@ function Login() {
     
     try {
         const response = await api.post('/users/login', form);
-        const { accessToken, user } = response.data.data;
+        const { accessToken, user,refreshToken } = response.data.data;
 
         console.log('Login successful:', response.data);
         console.log('Access Token:', accessToken);
@@ -29,6 +29,7 @@ function Login() {
 
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('refreshToken',JSON.stringify(refreshToken));
 
         setUser(user);
         setIsAuthenticated(true);

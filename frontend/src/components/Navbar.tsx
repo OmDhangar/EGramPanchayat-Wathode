@@ -51,12 +51,12 @@ export default function Navbar() {
 		<div className="relative z-50 w-full shadow-sm">
 			{/* Header */}
 			<div className="bg-white py-4">
-				<div className="max-w-7xl mx-auto flex items-center justify-between px-4">
+				<div className="max-w-8xl mx-auto flex items-center justify-between px-4">
 					<img src="/images/mhlogo.png" alt="Government Logo" className="h-16 w-auto" />
 
 					{/* Center Content */}
-					<div className="flex flex-col items-center flex-1">
-						<img src="/images/panchyatlogo.png" alt="Panchayat Logo" className="h-12 mx-auto mb-1" />
+					<div className="flex flex-col items-center justify-between flex-1">
+						<img src="/images/panchyatlogo.png" alt="Panchayat Logo" className="h-12 mb-1" />
 						<h1 className="text-5xl text-yellow-800 font-semibold tracking-wide tiro-header">
 							{t("header.title")}
 						</h1>

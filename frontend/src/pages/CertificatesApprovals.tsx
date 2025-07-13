@@ -49,6 +49,7 @@ const CertificateApprovals = () => {
   const fetchForms = async (status: string) => {
     try {
       console.log(localStorage.getItem('accessToken'));
+      console.log(localStorage.getItem('refreshToken'))
       setLoading(true);
       const res = await api.get(
         `/applications/admin`,
