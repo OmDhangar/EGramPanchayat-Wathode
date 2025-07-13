@@ -265,13 +265,13 @@ export default function Home() {
 <section className="py-10 px-2 sm:px-6 bg-[#f8fafc]">
   <div className="max-w-6xl mx-auto">
     <div className="mb-8">
-      <div className="bg-blue-500 rounded-[3rem]  border-spacing-0 py-4 px-4 text-center shadow">
+      <div className="bg-blue-500 rounded-[3rem]  border border-blue-950 py-4 px-4 text-center shadow">
         <h2 className="text-2xl sm:text-4xl  text-white font-semibold font-tiro-marathi">अधिकारी/पदाधिकारी</h2>
       </div>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
       {/* Officer 1 */}
-      <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+      <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col border-2 border-black items-center">
         <img
           src="/images/ceo.jpg"
           alt="विशाल सविता तेजराव नरवाडे"
@@ -284,7 +284,7 @@ export default function Home() {
         </p>
       </div>
       {/* Officer 2 */}
-      <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+      <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-black flex flex-col items-center">
         <img
           src="/images/vceo.jpg"
           alt="गणेश कुसुम भास्कर मोरे"
@@ -297,7 +297,7 @@ export default function Home() {
         </p>
       </div>
       {/* Officer 3 */}
-      <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+      <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-black flex flex-col items-center">
         <img
           src="/images/asceo.jpg"
           alt="प्रदीप सुमनताई बाबूलाल पवार"
@@ -309,7 +309,7 @@ export default function Home() {
           पंचायत समिती, शिरपूर, जि. धुळे
         </p>
       </div>
-      <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+      <div className="bg-white rounded-xl border-2 border-black shadow-lg p-6 flex flex-col items-center">
         <img
           src="/images/sarpanch.jpg"
           alt="vikas patil"
@@ -321,7 +321,7 @@ export default function Home() {
           ग्रामपंचायत, वाठोडे 
         </p>
       </div>
-      <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+      <div className="bg-white rounded-xl border-2 border-black shadow-lg p-6 flex flex-col items-center">
         <img
           src="/images/officer3.jpg"
           alt="प्रदीप सुमनताई बाबूलाल पवार"
@@ -333,7 +333,7 @@ export default function Home() {
           ग्रामपंचायत वाठोडे 
         </p>
       </div>
-      <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+      <div className="bg-white rounded-xl border-2 border-black shadow-lg p-6 flex flex-col items-center">
         <img
           src="/images/gramsevak.jpeg"
           alt=""
