@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: 'https://grampanchayat-backend.onrender.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
