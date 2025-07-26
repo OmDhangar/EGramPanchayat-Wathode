@@ -14,6 +14,7 @@ import { BirthCertificate } from "../models/birthcertificate.model.js";
 import { DeathCertificate } from "../models/deathcertificate.model.js";
 import { MarriageCertificate } from "../models/marriagecertificate.model.js";
 import { Notification } from "../models/notification.model.js";
+import { application } from "express";
 
 // Helper to generate unique application ID
 const generateApplicationId = (prefix) => {
@@ -77,6 +78,7 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
   // Validate date format
   const birthDate = new Date(dateOfBirth);
   if (isNaN(birthDate.getTime())) {
+    console.log(dateOfBirth)
     throw new ApiError(400, "Invalid date format for date of birth");
   }
   
@@ -120,6 +122,7 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
   
   // Create application with form data using the static method
   const application = await Application.createWithFormData(applicationData, formData);
+  console.log(application)
   
   // Create notification for user
   await createNotification(
@@ -192,13 +195,11 @@ const submitDeathCertificateApplication = asyncHandler(async (req, res) => {
     fatherAdhar:fatherAdhar || "",
     motherAdhar:motherAdhar || "",
     permanentAddress,
-    informantName,
-    informantRelation,
-    informantAddress
   };
   
   // Create application with form data using the static method
   const application = await Application.createWithFormData(applicationData, formData);
+  
   
   // Create notification for user
   await createNotification(
@@ -294,17 +295,20 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
 
 // Get user's applications
 const getUserApplications = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
-  
-  const applications = await Application.find({ applicantId: userId })
-    .sort({ createdAt: -1 })
-    .lean();
-  
+  const userId = req.params.userId; // Extract actual ID string
+
+  if (!mongoose.isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid user ID");
+  }
+
+  const applications = await Application.find({
+    applicantId: userId, // use applicantId directly
+  });
+
   return res.status(200).json(
     new ApiResponse(200, applications, "User applications retrieved successfully")
   );
 });
-
 
 
  //admin Dashboard Functionalities
@@ -337,27 +341,37 @@ const getUserApplications = asyncHandler(async (req, res) => {
   application.reviewedAt = new Date();
   application.reviewedBy = req.user._id;
   await application.save();
-  //Notify user about status update
-  await Notification.create({
-    userId:application.applicantId,
-    applicationId:application._id,
-    type: status === 'approved' ? 'application_approved' : 'application_rejected',
-    title: status === 'approved' ? 'Application Approved' : 'Application Rejected',
-    message: status === 'approved' 
-      ? `Your ${application.documentType.replace('_', ' ')} application has been approved.` 
-      : `Your ${application.documentType.replace('_', ' ')} application has been rejected. Reason: ${adminRemarks}`
-  });
+  
 
   //Get Apllicant details for email notification
   const applicant = await User.findById(application.applicantId);
   if(applicant){
     await notifyUserStatusUpdate(application,applicant);
   }
+    await Notification.findOneAndUpdate(
+  { applicationId: application._id }, // Find the existing notification
+  {
+    type: status === 'approved' ? 'application_approved' : 'application_rejected',
+    title: status === 'approved' ? 'Application Approved' : 'Application Rejected',
+    message: status === 'approved' 
+      ? `Your ${application.documentType.replace('_', ' ')} application has been approved.` 
+      : `Your ${application.documentType.replace('_', ' ')} application has been rejected. Reason: ${adminRemarks}`,
+    isRead: false,
+    emailSent: false,
+    updatedAt: new Date()
+  },
+  { new: true } // Return the updated document
+  );
+  
 
   return res.status(200).json(
     new ApiResponse(200, { application }, `Application ${status} successfully`)
   );
  });
+
+ //u
+
+
 
  //upload certificate to cloudinary
  const uploadCertificate = asyncHandler(async (req, res) => {
@@ -398,13 +412,19 @@ const getUserApplications = asyncHandler(async (req, res) => {
   await application.save();
 
   // Create notification for the user
-  await Notification.create({
-    userId: application.applicantId,
-    applicationId: application._id,
-    type: 'certificate_ready',
-    title: 'Certificate Ready for Download',
-    message: `Your ${application.documentType.replace('_', ' ')} certificate is ready for download.`
-  });
+  await Notification.findOneAndUpdate(
+  { applicationId: application._id }, // Find the existing notification
+  {
+    type: 'Certificate Generated',
+    title:'Application Approved and certificate Generated',
+    message:`Your ${application.documentType.replace('_', ' ')} application has been approved and certificate has been generated.` ,
+    isRead: false,
+    emailSent: false,
+    updatedAt: new Date()
+  },
+  { new: true } // Return the updated document
+  );
+  
   // Get applicant details for email notification
   const applicant = await User.findById(application.applicantId);
   if (applicant) {
@@ -416,6 +436,10 @@ const getUserApplications = asyncHandler(async (req, res) => {
   );
 
  });
+
+
+
+
  // Get applications by status (for admin filtering)
 const getApplicationsByStatus = asyncHandler(async (req, res) => {
   // Check if user is admin
@@ -441,6 +465,9 @@ const getApplicationsByStatus = asyncHandler(async (req, res) => {
   );
 });
 
+//get Users for admin's information 
+
+
 
 
 // Get admin's applications
@@ -451,7 +478,7 @@ const getAdminApplications = asyncHandler(async (req, res) => {
   const applications = await Application.find(
     {
       status:{
-        $in:['pending','approved','rejected']
+        $in:['pending','approved', 'certificate_generated','rejected', 'completed']
       }
     }
   )
@@ -464,20 +491,32 @@ const getAdminApplications = asyncHandler(async (req, res) => {
   
 })
 
+
 // Get application details
 const getApplicationDetails = asyncHandler(async (req, res) => {
-  const { applicationId } = req.params;
+  let { applicationId } = req.params;
   
   if (!applicationId) {
     throw new ApiError(400, "Application ID is required");
   }
   
-  const application = await Application.findOne({
-    $or: [
-      { _id: mongoose.isValidObjectId(applicationId) ? applicationId : null },
-      { applicationId }
-    ]
-  });
+  // Remove leading colon if present (common route parameter issue)
+  if (applicationId.startsWith(':')) {
+    applicationId = applicationId.substring(1);
+  }
+  
+  // Additional validation
+  if (!applicationId || applicationId.trim() === '') {
+    throw new ApiError(400, "Valid Application ID is required");
+  }
+
+  
+  console.log("Application ID:", applicationId);
+  
+  // Fixed: Use queryConditions directly, not queryConditions.applicationId
+  const application = await Application.findOne({applicationId});
+  
+  console.log("Found application:", application?._id);
   
   if (!application) {
     throw new ApiError(404, "Application not found");
@@ -495,6 +534,7 @@ const getApplicationDetails = asyncHandler(async (req, res) => {
     new ApiResponse(200, { application, formData }, "Application details retrieved successfully")
   );
 });
+
 
 export {
   getAdminApplications,

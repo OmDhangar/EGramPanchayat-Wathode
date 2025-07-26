@@ -19,7 +19,7 @@ const mailGenerator = new Mailgen({
   theme: 'default',
   product: {
     name: 'Gram Panchayat Services',
-    link: process.env.FRONTEND_URL || 'http://localhost:3000'
+    link: process.env.FRONTEND_URL || 'http://localhost:5173'
   }
 });
 

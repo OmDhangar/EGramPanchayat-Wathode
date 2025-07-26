@@ -1,0 +1,46 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Arya:wght@400;700&family=Pixelify+Sans:wght@400..700&family=Tiro+Devanagari+Marathi:ital@0;1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.tiro-header {
+  font-family: 'Tiro Devanagari Marathi', serif;
+}
+html {
+  scroll-behavior: smooth;
+}
+
+
+.font-arya {
+  font-family: 'Arya', sans-serif;
+}
+
+.font-pixelify {
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.font-tiro-marathi {
+  font-family: 'Tiro Devanagari Marathi', serif;
+}
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(40px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+.animate-fade-in {
+  animation: fade-in 1s cubic-bezier(0.4,0,0.2,1) both;
+}
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1), transform 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.reveal-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
