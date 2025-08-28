@@ -28,10 +28,10 @@ import applicationRouter from "./routes/application.routes.js"
 
 //routes declaration
 
-app.use("/api/v1",paymentRoutes);
+app.use("/api",paymentRoutes);
 app.use("/api",healthCheckRoutes);
-app.use("/api/v1/users",userRouter);
-app.use("/api/v1/applications", applicationRouter);
+app.use("/api/users",userRouter);
+app.use("/api/applications", applicationRouter);
 
 
 export default app

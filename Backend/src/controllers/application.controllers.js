@@ -1,10 +1,9 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { processUploadedFilesS3, moveFileToFolder, getFileDownloadUrl } from "../utils/s3Service.js";
 import { notifyAdminNewApplication, notifyUserStatusUpdate } from "../utils/emailService.js";
 import mongoose from "mongoose";
-import fs from "fs";
 import crypto from "crypto";
 
 // Import models
@@ -14,40 +13,12 @@ import { BirthCertificate } from "../models/birthcertificate.model.js";
 import { DeathCertificate } from "../models/deathcertificate.model.js";
 import { MarriageCertificate } from "../models/marriagecertificate.model.js";
 import { Notification } from "../models/notification.model.js";
-import { application } from "express";
 
 // Helper to generate unique application ID
 const generateApplicationId = (prefix) => {
   const timestamp = Date.now().toString().slice(-6);
   const random = crypto.randomBytes(3).toString('hex');
   return `${prefix}-${timestamp}-${random}`;
-};
-
-// Helper to process uploaded files
-const processUploadedFiles = async (files) => {
-  if (!files || !files.length) return [];
-  
-  const uploadedFiles = [];
-  
-  for (const file of files) {
-    const localPath = file.path;
-    if (!localPath) continue;
-    
-    const cloudinaryResponse = await uploadOnCloudinary(localPath);
-    
-    if (cloudinaryResponse) {
-      uploadedFiles.push({
-        fileName: cloudinaryResponse.public_id,
-        originalName: file.originalname,
-        filePath: cloudinaryResponse.secure_url,
-        fileType: file.mimetype,
-        fileSize: file.size
-      });
-    }
-  }
-  
-
-  return uploadedFiles;
 };
 
 // Helper to create notification
@@ -70,27 +41,27 @@ const createNotification = async (userId, applicationId, type, title, message) =
 // Submit Birth Certificate Application
 const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
   const { 
-    childName, dateOfBirth, placeOfBirth, gender,motherAdharNumber,parentsAddressAtBirth,
-    fatherName,fatherAdharNumber,permanentAddressParent ,motherName, fatherOccupation, 
+    childName, dateOfBirth, placeOfBirth, gender, motherAdharNumber, parentsAddressAtBirth,
+    fatherName, fatherAdharNumber, permanentAddressParent, motherName, fatherOccupation, 
     motherOccupation, hospitalName 
   } = req.body;
   
   // Validate date format
   const birthDate = new Date(dateOfBirth);
   if (isNaN(birthDate.getTime())) {
-    console.log(dateOfBirth)
+    console.log(dateOfBirth);
     throw new ApiError(400, "Invalid date format for date of birth");
   }
   
   // Validate gender
   const trimmedGender = gender.trim();
-  console.log("Trimmed Gender:",trimmedGender);
+  console.log("Trimmed Gender:", trimmedGender);
   if(gender !== 'Male' && gender !== 'Female' && gender !== 'Other'){
-    throw new ApiError(400,"Invalid gender");
+    throw new ApiError(400, "Invalid gender");
   }
   
-  // Process uploaded files
-  const uploadedFiles = await processUploadedFiles(req.files);
+  // Process uploaded files using S3 (files start as 'unverified')
+  const uploadedFiles = await processUploadedFilesS3(req.files, 'unverified');
   
   // Create application with unique ID
   const applicationId = generateApplicationId('BIRTH');
@@ -108,8 +79,8 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
     childName,
     dateOfBirth: birthDate,
     placeOfBirth,
-    motherAdharNumber:motherAdharNumber || "",
-    fatherAdharNumber:fatherAdharNumber || "",
+    motherAdharNumber: motherAdharNumber || "",
+    fatherAdharNumber: fatherAdharNumber || "",
     permanentAddressParent,
     parentsAddressAtBirth,
     gender,
@@ -122,7 +93,7 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
   
   // Create application with form data using the static method
   const application = await Application.createWithFormData(applicationData, formData);
-  console.log(application)
+  console.log(application);
   
   // Create notification for user
   await createNotification(
@@ -132,6 +103,7 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
     'Birth Certificate Application Submitted',
     `Your application for ${childName}'s birth certificate has been submitted successfully.`
   );
+  
   // Notify admin about new application
   await notifyAdminNewApplication(application, req.user.fullName);
   
@@ -143,10 +115,9 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
 // Submit Death Certificate Application
 const submitDeathCertificateApplication = asyncHandler(async (req, res) => {
   const { 
-    deceasedName, dateOfDeath, addressOfDeath,placeOfDeath, age, gender, causeOfDeath,deceasedAdharNumber,
-    fatherName,motherName ,spouseName, spouseAdhar, motherAdhar, fatherAdhar,permanentAddress 
+    deceasedName, dateOfDeath, addressOfDeath, placeOfDeath, age, gender, causeOfDeath, deceasedAdharNumber,
+    fatherName, motherName, spouseName, spouseAdhar, motherAdhar, fatherAdhar, permanentAddress 
   } = req.body;
-  
   
   // Validate date format
   const deathDate = new Date(dateOfDeath);
@@ -164,8 +135,8 @@ const submitDeathCertificateApplication = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Gender must be Male, Female, or Other");
   }
   
-  // Process uploaded files
-  const uploadedFiles = await processUploadedFiles(req.files);
+  // Process uploaded files using S3 (files start as 'unverified')
+  const uploadedFiles = await processUploadedFilesS3(req.files, 'unverified');
   
   // Create application with unique ID
   const applicationId = generateApplicationId('DEATH');
@@ -191,15 +162,14 @@ const submitDeathCertificateApplication = asyncHandler(async (req, res) => {
     fatherName,
     motherName,
     spouseName: spouseName || "",
-    spouseAdhar:spouseAdhar || "",
-    fatherAdhar:fatherAdhar || "",
-    motherAdhar:motherAdhar || "",
+    spouseAdhar: spouseAdhar || "",
+    fatherAdhar: fatherAdhar || "",
+    motherAdhar: motherAdhar || "",
     permanentAddress,
   };
   
   // Create application with form data using the static method
   const application = await Application.createWithFormData(applicationData, formData);
-  
   
   // Create notification for user
   await createNotification(
@@ -226,7 +196,6 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
     wifeName, wifeAge, wifeFatherName, wifeAddress, wifeOccupation, SolemnizedOn,
   } = req.body;
   
-  
   // Validate date format
   const marriageDate = new Date(dateOfMarriage);
   if (isNaN(marriageDate.getTime())) {
@@ -242,8 +211,8 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Bride's age must be at least 18 years");
   }
   
-  // Process uploaded files
-  const uploadedFiles = await processUploadedFiles(req.files);
+  // Process uploaded files using S3 (files start as 'unverified')
+  const uploadedFiles = await processUploadedFilesS3(req.files, 'unverified');
   
   // Create application with unique ID
   const applicationId = generateApplicationId('MARRIAGE');
@@ -295,14 +264,14 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
 
 // Get user's applications
 const getUserApplications = asyncHandler(async (req, res) => {
-  const userId = req.params.userId; // Extract actual ID string
+  const userId = req.params.userId;
 
   if (!mongoose.isValidObjectId(userId)) {
     throw new ApiError(400, "Invalid user ID");
   }
 
   const applications = await Application.find({
-    applicantId: userId, // use applicantId directly
+    applicantId: userId,
   });
 
   return res.status(200).json(
@@ -310,18 +279,18 @@ const getUserApplications = asyncHandler(async (req, res) => {
   );
 });
 
+// Admin Dashboard Functionalities
+const reviewApplication = asyncHandler(async (req, res) => {
+  const { status, adminRemarks } = req.body;
+  const { applicationId } = req.params;
 
- //admin Dashboard Functionalities
- const reviewApplication = asyncHandler(async (req,res)=>{
-  const {status,adminRemarks} = req.body;
-  const {applicationId} = req.params;
+  if (!applicationId) {
+    throw new ApiError(400, "Application ID is required");
+  }
+  if (!status || status !== 'approved' && status !== 'rejected') {
+    throw new ApiError(400, "Invalid status value");
+  }
 
-  if(!applicationId){
-    throw new ApiError(400,"Application ID is required");
-  }
-  if(!status ||status !== 'approved' && status !== 'rejected'){
-    throw new ApiError(400,"Invalid status value");
-  }
   const application = await Application.findOne({
     $or: [
       { _id: mongoose.isValidObjectId(applicationId) ? applicationId : null },
@@ -329,62 +298,76 @@ const getUserApplications = asyncHandler(async (req, res) => {
     ]
   });
 
-  if(!application){
-    throw new ApiError(404,"Application not found");
+  if (!application) {
+    throw new ApiError(404, "Application not found");
   }
 
-  if(application.status !=='pending'){
-    throw new ApiError(400,"Application is already reviewed");
+  if (application.status !== 'pending') {
+    throw new ApiError(400, "Application is already reviewed");
   }
+
   application.status = status;
   application.adminRemarks = adminRemarks;
   application.reviewedAt = new Date();
   application.reviewedBy = req.user._id;
   await application.save();
-  
 
-  //Get Apllicant details for email notification
-  const applicant = await User.findById(application.applicantId);
-  if(applicant){
-    await notifyUserStatusUpdate(application,applicant);
+  // If approved, move uploaded files from 'unverified' to 'verified' folder in S3
+  if (status === 'approved' && application.uploadedFiles?.length > 0) {
+    try {
+      for (let i = 0; i < application.uploadedFiles.length; i++) {
+        const file = application.uploadedFiles[i];
+        if (file.s3Key?.startsWith('unverified/')) {
+          const updatedFile = await moveFileToFolder(file.s3Key, 'verified');
+          await application.updateFileLocation(i, updatedFile.newKey, 'verified');
+        }
+      }
+    } catch (error) {
+      console.error('Error moving files:', error);
+    }
   }
-    await Notification.findOneAndUpdate(
-  { applicationId: application._id }, // Find the existing notification
-  {
-    type: status === 'approved' ? 'application_approved' : 'application_rejected',
-    title: status === 'approved' ? 'Application Approved' : 'Application Rejected',
-    message: status === 'approved' 
-      ? `Your ${application.documentType.replace('_', ' ')} application has been approved.` 
-      : `Your ${application.documentType.replace('_', ' ')} application has been rejected. Reason: ${adminRemarks}`,
-    isRead: false,
-    emailSent: false,
-    updatedAt: new Date()
-  },
-  { new: true } // Return the updated document
+
+  // Get Applicant details for email notification
+  const applicant = await User.findById(application.applicantId);
+  if (applicant) {
+    await notifyUserStatusUpdate(application, applicant);
+  }
+
+  await Notification.findOneAndUpdate(
+    { applicationId: application._id },
+    {
+      type: status === 'approved' ? 'application_approved' : 'application_rejected',
+      title: status === 'approved' ? 'Application Approved' : 'Application Rejected',
+      message: status === 'approved' 
+        ? `Your ${application.documentType.replace('_', ' ')} application has been approved.` 
+        : `Your ${application.documentType.replace('_', ' ')} application has been rejected. Reason: ${adminRemarks}`,
+      isRead: false,
+      emailSent: false,
+      updatedAt: new Date()
+    },
+    { new: true }
   );
-  
 
   return res.status(200).json(
     new ApiResponse(200, { application }, `Application ${status} successfully`)
   );
- });
+});
 
- //u
-
-
-
- //upload certificate to cloudinary
- const uploadCertificate = asyncHandler(async (req, res) => {
+// Upload certificate to S3 (goes into 'certificate' folder)
+const uploadCertificate = asyncHandler(async (req, res) => {
   const { applicationId } = req.params;
 
   if (!applicationId) {
     throw new ApiError(400, "Application ID is required");
   }
-  const uploadedFiles = await processUploadedFiles([req.file]);
+
+  // Upload certificate file into 'certificate' folder
+  const uploadedFiles = await processUploadedFilesS3([req.file], 'certificate');
   
   if (!uploadedFiles || uploadedFiles.length === 0) {
     throw new ApiError(400, "Failed to process certificate file");
   }
+
   const application = await Application.findOne({
     $or: [
       { _id: mongoose.isValidObjectId(applicationId) ? applicationId : null },
@@ -400,32 +383,38 @@ const getUserApplications = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Application must be approved to upload certificate");
   }
 
-  console.log("Uploaded Files:", uploadedFiles);
+  console.log("Uploaded Certificate:", uploadedFiles);
+  const uploadedFile = uploadedFiles[0];
 
-  // Update application with certificate details
   application.generatedCertificate = {
-    fileName: uploadedFiles[0].fileName,
-    filePath: uploadedFiles[0].filePath,
-    generatedAt: new Date()
+    fileName: uploadedFile.fileName,
+    filePath: uploadedFile.filePath,
+    s3Key: uploadedFile.s3Key,
+    folder: 'certificate',
+    contentType: uploadedFile.contentType,
+    fileSize: uploadedFile.fileSize,
+    generatedAt: new Date(),
+    downloadCount: 0
   };
+
   application.status = "certificate_generated";
   await application.save();
 
   // Create notification for the user
   await Notification.findOneAndUpdate(
-  { applicationId: application._id }, // Find the existing notification
-  {
-    type: 'Certificate Generated',
-    title:'Application Approved and certificate Generated',
-    message:`Your ${application.documentType.replace('_', ' ')} application has been approved and certificate has been generated.` ,
-    isRead: false,
-    emailSent: false,
-    updatedAt: new Date()
-  },
-  { new: true } // Return the updated document
+    { applicationId: application._id },
+    {
+      type: 'Certificate Generated',
+      title: 'Application Approved and Certificate Generated',
+      message: `Your ${application.documentType.replace('_', ' ')} application has been approved and certificate has been generated.`,
+      isRead: false,
+      emailSent: false,
+      updatedAt: new Date()
+    },
+    { new: true }
   );
   
-  // Get applicant details for email notification
+  // Notify applicant by email
   const applicant = await User.findById(application.applicantId);
   if (applicant) {
     await notifyUserStatusUpdate(application, applicant);
@@ -434,13 +423,10 @@ const getUserApplications = asyncHandler(async (req, res) => {
   return res.status(200).json(
     new ApiResponse(200, { application }, "Certificate uploaded successfully")
   );
-
- });
-
+});
 
 
-
- // Get applications by status (for admin filtering)
+// Get applications by status (for admin filtering)
 const getApplicationsByStatus = asyncHandler(async (req, res) => {
   // Check if user is admin
   if (req.user.role !== 'admin') {
@@ -451,7 +437,7 @@ const getApplicationsByStatus = asyncHandler(async (req, res) => {
   
   // Build filter based on status
   const filter = {};
-  if (status && ['pending', 'approved', 'certificate_generated','rejected', 'completed'].includes(status)) {
+  if (status && ['pending', 'approved', 'certificate_generated', 'rejected', 'completed'].includes(status)) {
     filter.status = status;
   }
   
@@ -465,32 +451,24 @@ const getApplicationsByStatus = asyncHandler(async (req, res) => {
   );
 });
 
-//get Users for admin's information 
-
-
-
-
 // Get admin's applications
 const getAdminApplications = asyncHandler(async (req, res) => {
-  if(req.user.role !== 'admin'){
-    throw new ApiError(403,"Unauthorized access");
+  if (req.user.role !== 'admin') {
+    throw new ApiError(403, "Unauthorized access");
   }
-  const applications = await Application.find(
-    {
-      status:{
-        $in:['pending','approved', 'certificate_generated','rejected', 'completed']
-      }
+  
+  const applications = await Application.find({
+    status: {
+      $in: ['pending', 'approved', 'certificate_generated', 'rejected', 'completed']
     }
-  )
-   .sort({ createdAt: -1 })
-   .lean();
+  })
+  .sort({ createdAt: -1 })
+  .lean();
 
   return res.status(200).json(
     new ApiResponse(200, applications, "Admin applications retrieved successfully")
   );
-  
-})
-
+});
 
 // Get application details
 const getApplicationDetails = asyncHandler(async (req, res) => {
@@ -510,11 +488,9 @@ const getApplicationDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Valid Application ID is required");
   }
 
-  
   console.log("Application ID:", applicationId);
   
-  // Fixed: Use queryConditions directly, not queryConditions.applicationId
-  const application = await Application.findOne({applicationId});
+  const application = await Application.findOne({ applicationId });
   
   console.log("Found application:", application?._id);
   
@@ -535,6 +511,78 @@ const getApplicationDetails = asyncHandler(async (req, res) => {
   );
 });
 
+// New function: Download file from S3
+const downloadFile = asyncHandler(async (req, res) => {
+  const { fileKey } = req.params;
+  
+  if (!fileKey) {
+    throw new ApiError(400, "File key is required");
+  }
+  
+  try {
+    // Generate signed URL for download (1 hour expiry)
+    const downloadUrl = await getFileDownloadUrl(fileKey, 3600);
+    
+    return res.status(200).json(
+      new ApiResponse(200, { 
+        downloadUrl, 
+        fileKey,
+        expiresIn: '1 hour',
+        expiresAt: new Date(Date.now() + 3600 * 1000).toISOString()
+      }, "Download URL generated successfully")
+    );
+  } catch (error) {
+    console.error('Error generating download URL:', error);
+    throw new ApiError(500, 'Failed to generate download URL');
+  }
+});
+
+// New function: Get file status and details
+const getFileDetails = asyncHandler(async (req, res) => {
+  const { applicationId, fileIndex } = req.params;
+  
+  if (!applicationId) {
+    throw new ApiError(400, "Application ID is required");
+  }
+  
+  const application = await Application.findOne({ applicationId });
+  
+  if (!application) {
+    throw new ApiError(404, "Application not found");
+  }
+  
+  // Check authorization
+  if (req.user.role !== 'admin' && application.applicantId.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not authorized to view this application's files");
+  }
+  
+  const fileIdx = parseInt(fileIndex);
+  if (isNaN(fileIdx) || fileIdx < 0 || fileIdx >= application.uploadedFiles.length) {
+    throw new ApiError(400, "Invalid file index");
+  }
+  
+  const file = application.uploadedFiles[fileIdx];
+  
+  // Generate download URL if file exists
+  let downloadUrl = null;
+  if (file.s3Key) {
+    try {
+      downloadUrl = await getFileDownloadUrl(file.s3Key, 3600);
+    } catch (error) {
+      console.error('Error generating download URL:', error);
+    }
+  }
+  
+  return res.status(200).json(
+    new ApiResponse(200, { 
+      file: {
+        ...file,
+        downloadUrl,
+        downloadExpiry: downloadUrl ? new Date(Date.now() + 3600 * 1000).toISOString() : null
+      }
+    }, "File details retrieved successfully")
+  );
+});
 
 export {
   getAdminApplications,
@@ -545,5 +593,7 @@ export {
   getApplicationDetails,
   reviewApplication,
   uploadCertificate,
-  getApplicationsByStatus
+  getApplicationsByStatus,
+  downloadFile,
+  getFileDetails
 };
