@@ -58,7 +58,7 @@ export default function CertificateForms() {
       transition: {
         delay: i * 0.3,
         duration: 0.6,
-        ease: "easeOut",
+        ease: ["easeOut"],
       },
     }),
   };
