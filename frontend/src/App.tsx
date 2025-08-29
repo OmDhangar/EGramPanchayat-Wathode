@@ -25,6 +25,7 @@ import AboutVathode from './pages/AboutVathode';
 import BirthCertificate from './pages/BirthCertificate';
 import DeathCertificate from './pages/DeathCertificate';
 import MarriageCertificate from './pages/MarriageCertificateForm';
+import CertificateForms from './pages/applyforcertificates';
 
 
 import Members from './pages/Members'; // Import the AboutKhasala component
@@ -99,7 +100,7 @@ function AppContent() {
             <Route path="*" element={<NotFound />} />
 
             <Route path="/contact" element={<Help/>} />
-            <Route path="/apply-for-certificates" element={<FormsPage/>} />
+            <Route path="/apply-for-certificates" element={<CertificateForms/>} />
             <Route path="/apply-for-certificates/birth-certificate" element={<BirthCertificate />} />
             <Route path="/apply-for-certificates/death-certificate" element={<DeathCertificate />} />
             <Route path="/apply-for-certificates/marriage-certificate" element={<MarriageCertificateForm />} />
