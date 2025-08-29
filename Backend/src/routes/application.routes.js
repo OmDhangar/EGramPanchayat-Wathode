@@ -10,8 +10,11 @@ import {
   submitDeathCertificateApplication,
   submitMarriageCertificateApplication,
   getUserApplications,
-  getApplicationDetails
+  getApplicationDetails,
+  getFileUrls
 } from "../controllers/application.controllers.js";
+import {asyncHandler} from "../utils/asyncHandler.js"
+import {getSecureFileUrl} from "../utils/s3Service.js"
 
 const router = Router();
 
@@ -38,7 +41,53 @@ router.route("/marriage-certificate").post(
 router.route("/user/:userId").get(verifyJWT,getUserApplications);
 router.route("/admin").get(verifyAdmin,getAdminApplications);
 router.route("/admin/filter").get(verifyAdmin,getApplicationsByStatus);
-router.route("/:applicationId").get(verifyJWT,getApplicationDetails);
+router.route("/:applicationId").get(verifyJWT,asyncHandler(getApplicationDetails));
+router.get("/files/urls",verifyJWT,asyncHandler(getFileUrls));
+router.get(
+  "/secure-url/:fileId",
+  verifyJWT,
+  asyncHandler(async (req, res) => {
+    const { fileId } = req.params;
+    const application = await Application.findOne({
+      $or: [
+        { "uploadedFiles._id": fileId },
+        { "generatedCertificate._id": fileId }
+      ]
+    });
+
+    if (!application) {
+      throw new ApiError(404, "File not found");
+    }
+
+    // Check if user has access to this application
+    if (
+      application.applicantId.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      throw new ApiError(403, "Access denied");
+    }
+
+    let filePath;
+    if (application.generatedCertificate?._id.toString() === fileId) {
+      filePath = application.generatedCertificate.filePath;
+    } else {
+      const file = application.uploadedFiles.find(
+        f => f._id.toString() === fileId
+      );
+      filePath = file?.filePath;
+    }
+
+    if (!filePath) {
+      throw new ApiError(404, "File path not found");
+    }
+
+    const secureUrl = await getSecureFileUrl(filePath);
+    
+    return res.status(200).json(
+      new ApiResponse(200, { secureUrl }, "Secure URL generated successfully")
+    );
+  })
+);
 
 
 // Admin review routes

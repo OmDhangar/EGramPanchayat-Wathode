@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { getFileDownloadUrl, getSecureFileUrl } from '../utils/s3Service.js';
 
 // Update the uploadedFiles schema within applicationSchema
 const applicationSchema = new mongoose.Schema({
@@ -222,13 +223,12 @@ const validateMarriageCertificate = (data) => {
 // Add method to get signed download URL
 applicationSchema.methods.getFileDownloadUrl = async function(fileIndex) {
   const file = this.uploadedFiles[fileIndex];
-  if (!file || !file.s3Key) {
-    throw new Error('File not found or S3 key missing');
+  if (!file || (!file.s3Key && !file.filePath)) {
+    throw new Error('File not found or file path missing');
   }
 
   try {
-    const { getFileDownloadUrl } = await import('../utils/s3Service.js');
-    return await getFileDownloadUrl(file.s3Key);
+    return await getSecureFileUrl(file.s3Key || file.filePath);
   } catch (error) {
     throw new Error(`Failed to generate download URL: ${error.message}`);
   }
@@ -236,18 +236,19 @@ applicationSchema.methods.getFileDownloadUrl = async function(fileIndex) {
 
 // Add method to get certificate download URL
 applicationSchema.methods.getCertificateDownloadUrl = async function() {
-  if (!this.generatedCertificate?.s3Key) {
-    throw new Error('Certificate not found or S3 key missing');
+  if (!this.generatedCertificate?.s3Key && !this.generatedCertificate?.filePath) {
+    throw new Error('Certificate not found or file path missing');
   }
 
   try {
-    const { getFileDownloadUrl } = await import('../utils/s3Service.js');
     // Update download count and last downloaded time
     this.generatedCertificate.downloadCount += 1;
     this.generatedCertificate.lastDownloaded = new Date();
     await this.save();
 
-    return await getFileDownloadUrl(this.generatedCertificate.s3Key);
+    return await getSecureFileUrl(
+      this.generatedCertificate.s3Key || this.generatedCertificate.filePath
+    );
   } catch (error) {
     throw new Error(`Failed to generate certificate download URL: ${error.message}`);
   }
@@ -264,6 +265,46 @@ applicationSchema.methods.updateFileLocation = async function(fileIndex, newS3Ke
   this.uploadedFiles[fileIndex].filePath = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${newS3Key}`;
 
   return await this.save();
+};
+
+// Add method to get all file URLs for an application
+applicationSchema.methods.getSignedUrls = async function() {
+  const urls = [];
+  
+  // Get URLs for uploaded files
+  for (const file of this.uploadedFiles) {
+    try {
+      // Use getSecureFileUrl instead of getFileDownloadUrl
+      const signedUrl = await getSecureFileUrl(file.s3Key || file.filePath);
+      urls.push({
+        fileName: file.originalName,
+        url: signedUrl,
+        expiresIn: 3600,
+        type: 'document'
+      });
+    } catch (error) {
+      console.error(`Error generating URL for ${file.fileName}:`, error);
+    }
+  }
+
+  // Get URL for certificate if available
+  if (this.generatedCertificate?.s3Key || this.generatedCertificate?.filePath) {
+    try {
+      const certificateUrl = await getSecureFileUrl(
+        this.generatedCertificate.s3Key || this.generatedCertificate.filePath
+      );
+      urls.push({
+        fileName: this.generatedCertificate.fileName,
+        url: certificateUrl,
+        expiresIn: 3600,
+        type: 'certificate'
+      });
+    } catch (error) {
+      console.error('Error generating certificate URL:', error);
+    }
+  }
+
+  return urls;
 };
 
 export const Application = mongoose.model('Application', applicationSchema);

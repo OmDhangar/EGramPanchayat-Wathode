@@ -2,6 +2,7 @@
 import { S3Client, PutObjectCommand, CopyObjectCommand, DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import fs from 'fs';
+import { url } from 'inspector';
 
 // Initialize S3 Client
 const s3Client = new S3Client({
@@ -12,6 +13,7 @@ const s3Client = new S3Client({
   },
 });
 
+const urlCache = new Map();
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
 
 /**
@@ -151,19 +153,35 @@ const moveFileToFolder = async (currentKey, newFolder) => {
 };
 
 /**
- * Generate signed URL for file download
+ * Generate signed URL with caching
  * @param {string} fileKey - S3 file key
- * @param {number} expiresIn - URL expiry time in seconds (default: 1 hour)
- * @returns {string} Signed URL
+ * @param {number} expiresIn - URL expiry time in seconds
+ * @returns {Promise<string>} Signed URL
  */
 const getFileDownloadUrl = async (fileKey, expiresIn = 3600) => {
   try {
+    const cacheKey = `${fileKey}-${expiresIn}`;
+    const cachedUrl = urlCache.get(cacheKey);
+
+    if (cachedUrl?.url && cachedUrl.expiry > Date.now()) {
+      return cachedUrl.url;
+    }
+
     const command = new GetObjectCommand({
       Bucket: S3_BUCKET_NAME,
       Key: fileKey,
+      ResponseContentDisposition:'attachment'
     });
 
-    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn });
+    const signedUrl = await getSignedUrl(s3Client, command, { 
+      expiresIn,
+      signableHeaders: new Set(['host'])
+     });
+     //cache the url
+     urlCache.set(cacheKey,{
+      url:signedUrl,
+      expiry: Date.now()+ (expiresIn *1000)
+     });
     return signedUrl;
   } catch (error) {
     throw new Error(`Failed to generate download URL: ${error.message}`);
@@ -329,6 +347,37 @@ const processUploadedFilesS3 = async (files, folder = 'unverified') => {
   return uploadedFiles;
 };
 
+/**
+ * Get secure URL for file access - handles both stored URLs and S3 keys
+ * @param {string} filePathOrKey - Either full S3 URL or key
+ * @returns {Promise<string>} Signed URL
+ */
+const getSecureFileUrl = async (filePathOrKey) => {
+  try {
+    // Extract key if full URL was stored
+    let key = filePathOrKey;
+    if (filePathOrKey.includes('.amazonaws.com')) {
+      key = filePathOrKey.split('.amazonaws.com/')[1];
+    }
+
+    const command = new GetObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: key,
+      ResponseContentDisposition: 'inline'
+    });
+
+    const signedUrl = await getSignedUrl(s3Client, command, { 
+      expiresIn: 3600 // 1 hour
+    });
+
+    console.log(signedUrl);
+    return signedUrl;
+  } catch (error) {
+    console.error("Error generating secure URL:", error);
+    throw new Error(`Failed to generate secure URL: ${error.message}`);
+  }
+};
+
 export {
   uploadToS3,
   moveFileToFolder,
@@ -339,5 +388,6 @@ export {
   processUploadedFilesS3,
   getContentType,
   getFileType,
-  s3Client
+  s3Client,
+  getSecureFileUrl
 };

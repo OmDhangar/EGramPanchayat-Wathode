@@ -9,10 +9,20 @@ export const api = axios.create({
   timeout: 30000,
 });
 
-// Global refresh retry counter
-let refreshRetryCount = 0;
+let isRefreshing = false;
+let failedQueue: any[] = [];
 
-// Request interceptor
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -30,42 +40,41 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      refreshRetryCount < 3
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
-      refreshRetryCount += 1;
+      isRefreshing = true;
 
       try {
-        // Refresh token call using cookies (no body required)
-        const response = await api.post(
-          '/users/refresh-token',
-          {},
-          { withCredentials: true }
-        );
-
+        const response = await api.post('/users/refresh-token');
         const { accessToken } = response.data.data;
+        
         localStorage.setItem('accessToken', accessToken);
-
-        // Reset retry counter on successful refresh
-        refreshRetryCount = 0;
-
-        // Retry original request with new token
+        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return axios(originalRequest);
+        
+        processQueue(null, accessToken);
+        return api(originalRequest);
       } catch (refreshError) {
-        // Clear tokens and redirect on failure
-        refreshRetryCount = 0;
+        processQueue(refreshError, null);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
         window.location.href = '/login';
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
-
-    // Reject if not 401 or retry limit exceeded
     return Promise.reject(error);
   }
 );

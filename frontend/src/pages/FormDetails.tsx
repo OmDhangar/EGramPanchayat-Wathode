@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaCheck, FaTimes, FaArrowLeft, FaCreditCard, FaDownload, FaEye, FaLock } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaArrowLeft, FaCreditCard, FaDownload, FaEye, FaLock, FaSpinner } from 'react-icons/fa';
 import { api } from '../api/axios';
 
 // Razorpay types
@@ -101,6 +101,7 @@ const FormDetails = () => {
   const [showAnimation, setShowAnimation] = useState<null | 'approved' | 'rejected'>(null);
   const [remarks, setRemarks] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [loadingFiles, setLoadingFiles] = useState<{ [key: string]: boolean }>({});
 
   // Initialize Razorpay script
   useEffect(() => {
@@ -136,6 +137,8 @@ const FormDetails = () => {
     getUserInfo();
   }, []);
 
+
+  
   useEffect(() => {
     const fetchData = async () => {
       if (!applicationId) {
@@ -146,39 +149,28 @@ const FormDetails = () => {
       try {
         setLoading(true);
         setError(null);
-        setFormDetails(null);
-        setFormData(null);
         
         console.log('Fetching data for applicationId:', applicationId);
 
-        const res = await api.get(`/applications/${applicationId}`);
+        const response = await api.get(`/applications/${applicationId}`);
+        const { application, formData } = response.data.data;
 
-        console.log('Application data:', res.data.data.application);
-        console.log('Form data:', res.data.data.formData);
-        
-        const applicationData = res.data.data.application;
-        const formDataResponse = res.data.data.formData;
-        
-        if (applicationData.applicationId !== applicationId) {
-          console.warn('Mismatch: Requested ID:', applicationId, 'Received ID:', applicationData.applicationId);
-        }
-        
-        setFormDetails(applicationData);
-        setFormData(formDataResponse);
+        console.log('Application data:', application);
+        console.log('Form data:', formData);
+
+        setFormDetails(application);
+        setFormData(formData);
+
       } catch (err: any) {
-        console.error('Error fetching data for applicationId:', applicationId, err);
+        console.error('Error fetching application details:', err);
         setError(err.response?.data?.message || 'Failed to fetch application details');
-        setFormDetails(null);
-        setFormData(null);
       } finally {
         setLoading(false);
       }
     };
 
-    if (applicationId && user) {
-      fetchData();
-    }
-  }, [applicationId, user]);
+    fetchData();
+  }, [applicationId]);
 
   // Admin functions
   const updateStatus = async (status: 'approved' | 'rejected') => {
@@ -238,6 +230,60 @@ const FormDetails = () => {
     updateStatus('rejected');
   };
 
+
+  //handle Download after payment
+  const handleSecureCertificateDownload = async () => {
+  if (!formDetails?.generatedCertificate) {
+    setError("Certificate not available yet");
+    return;
+  }
+
+  if (formDetails.paymentDetails.paymentStatus !== "completed") {
+    setError("Payment must be completed before downloading the certificate");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError(null);
+
+    // Ask backend for a signed URL
+    const res = await api.get(`/applications/files/urls`, {
+      params: { applicationId: formDetails.applicationId },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+    console.log(res.data);
+
+    const signedUrl = res.data?.data?.url;
+    if (!signedUrl) {
+      throw new Error("No signed URL received");
+    }
+
+    // Download file as blob
+    const response = await fetch(signedUrl);
+    if (!response.ok) throw new Error("Failed to download file");
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+
+    // Trigger download
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = formDetails.generatedCertificate.fileName || "certificate.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (err: any) {
+    console.error("Certificate download failed:", err);
+    setError(err.message || "Download failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   // Payment functions
@@ -576,7 +622,7 @@ const renderUserActions = () => {
               y: -2
             }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => window.open(generatedCertificate.filePath, '_blank')}
+            onClick={handleSecureCertificateDownload}
             className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-3 hover:from-green-700 hover:to-green-800 transition-all duration-300 font-semibold text-lg shadow-lg"
           >
             <FaDownload className="text-xl" />
