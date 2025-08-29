@@ -502,6 +502,18 @@ const getApplicationDetails = asyncHandler(async (req, res) => {
       secureUrl: await getSecureFileUrl(application.generatedCertificate.filePath)
     };
   }
+  // Also fetch the referenced form data and include it explicitly for client convenience
+  let formData = null;
+  try {
+    if (application.formDataRef) {
+      const form = await application.getFormData();
+      formData = form ? form.toObject() : null;
+    }
+  } catch (e) {
+    // Non-fatal; continue without form data
+    formData = null;
+  }
+
   const responseData = {
     ...application.toObject(),
     uploadedFiles: secureFiles,
@@ -509,7 +521,7 @@ const getApplicationDetails = asyncHandler(async (req, res) => {
   };
 
   return res.status(200).json(
-    new ApiResponse(200, responseData, "Application details retrieved successfully")
+    new ApiResponse(200, { application: responseData, formData }, "Application details retrieved successfully")
   );
 });
 

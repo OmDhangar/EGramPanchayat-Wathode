@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaCheck, FaTimes, FaArrowLeft, FaCreditCard, FaDownload, FaEye, FaLock, FaSpinner } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaArrowLeft, FaCreditCard, FaDownload, FaEye, FaLock } from 'react-icons/fa';
 import { api } from '../api/axios';
 
 // Razorpay types
@@ -21,12 +21,7 @@ interface UploadedFile {
   uploadedAt: string;
 }
 
-interface PaymentDetails {
-  paymentStatus: 'pending' | 'completed' | 'failed';
-  paymentId?: string;
-  paymentAmount?: number;
-  paymentDate?: string;
-}
+// PaymentDetails interface inlined in FormDetails.paymentDetails
 
 interface FormDetails {
   _id: string;
@@ -101,7 +96,7 @@ const FormDetails = () => {
   const [showAnimation, setShowAnimation] = useState<null | 'approved' | 'rejected'>(null);
   const [remarks, setRemarks] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [loadingFiles, setLoadingFiles] = useState<{ [key: string]: boolean }>({});
+  // Removed unused loadingFiles state
 
   // Initialize Razorpay script
   useEffect(() => {
@@ -153,7 +148,10 @@ const FormDetails = () => {
         console.log('Fetching data for applicationId:', applicationId);
 
         const response = await api.get(`/applications/${applicationId}`);
-        const { application, formData } = response.data.data;
+        // Support both old and new response shapes
+        const data = response.data?.data;
+        const application = data?.application || data; 
+        const formData = data?.formData || null;
 
         console.log('Application data:', application);
         console.log('Form data:', formData);
@@ -231,7 +229,7 @@ const FormDetails = () => {
   };
 
 
-  //handle Download after payment
+  //handle Download after payment: redirect to signed URL immediately
   const handleSecureCertificateDownload = async () => {
   if (!formDetails?.generatedCertificate) {
     setError("Certificate not available yet");
@@ -261,22 +259,8 @@ const FormDetails = () => {
       throw new Error("No signed URL received");
     }
 
-    // Download file as blob
-    const response = await fetch(signedUrl);
-    if (!response.ok) throw new Error("Failed to download file");
-
-    const blob = await response.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
-
-    // Trigger download
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = formDetails.generatedCertificate.fileName || "certificate.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    window.URL.revokeObjectURL(downloadUrl);
+    // Redirect to signed URL (lets the browser handle viewing/downloading)
+    window.location.href = signedUrl;
   } catch (err: any) {
     console.error("Certificate download failed:", err);
     setError(err.message || "Download failed");
@@ -345,8 +329,25 @@ const FormDetails = () => {
               setShowAnimation('approved');
               await new Promise(resolve => setTimeout(resolve, 1500));
               setShowAnimation(null);
-              
-              // Refresh form details to show updated payment status
+
+              // Immediately fetch signed URL and redirect for download
+              try {
+                const res = await api.get(`/applications/files/urls`, {
+                  params: { applicationId: formDetails.applicationId },
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                  },
+                });
+                const signedUrl = res.data?.data?.url;
+                if (signedUrl) {
+                  window.location.href = signedUrl;
+                  return;
+                }
+              } catch (e) {
+                // Fall back to reloading details if URL fetch fails
+              }
+
+              // Fallback: reload to show updated status
               window.location.reload();
             }
           } catch (error: any) {
@@ -381,22 +382,9 @@ const FormDetails = () => {
   };
 
   // Navigation functions
-  const handleDownloadCertificate = () => {
-    // Check if payment is completed before allowing download
-    if (formDetails?.paymentDetails.paymentStatus !== 'completed') {
-      setError('Payment must be completed before downloading the certificate');
-      return;
-    }
-    navigate(`/certificate/${applicationId}`);
-  };
+  // Removed unused navigate-to-certificate route; using direct signed URL instead
 
-  const handleProtectedDownload = () => {
-    if (formDetails?.paymentDetails.paymentStatus !== 'completed') {
-      setError('Complete the payment first to download your certificate');
-      return;
-    }
-    handleDownloadCertificate();
-  };
+  // Removed unused handleProtectedDownload
 
   const handleBackNavigation = () => {
     if (user?.role === 'admin') {
