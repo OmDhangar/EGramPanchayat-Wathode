@@ -105,58 +105,45 @@ const registerUser = asyncHandler(async function (req,res){
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email) {
-    throw new ApiError(400, "Email is required");
+  if (!email || !password) {
+    throw new ApiError(400, "Email and password are required");
   }
 
-  if (!password) {
-    throw new ApiError(400, "Password is required");
-  }
-
-  console.log('finding user')
+  console.log("finding user");
   const user = await User.findOne({ email });
+
   if (!user) {
-    throw new ApiError(401, "User does not exist");
+    throw new ApiError(404, "User does not exist");
   }
 
-   console.log('checking password of user')
+  console.log("checking password of user");
   const isPasswordValid = await user.isPasswordCorrect(password);
+
   if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid password");
+    throw new ApiError(401, "Invalid credentials");
   }
 
-  console.log('generating access and refresh token');
+  console.log("generating access and refresh token");
   const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(user._id);
 
-  const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
-
+  const loggedInUser = await User.findById(user._id).select("-password");
 
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: "lax",
-    maxAge: 15 * 60 * 1000, // 15 minutes
-  };
-
-  const refreshOptions = {
-    ...options,
-    maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+    secure: process.env.NODE_ENV === "production",
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   };
 
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, refreshOptions)
+    .cookie("refreshToken", refreshToken, options)
     .json(
-      new ApiResponse(
-        200,
-        {
-          user: loggedInUser,
-          accessToken,
-          refreshToken
-        },
-        "User logged in successfully"
-      )
+      new ApiResponse(200, {
+        user: loggedInUser,
+        accessToken,
+        refreshToken // Only for development
+      }, "User logged in successfully")
     );
 });
 

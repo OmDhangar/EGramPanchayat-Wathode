@@ -1,80 +1,61 @@
-import {asyncHandler} from "../utils/asyncHandler.js"
-import {ApiError} from '../utils/ApiError.js'
-import jwt from "jsonwebtoken"
-import { User } from "../models/user.model.js"
-
+import jwt from "jsonwebtoken";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { User } from "../models/user.model.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
-  const token =
-    req.cookies?.accessToken ||
-    req.header("Authorization")?.replace("Bearer ", "");
+  const accessToken = req.headers?.authorization?.replace("Bearer ", "");
+  const refreshToken = req.cookies?.refreshToken;
 
-  if (!token) {
-    throw new ApiError(401, "Unauthorized request - No token provided");
+  if (!accessToken) {
+    throw new ApiError(401, "Unauthorized request");
   }
-
-  let decodedToken;
 
   try {
-    decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const user = await User.findById(decodedToken?._id).select("-password");
+    
+    if (!user) {
+      throw new ApiError(401, "Invalid Access Token");
+    }
+
+    req.user = user;
+    next();
   } catch (error) {
-    // Access token expired or invalid
-    if (error.name !== "TokenExpiredError") {
-      throw new ApiError(401, "Invalid access token");
-    }
+    if (error.name === 'TokenExpiredError' && refreshToken) {
+      try {
+        // Verify refresh token
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+        const user = await User.findById(decoded?._id).select("-password");
+        
+        if (!user) {
+          throw new ApiError(401, "Invalid Refresh Token");
+        }
 
-    // Try to verify and refresh the token
-    const refreshToken = req.cookies?.refreshToken;
-    if (!refreshToken) {
-      throw new ApiError(401, "Access token expired and no refresh token provided");
-    }
+        // Generate new tokens
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = 
+          await user.generateAuthTokens();
 
-    try {
-      const decodedRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-      const user = await User.findById(decodedRefreshToken?._id);
+        // Set new cookies
+        res.cookie("refreshToken", newRefreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: 'strict',
+          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
 
-      if (!user || user.refreshToken !== refreshToken) {
-        throw new ApiError(401, "Invalid refresh token");
+        // Set new user and token
+        req.user = user;
+        req.headers.authorization = `Bearer ${newAccessToken}`;
+        next();
+      } catch (refreshError) {
+        throw new ApiError(401, "Invalid or expired refresh token");
       }
-
-      const newAccessToken = user.generateAccessToken();
-      const newRefreshToken = user.generateRefreshToken();
-
-      res.cookie("accessToken", newAccessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        domain: "localhost",
-        maxAge: 15 * 60 * 1000 // 15 minutes
-      });
-
-      res.cookie("refreshToken", newRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        domain: "localhost",
-        path: "/",
-        maxAge: 10 * 24 * 60 * 60 * 1000 // 30 days
-      });
-
-      req.user = user;
-      return next();
-    } catch (refreshError) {
-      throw new ApiError(401, "Invalid or expired refresh token");
+    } else {
+      throw new ApiError(401, "Invalid Access Token");
     }
   }
-
-  // Normal case: valid access token
-  const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
-
-  if (!user) {
-    throw new ApiError(401, "Invalid Access Token - user not found");
-  }
-
-  req.user = user;
-  return next();
 });
-
 
 export const verifyAdmin = asyncHandler(async (req, res, next) => {
    try {

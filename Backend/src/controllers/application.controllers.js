@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { processUploadedFilesS3, moveFileToFolder, getFileDownloadUrl } from "../utils/s3Service.js";
+import { processUploadedFilesS3, moveFileToFolder, getFileDownloadUrl,getSecureFileUrl } from "../utils/s3Service.js";
 import { notifyAdminNewApplication, notifyUserStatusUpdate } from "../utils/emailService.js";
 import mongoose from "mongoose";
 import crypto from "crypto";
@@ -472,42 +472,56 @@ const getAdminApplications = asyncHandler(async (req, res) => {
 
 // Get application details
 const getApplicationDetails = asyncHandler(async (req, res) => {
-  let { applicationId } = req.params;
+  const { applicationId } = req.params;
   
-  if (!applicationId) {
-    throw new ApiError(400, "Application ID is required");
-  }
-  
-  // Remove leading colon if present (common route parameter issue)
-  if (applicationId.startsWith(':')) {
-    applicationId = applicationId.substring(1);
-  }
-  
-  // Additional validation
-  if (!applicationId || applicationId.trim() === '') {
-    throw new ApiError(400, "Valid Application ID is required");
-  }
+  // Find application by applicationId string instead of applicantId
+  const application = await Application.findOne({
+    $or: [
+      { _id: mongoose.isValidObjectId(applicationId) ? applicationId : null },
+      { applicationId: applicationId } // Search by application ID string
+    ]
+  });
 
-  console.log("Application ID:", applicationId);
-  
-  const application = await Application.findOne({ applicationId });
-  
-  console.log("Found application:", application?._id);
-  
   if (!application) {
     throw new ApiError(404, "Application not found");
   }
-  
-  // Check if the user is authorized to view this application
-  if (req.user.role !== 'admin' && application.applicantId.toString() !== req.user._id.toString()) {
-    throw new ApiError(403, "You are not authorized to view this application");
+
+  // Generate secure URLs for all files
+  const secureFiles = await Promise.all(
+    application.uploadedFiles.map(async (file) => ({
+      ...file.toObject(),
+      secureUrl: await getSecureFileUrl(file.filePath)
+    }))
+  );
+
+  // Generate secure URL for certificate if exists
+  let secureCertificate = null;
+  if (application.generatedCertificate?.filePath) {
+    secureCertificate = {
+      ...application.generatedCertificate.toObject(),
+      secureUrl: await getSecureFileUrl(application.generatedCertificate.filePath)
+    };
   }
-  
-  // Get form data
-  const formData = await application.getFormData();
-  
+  // Also fetch the referenced form data and include it explicitly for client convenience
+  let formData = null;
+  try {
+    if (application.formDataRef) {
+      const form = await application.getFormData();
+      formData = form ? form.toObject() : null;
+    }
+  } catch (e) {
+    // Non-fatal; continue without form data
+    formData = null;
+  }
+
+  const responseData = {
+    ...application.toObject(),
+    uploadedFiles: secureFiles,
+    generatedCertificate: secureCertificate
+  };
+
   return res.status(200).json(
-    new ApiResponse(200, { application, formData }, "Application details retrieved successfully")
+    new ApiResponse(200, { application: responseData, formData }, "Application details retrieved successfully")
   );
 });
 
@@ -584,6 +598,61 @@ const getFileDetails = asyncHandler(async (req, res) => {
   );
 });
 
+// New function: Get signed URL(s)
+// - If query has applicationId, return ONLY the generated certificate's signed URL for that application
+// - Otherwise, return a list of signed URLs across the user's applications
+const getFileUrls = asyncHandler(async (req, res) => {
+  const { applicationId } = req.query;
+
+  // Single certificate URL for a specific application (used by "View Certificate")
+  if (applicationId) {
+    const application = await Application.findOne({
+      $or: [
+        { _id: mongoose.isValidObjectId(applicationId) ? applicationId : null },
+        { applicationId }
+      ]
+    });
+
+    if (!application) {
+      throw new ApiError(404, "Application not found");
+    }
+
+    // Authorization: owner or admin
+    if (
+      req.user.role !== 'admin' &&
+      application.applicantId.toString() !== req.user._id.toString()
+    ) {
+      throw new ApiError(403, "Unauthorized access");
+    }
+
+    if (!application.generatedCertificate?.s3Key && !application.generatedCertificate?.filePath) {
+      throw new ApiError(404, "Certificate not available yet");
+    }
+
+    const url = await getSecureFileUrl(
+      application.generatedCertificate.s3Key || application.generatedCertificate.filePath
+    );
+
+    return res.status(200).json(
+      new ApiResponse(200, { url }, "Certificate URL generated successfully")
+    );
+  }
+
+  // Fallback: aggregate signed URLs across all user's applications (admin gets all their own; not cross-tenant)
+  const applications = await Application.find({ applicantId: req.user._id });
+
+  let allUrls = [];
+  for (const application of applications) {
+    // Fix incorrect call: use model method getSignedUrls
+    const urls = await application.getSignedUrls();
+    allUrls = [...allUrls, ...urls];
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, allUrls, "File URLs generated successfully")
+  );
+});
+
 export {
   getAdminApplications,
   submitBirthCertificateApplication,
@@ -595,5 +664,6 @@ export {
   uploadCertificate,
   getApplicationsByStatus,
   downloadFile,
-  getFileDetails
+  getFileDetails,
+  getFileUrls
 };
