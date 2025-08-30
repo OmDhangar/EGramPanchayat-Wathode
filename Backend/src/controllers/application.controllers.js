@@ -471,6 +471,8 @@ const getAdminApplications = asyncHandler(async (req, res) => {
 });
 
 // Get application details
+// Optimized to return raw data without generating signed URLs upfront
+// URLs are generated on-demand when user clicks on files to reduce AWS S3 costs
 const getApplicationDetails = asyncHandler(async (req, res) => {
   const { applicationId } = req.params;
   
@@ -486,22 +488,14 @@ const getApplicationDetails = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Application not found");
   }
 
-  // Generate secure URLs for all files
-  const secureFiles = await Promise.all(
-    application.uploadedFiles.map(async (file) => ({
-      ...file.toObject(),
-      secureUrl: await getSecureFileUrl(file.filePath)
-    }))
-  );
+  // Return raw application data without generating signed URLs upfront
+  // URLs will be generated on-demand when user clicks on files
+  const responseData = {
+    ...application.toObject(),
+    uploadedFiles: application.uploadedFiles.map(file => file.toObject()),
+    generatedCertificate: application.generatedCertificate ? application.generatedCertificate.toObject() : null
+  };
 
-  // Generate secure URL for certificate if exists
-  let secureCertificate = null;
-  if (application.generatedCertificate?.filePath) {
-    secureCertificate = {
-      ...application.generatedCertificate.toObject(),
-      secureUrl: await getSecureFileUrl(application.generatedCertificate.filePath)
-    };
-  }
   // Also fetch the referenced form data and include it explicitly for client convenience
   let formData = null;
   try {
@@ -513,12 +507,6 @@ const getApplicationDetails = asyncHandler(async (req, res) => {
     // Non-fatal; continue without form data
     formData = null;
   }
-
-  const responseData = {
-    ...application.toObject(),
-    uploadedFiles: secureFiles,
-    generatedCertificate: secureCertificate
-  };
 
   return res.status(200).json(
     new ApiResponse(200, { application: responseData, formData }, "Application details retrieved successfully")
@@ -629,13 +617,21 @@ const getFileUrls = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Certificate not available yet");
     }
 
-    const url = await getSecureFileUrl(
-      application.generatedCertificate.s3Key || application.generatedCertificate.filePath
-    );
-
-    return res.status(200).json(
-      new ApiResponse(200, { url }, "Certificate URL generated successfully")
-    );
+    try {
+      const url = await getSecureFileUrl(
+        application.generatedCertificate.s3Key || application.generatedCertificate.filePath
+      );
+      
+      return res.status(200).json(
+        new ApiResponse(200, { url }, "Certificate URL generated successfully")
+      );
+    } catch (error) {
+      console.error('Error generating certificate URL:', error);
+      if (error.message.includes('File not found') || error.message.includes('NoSuchKey')) {
+        throw new ApiError(404, "Certificate file not found in storage");
+      }
+      throw new ApiError(500, "Failed to generate certificate URL");
+    }
   }
 
   // Fallback: aggregate signed URLs across all user's applications (admin gets all their own; not cross-tenant)
@@ -653,6 +649,76 @@ const getFileUrls = asyncHandler(async (req, res) => {
   );
 });
 
+// New function: Generate signed URL for a specific file on-demand
+const generateFileSignedUrl = asyncHandler(async (req, res) => {
+  const { applicationId, fileId, fileType } = req.params;
+
+  if (!applicationId) {
+    throw new ApiError(400, "Application ID is required");
+  }
+
+  // Find the application
+  const application = await Application.findOne({
+    $or: [
+      { _id: mongoose.isValidObjectId(applicationId) ? applicationId : null },
+      { applicationId }
+    ]
+  });
+
+  if (!application) {
+    throw new ApiError(404, "Application not found");
+  }
+
+  // Authorization: owner or admin
+  if (
+    req.user.role !== 'admin' &&
+    application.applicantId.toString() !== req.user._id.toString()
+  ) {
+    throw new ApiError(403, "Unauthorized access");
+  }
+
+  let filePath;
+  let fileName;
+
+  // Handle certificate files
+  if (fileType === 'certificate') {
+    if (!application.generatedCertificate?.filePath) {
+      throw new ApiError(404, "Certificate not found or not yet generated");
+    }
+    filePath = application.generatedCertificate.filePath;
+    fileName = application.generatedCertificate.fileName;
+  } else {
+    // Handle uploaded files
+    const file = application.uploadedFiles.find(f => f._id.toString() === fileId);
+    if (!file) {
+      throw new ApiError(404, "File not found");
+    }
+    if (!file.filePath) {
+      throw new ApiError(404, "File path not available");
+    }
+    filePath = file.filePath;
+    fileName = file.originalName;
+  }
+
+  try {
+    const signedUrl = await getSecureFileUrl(filePath);
+    
+    return res.status(200).json(
+      new ApiResponse(200, { 
+        url: signedUrl,
+        fileName: fileName,
+        expiresIn: '1 hour'
+      }, "Signed URL generated successfully")
+    );
+  } catch (error) {
+    console.error('Error generating signed URL:', error);
+    if (error.message.includes('File not found') || error.message.includes('NoSuchKey')) {
+      throw new ApiError(404, "File not found in storage");
+    }
+    throw new ApiError(500, "Failed to generate signed URL");
+  }
+});
+
 export {
   getAdminApplications,
   submitBirthCertificateApplication,
@@ -665,5 +731,6 @@ export {
   getApplicationsByStatus,
   downloadFile,
   getFileDetails,
-  getFileUrls
+  getFileUrls,
+  generateFileSignedUrl
 };

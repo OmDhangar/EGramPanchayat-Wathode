@@ -11,10 +11,14 @@ import {
   submitMarriageCertificateApplication,
   getUserApplications,
   getApplicationDetails,
-  getFileUrls
+  getFileUrls,
+  generateFileSignedUrl
 } from "../controllers/application.controllers.js";
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {getSecureFileUrl} from "../utils/s3Service.js"
+import {ApiError} from "../utils/ApiError.js"
+import {ApiResponse} from "../utils/ApiResponse.js"
+import {Application} from "../models/application.model.js"
 
 const router = Router();
 
@@ -41,8 +45,14 @@ router.route("/marriage-certificate").post(
 router.route("/user/:userId").get(verifyJWT,getUserApplications);
 router.route("/admin").get(verifyAdmin,getAdminApplications);
 router.route("/admin/filter").get(verifyAdmin,getApplicationsByStatus);
-router.route("/:applicationId").get(verifyJWT,asyncHandler(getApplicationDetails));
+
+// File-related routes must come before the general applicationId route
 router.get("/files/urls",verifyJWT,asyncHandler(getFileUrls));
+// Certificate route must come before the file ID route to avoid conflicts
+router.get("/files/:applicationId/certificate/signed-url", verifyJWT, asyncHandler(generateFileSignedUrl));
+router.get("/files/:applicationId/:fileId/signed-url", verifyJWT, asyncHandler(generateFileSignedUrl));
+
+router.route("/:applicationId").get(verifyJWT,asyncHandler(getApplicationDetails));
 router.get(
   "/secure-url/:fileId",
   verifyJWT,
