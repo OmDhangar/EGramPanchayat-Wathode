@@ -61,9 +61,10 @@ const CertificateApprovals = () => {
           },
         } 
       );
-      const filteredForms = filterFormByStatus(res.data.data ||[])
-      console.log(res);
-      setForms(filteredForms);
+             const filteredForms = filterFormByStatus(res.data.data ||[])
+       console.log('Applications data:', res.data.data);
+       console.log('Filtered forms:', filteredForms);
+       setForms(filteredForms);
     } catch (err) {
       console.error('Error fetching forms:', err);
     } finally {
@@ -89,20 +90,17 @@ const CertificateApprovals = () => {
 
       let url;
       if (fileType === 'certificate') {
-        // For certificates, use the new on-demand endpoint
-        const res = await api.get(`/applications/files/${applicationId}/certificate/signed-url`, {
+        // For certificates, use the working route from FormDetails
+        const res = await api.get(`/applications/files/urls`, {
+          params: { applicationId },
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           }
         });
         url = res.data?.data?.url;
       } else {
-        // For uploaded files, use the new on-demand endpoint
-        const res = await api.get(`/applications/files/${applicationId}/${fileId}/signed-url`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          }
-        });
+        // For uploaded files, use the secure-url route
+        const res = await api.get(`/applications/files/${applicationId}/${fileId}/signed-url`);
         url = res.data?.data?.url;
       }
 
@@ -264,7 +262,7 @@ const CertificateApprovals = () => {
                        )}
                      </div>
 
-                                         {form.generatedCertificate && form.generatedCertificate.filePath && form.status === 'certificate_generated' && (
+                                         {form.generatedCertificate && (form.generatedCertificate.filePath || form.generatedCertificate.fileName) && (
                        <div className="border-t pt-3">
                          <p className="mb-2 font-medium">Generated Certificate:</p>
                          <div className="flex items-center gap-2">
@@ -286,6 +284,7 @@ const CertificateApprovals = () => {
                                className="text-blue-600 hover:text-blue-800 hover:underline flex-1 disabled:opacity-50"
                                onClick={(e) => {
                                  e.stopPropagation();
+                                 console.log('Certificate data:', form.generatedCertificate);
                                  handleFileClick(form.applicationId, `cert-${form._id}`, 'certificate');
                                }}
                                disabled={loadingUrls[`cert-${form._id}`]}
@@ -297,7 +296,7 @@ const CertificateApprovals = () => {
                              <span className="text-red-500 text-xs">{urlErrors[`cert-${form._id}`]}</span>
                            )}
                            <span className="text-xs text-gray-500">
-                             ({new Date(form.generatedCertificate.generatedAt).toLocaleDateString()})
+                             ({form.generatedCertificate.generatedAt ? new Date(form.generatedCertificate.generatedAt).toLocaleDateString() : 'Date not available'})
                            </span>
                          </div>
                        </div>

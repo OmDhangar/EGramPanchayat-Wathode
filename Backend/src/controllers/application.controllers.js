@@ -443,11 +443,30 @@ const getApplicationsByStatus = asyncHandler(async (req, res) => {
   
   const applications = await Application.find(filter)
     .sort({ createdAt: -1 })
-    .populate('applicantId', 'fullName')
-    .lean();
+    .populate('applicantId', 'fullName');
+
+  // Convert to plain objects and ensure subdocuments are properly serialized
+  const applicationsData = applications.map(app => {
+    const appData = app.toObject();
+    return {
+      ...appData,
+      uploadedFiles: appData.uploadedFiles || [],
+      generatedCertificate: appData.generatedCertificate ? {
+        fileName: appData.generatedCertificate.fileName,
+        filePath: appData.generatedCertificate.filePath,
+        s3Key: appData.generatedCertificate.s3Key,
+        folder: appData.generatedCertificate.folder,
+        contentType: appData.generatedCertificate.contentType,
+        fileSize: appData.generatedCertificate.fileSize,
+        generatedAt: appData.generatedCertificate.generatedAt,
+        downloadCount: appData.generatedCertificate.downloadCount,
+        lastDownloaded: appData.generatedCertificate.lastDownloaded
+      } : null
+    };
+  });
   
   return res.status(200).json(
-    new ApiResponse(200, applications, "Applications retrieved successfully")
+    new ApiResponse(200, applicationsData, "Applications retrieved successfully")
   );
 });
 
@@ -462,11 +481,30 @@ const getAdminApplications = asyncHandler(async (req, res) => {
       $in: ['pending', 'approved', 'certificate_generated', 'rejected', 'completed']
     }
   })
-  .sort({ createdAt: -1 })
-  .lean();
+  .sort({ createdAt: -1 });
+
+  // Convert to plain objects and ensure subdocuments are properly serialized
+  const applicationsData = applications.map(app => {
+    const appData = app.toObject();
+    return {
+      ...appData,
+      uploadedFiles: appData.uploadedFiles || [],
+      generatedCertificate: appData.generatedCertificate ? {
+        fileName: appData.generatedCertificate.fileName,
+        filePath: appData.generatedCertificate.filePath,
+        s3Key: appData.generatedCertificate.s3Key,
+        folder: appData.generatedCertificate.folder,
+        contentType: appData.generatedCertificate.contentType,
+        fileSize: appData.generatedCertificate.fileSize,
+        generatedAt: appData.generatedCertificate.generatedAt,
+        downloadCount: appData.generatedCertificate.downloadCount,
+        lastDownloaded: appData.generatedCertificate.lastDownloaded
+      } : null
+    };
+  });
 
   return res.status(200).json(
-    new ApiResponse(200, applications, "Admin applications retrieved successfully")
+    new ApiResponse(200, applicationsData, "Admin applications retrieved successfully")
   );
 });
 

@@ -45,7 +45,7 @@ router.route("/marriage-certificate").post(
 router.route("/user/:userId").get(verifyJWT,getUserApplications);
 router.route("/admin").get(verifyAdmin,getAdminApplications);
 router.route("/admin/filter").get(verifyAdmin,getApplicationsByStatus);
-
+  
 // File-related routes must come before the general applicationId route
 router.get("/files/urls",verifyJWT,asyncHandler(getFileUrls));
 // Certificate route must come before the file ID route to avoid conflicts
@@ -78,6 +78,7 @@ router.get(
     }
 
     let filePath;
+    console.log(application.generatedCertificate.id);
     if (application.generatedCertificate?._id.toString() === fileId) {
       filePath = application.generatedCertificate.filePath;
     } else {
