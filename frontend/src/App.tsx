@@ -25,18 +25,15 @@ import AboutVathode from './pages/AboutVathode';
 import BirthCertificate from './pages/BirthCertificate';
 import DeathCertificate from './pages/DeathCertificate';
 import MarriageCertificate from './pages/MarriageCertificateForm';
-import CertificateForms from './pages/applyforcertificates';
 
-
-import Members from './pages/Members'; // Import the AboutKhasala component
-// import Certificates from './pages/Certificates';
+import Members from './pages/Members';
 import FormsPage from './pages/applyforcertificates';
 import PublicInfo from './pages/publicinfo';
 import Help from './pages/help';
 import { Toaster } from 'react-hot-toast';
 
 // i18n setup
-import '../src/i18n'; // Make sure the path is correct relative to your file
+import '../src/i18n';
 import MarriageCertificateForm from './pages/MarriageCertificateForm';
 import CertificateDownload from './pages/certificateDownload';
 
@@ -55,6 +52,15 @@ function AppContent() {
     i18n.changeLanguage(lng);
   };
 
+  // Only show Login page without layout
+  if (location.pathname === "/login") {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -65,9 +71,7 @@ function AppContent() {
 
   return (
     <AuthContextProvider>
-
       <div className="flex flex-col min-h-screen">
-
         {/* Language Switcher */}
         <div className="text-right px-4 py-2 bg-gray-100 shadow-sm">
           <button onClick={() => changeLanguage('en')} className="mr-2 text-sm font-medium text-blue-600">English</button>
@@ -75,6 +79,8 @@ function AppContent() {
         </div>
         <Toaster position="top-right" />
         <Navbar />
+        {/* Spacer to prevent content being hidden behind the fixed/auto-hiding navbar */}
+        <div className="h-[112px] sm:h-[136px]" />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -83,7 +89,6 @@ function AppContent() {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/gallery/:year" element={<YearGallery />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin/users" element={<ManageUsers />} />
             <Route path="/form-details/:applicationId" element={<FormDetails />} />
@@ -98,9 +103,8 @@ function AppContent() {
             <Route path="/members" element={<Members />} />
             <Route path="/notices" element={<PublicInfo />} />
             <Route path="*" element={<NotFound />} />
-
             <Route path="/contact" element={<Help/>} />
-            <Route path="/apply-for-certificates" element={<CertificateForms/>} />
+            <Route path="/apply-for-certificates" element={<FormsPage/>} />
             <Route path="/apply-for-certificates/birth-certificate" element={<BirthCertificate />} />
             <Route path="/apply-for-certificates/death-certificate" element={<DeathCertificate />} />
             <Route path="/apply-for-certificates/marriage-certificate" element={<MarriageCertificateForm />} />

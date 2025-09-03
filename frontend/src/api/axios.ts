@@ -1,29 +1,18 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-
+  baseURL: 'http://localhost:8000/api/v1',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 10000,
 });
 
-let isRefreshing = false;
-let failedQueue: any[] = [];
+// Global refresh retry counter
+let refreshRetryCount = 0;
 
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
-
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -41,41 +30,42 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(token => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api(originalRequest);
-          })
-          .catch(err => Promise.reject(err));
-      }
-
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      refreshRetryCount < 3
+    ) {
       originalRequest._retry = true;
-      isRefreshing = true;
+      refreshRetryCount += 1;
 
       try {
-        const response = await api.post('/users/refresh-token');
+        // Refresh token call using cookies (no body required)
+        const response = await api.post(
+          '/users/refresh-token',
+          {},
+          { withCredentials: true }
+        );
+
         const { accessToken } = response.data.data;
-        
         localStorage.setItem('accessToken', accessToken);
-        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+        // Reset retry counter on successful refresh
+        refreshRetryCount = 0;
+
+        // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        
-        processQueue(null, accessToken);
-        return api(originalRequest);
+        return axios(originalRequest);
       } catch (refreshError) {
-        processQueue(refreshError, null);
+        // Clear tokens and redirect on failure
+        refreshRetryCount = 0;
         localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
         window.location.href = '/login';
         return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
+
+    // Reject if not 401 or retry limit exceeded
     return Promise.reject(error);
   }
 );
