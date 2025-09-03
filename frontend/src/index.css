@@ -44,3 +44,50 @@ html {
   opacity: 1;
   transform: translateY(0);
 }
+@import url('https://fonts.googleapis.com/css2?family=Tiro+Marathi&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+.map-container {
+  perspective: 1000px;
+}
+
+.map-image {
+  transition: transform 0.7s ease;
+}
+
+.map-container:hover .map-image {
+  transform: rotateY(15deg) rotateX(5deg);
+}
+
+.stat-card {
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.info-palette {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.decoration-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+  z-index: 0;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}

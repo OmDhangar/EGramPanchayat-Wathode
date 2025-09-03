@@ -38,8 +38,8 @@ const nearbyVillages = [
 
 const AboutVathode = () => {
   return (
-    <div className="max-w-4xl mx-auto p-4 font-[Tiro Devanagari Marathi]">
-      <h1 className="text-3xl font-bold mb-4 text-yellow-800 tiro-header">वाठोडे गावाची माहिती</h1>
+ <div className="max-w-4xl mx-auto p-4 font-[Tiro Devanagari Marathi] pt-32 sm:pt-40">
+    <h1 className="text-3xl font-bold mb-4 text-yellow-800 tiro-header">वाठोडे गावाची माहिती</h1>
       <p className="mb-4 text-gray-700 text-lg">
         <b>वाठोडे</b> हे महाराष्ट्रातील धुळे जिल्ह्यातील शिरपूर तालुक्यातील एक गाव आहे. हे गाव शिरपूरपासून सुमारे १२ किमी आणि जिल्हा मुख्यालय धुळेपासून ६९ किमी अंतरावर आहे. २००९ नुसार, वाठोडे हे स्वतःचे ग्रामपंचायत आहे. गावाचा भौगोलिक कोड ५२६०७४ आहे आणि एकूण क्षेत्रफळ २९९.१७ हेक्टर आहे. शिरपूर हे गावाच्या जवळचे प्रमुख आर्थिक केंद्र आहे.
       </p>

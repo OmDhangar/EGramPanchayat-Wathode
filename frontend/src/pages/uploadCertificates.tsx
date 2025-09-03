@@ -61,7 +61,7 @@ const UploadCertificates = () => {
       const formData = new FormData();
       formData.append('certificate', file);
 
-      const response = await api.post(
+      await api.post(
         `/applications/admin/certificate/${applicationId}`,
         formData,
         {
@@ -71,12 +71,6 @@ const UploadCertificates = () => {
           }
         }
       );
-      
-    if (response.data.success) {
-      // Handle success
-      console.log("Certificate uploaded successfully");
-      return response.data.data;
-    }
 
       // Refresh the applications list
       await fetchApprovedApplications();

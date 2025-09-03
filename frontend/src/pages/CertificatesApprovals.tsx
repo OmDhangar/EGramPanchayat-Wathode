@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaEye } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { FaFileAlt, FaFilePdf, FaFileImage } from 'react-icons/fa';
 import { api } from '../api/axios';
 
@@ -38,9 +39,11 @@ const CertificateApprovals = () => {
   const [forms, setForms] = useState<FormSubmission[]>([]);
   const [activeTab, setActiveTab] = useState<string>('pending');
   const [loading, setLoading] = useState(false);
+
   const [fileUrls, setFileUrls] = useState<{ [key: string]: string }>({});
   const [loadingUrls, setLoadingUrls] = useState<{ [key: string]: boolean }>({});
   const [urlErrors, setUrlErrors] = useState<{ [key: string]: string }>({});
+
   const navigate = useNavigate();
 
   const filterFormByStatus = (forms:FormSubmission[]):FormSubmission[]=>{
@@ -48,7 +51,7 @@ const CertificateApprovals = () => {
     return forms.filter(form => form.status === activeTab);
   }
 
-  const fetchForms = async () => {
+  const fetchForms = async (status: string) => {
     try {
       console.log(localStorage.getItem('accessToken'));
       console.log(localStorage.getItem('refreshToken'))
@@ -74,12 +77,13 @@ const CertificateApprovals = () => {
   
 
   useEffect(() => {
-    fetchForms();
+    fetchForms(activeTab);
   }, [activeTab]);
 
   const viewFormDetails = (formId: string) => {
     navigate(`/form-details/${formId}`);
   };
+
 
   // Generate signed URL for a specific file on-demand
   // This optimizes AWS S3 costs by only generating URLs when user clicks on files
@@ -141,7 +145,6 @@ const CertificateApprovals = () => {
   };
 
 
-
  return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
@@ -172,11 +175,11 @@ const CertificateApprovals = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {forms.map((form) => (
               <motion.div
+              onClick={(e)=>{
+                 e.stopPropagation();
+                viewFormDetails(form.applicationId);
+              }}
                 key={form._id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  viewFormDetails(form.applicationId);
-                }}
                 className="bg-white rounded-lg shadow-md hover:shadow-lg"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -209,7 +212,7 @@ const CertificateApprovals = () => {
                       </span>
                     </div>
                     
-                                                              <div>
+                      <div>
                        <p className="mb-2 font-medium">Uploaded Files:</p>
                        {form.uploadedFiles.filter(file => file.filePath).length > 0 ? (
                          <ul className="space-y-2">
@@ -320,7 +323,7 @@ const CertificateApprovals = () => {
                       className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
                       onClick={(e) => {
                         e.stopPropagation();
-                        viewFormDetails(form.applicationId);
+                        viewFormDetails(form._id);
                       }}
                     >
                       <FaEye /> View Details

@@ -36,12 +36,6 @@ interface DownloadHistory {
   ipAddress: string;
 }
 
-interface CertificateFile {
-  fileName: string;
-  secureUrl: string;
-  originalName: string;
-}
-
 const CertificateDownload = () => {
   const { applicationId } = useParams();
   const navigate = useNavigate();
@@ -51,81 +45,84 @@ const CertificateDownload = () => {
   const [downloadLoading, setDownloadLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [file, setFile] = useState<CertificateFile | null>(null);
 
   useEffect(() => {
     const fetchCertificate = async () => {
-              if (!applicationId) {
-                setError("No application ID provided");
-                return;
-              }
+      if (!applicationId) {
+        setError('No application ID provided');
+        return;
+      }
 
-              try {
-                setLoading(true);
-                setError(null);
+      try {
+        setLoading(true);
+        setError(null);
 
-                const response = await api.get(`/applications/files/urls`, {
-                  params: { applicationId },
-                  headers: {
-                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                  },
-                });
+        const response = await api.get(
+          `/certificates/${applicationId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+            }
+          }
+        );
 
-                console.log("Signed URL data:", response.data);
+        console.log('Certificate data:', response.data);
+        setCertificate(response.data.data.certificate);
+        setDownloadHistory(response.data.data.downloadHistory || []);
+      } catch (err: any) {
+        console.error('Error fetching certificate:', err);
+        setError(err.response?.data?.message || 'Failed to fetch certificate');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-                if (response.data?.data?.url) {
-                  setFile({
-                    fileName: `${applicationId}.pdf`,
-                    secureUrl: response.data.data.url,
-                    originalName: `${applicationId}.pdf`,
-                  });
-                } else {
-                  setError("Certificate not available yet");
-                }
-              } catch (err: any) {
-                console.error("Error fetching signed URL:", err);
-                setError(err.response?.data?.message || "Failed to fetch certificate URL");
-              } finally {
-                setLoading(false);
-              }
-  };
     fetchCertificate();
   }, [applicationId]);
 
-  const handleDownload = async (format: "pdf" | "image") => {
-  if (!file?.secureUrl) {
-    setError("No certificate file available");
-    return;
-  }
+  const handleDownload = async (format: 'pdf' | 'image') => {
+    if (!certificate) return;
 
-  try {
-    setDownloadLoading(format);
-    setError(null);
+    try {
+      setDownloadLoading(format);
+      setError(null);
 
-    // Fetch directly from signed URL
-    const response = await axios.get(file.secureUrl, { responseType: "blob" });
+      const response = await api.get(
+        `/certificates/${applicationId}/download`,
+        {
+          params: { format },
+          responseType: 'blob',
+        }
+      );
 
-    const blob = new Blob([response.data], {
-      type: format === "pdf" ? "application/pdf" : "image/png",
-    });
+      // Create blob URL and trigger download
+      const blob = new Blob([response.data], { 
+        type: format === 'pdf' ? 'application/pdf' : 'image/png' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${certificate.certificateType}_${certificate.certificateNumber}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${file.originalName}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+      // Update download history
+      const newDownload: DownloadHistory = {
+        downloadedAt: new Date().toISOString(),
+        downloadType: format,
+        ipAddress: 'xxx.xxx.xxx.xxx' // This would come from backend
+      };
+      setDownloadHistory(prev => [newDownload, ...prev]);
 
-  } catch (err: any) {
-    console.error("Download failed:", err);
-    setError("Download failed");
-  } finally {
-    setDownloadLoading(null);
-  }
-};
-
+    } catch (err: any) {
+      console.error('Download failed:', err);
+      setError(err.response?.data?.message || 'Download failed');
+    } finally {
+      setDownloadLoading(null);
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -158,10 +155,6 @@ const CertificateDownload = () => {
 
   const formatCertificateType = (type: string) => {
     return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
-
-  const viewCertificate = (url: string) => {
-    window.open(url, '_blank');
   };
 
   if (loading) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaDownload, FaSpinner, FaClock } from 'react-icons/fa';
 import axios from 'axios';
@@ -20,19 +20,11 @@ interface Certificate {
   updatedAt: string;
 }
 
-interface FileURL {
-  fileName: string;
-  url: string;
-  expiresIn: number;
-  type: 'document' | 'certificate';
-}
-
 const UserCertificates = () => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [fileUrls, setFileUrls] = useState<FileURL[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuthContext();
+  const {user} = useAuthContext()
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,21 +50,7 @@ const UserCertificates = () => {
       }
     };
 
-    const fetchSignedUrls = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get('/applications/files/urls');
-        setFileUrls(response.data.data);
-      } catch (error) {
-        setError('Failed to load file URLs');
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCertificates();
-    fetchSignedUrls();
   }, []);
 
   const getStatusColor = (status: string) => {
@@ -165,27 +143,6 @@ const UserCertificates = () => {
             No certificates found. Apply for a certificate first.
           </div>
         )}
-
-        <div className="grid gap-4 mt-8">
-          {fileUrls.map((file, index) => (
-            <div key={index} className="border p-4 rounded-lg shadow">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">{file.fileName}</span>
-                <a
-                  href={file.url}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Download
-                </a>
-              </div>
-              <div className="text-sm text-gray-500 mt-2">
-                Link expires in {Math.floor(file.expiresIn / 60)} minutes
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
