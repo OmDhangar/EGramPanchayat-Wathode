@@ -21,12 +21,7 @@ interface UploadedFile {
   uploadedAt: string;
 }
 
-interface PaymentDetails {
-  paymentStatus: 'pending' | 'completed' | 'failed';
-  paymentId?: string;
-  paymentAmount?: number;
-  paymentDate?: string;
-}
+// PaymentDetails interface inlined in FormDetails.paymentDetails
 
 interface FormDetails {
   _id: string;
@@ -101,6 +96,7 @@ const FormDetails = () => {
   const [showAnimation, setShowAnimation] = useState<null | 'approved' | 'rejected'>(null);
   const [remarks, setRemarks] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // Removed unused loadingFiles state
 
   // Initialize Razorpay script
   useEffect(() => {
@@ -136,6 +132,8 @@ const FormDetails = () => {
     getUserInfo();
   }, []);
 
+
+  
   useEffect(() => {
     const fetchData = async () => {
       if (!applicationId) {
@@ -146,39 +144,31 @@ const FormDetails = () => {
       try {
         setLoading(true);
         setError(null);
-        setFormDetails(null);
-        setFormData(null);
         
         console.log('Fetching data for applicationId:', applicationId);
 
-        const res = await api.get(`/applications/${applicationId}`);
+        const response = await api.get(`/applications/${applicationId}`);
+        // Support both old and new response shapes
+        const data = response.data?.data;
+        const application = data?.application || data; 
+        const formData = data?.formData || null;
 
-        console.log('Application data:', res.data.data.application);
-        console.log('Form data:', res.data.data.formData);
-        
-        const applicationData = res.data.data.application;
-        const formDataResponse = res.data.data.formData;
-        
-        if (applicationData.applicationId !== applicationId) {
-          console.warn('Mismatch: Requested ID:', applicationId, 'Received ID:', applicationData.applicationId);
-        }
-        
-        setFormDetails(applicationData);
-        setFormData(formDataResponse);
+        console.log('Application data:', application);
+        console.log('Form data:', formData);
+
+        setFormDetails(application);
+        setFormData(formData);
+
       } catch (err: any) {
-        console.error('Error fetching data for applicationId:', applicationId, err);
+        console.error('Error fetching application details:', err);
         setError(err.response?.data?.message || 'Failed to fetch application details');
-        setFormDetails(null);
-        setFormData(null);
       } finally {
         setLoading(false);
       }
     };
 
-    if (applicationId && user) {
-      fetchData();
-    }
-  }, [applicationId, user]);
+    fetchData();
+  }, [applicationId]);
 
   // Admin functions
   const updateStatus = async (status: 'approved' | 'rejected') => {
@@ -238,6 +228,46 @@ const FormDetails = () => {
     updateStatus('rejected');
   };
 
+
+  //handle Download after payment: redirect to signed URL immediately
+  const handleSecureCertificateDownload = async () => {
+  if (!formDetails?.generatedCertificate) {
+    setError("Certificate not available yet");
+    return;
+  }
+
+  if (formDetails.paymentDetails.paymentStatus !== "completed") {
+    setError("Payment must be completed before downloading the certificate");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError(null);
+
+    // Ask backend for a signed URL
+    const res = await api.get(`/applications/files/urls`, {
+      params: { applicationId: formDetails.applicationId },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+    console.log(res.data);
+
+    const signedUrl = res.data?.data?.url;
+    if (!signedUrl) {
+      throw new Error("No signed URL received");
+    }
+
+    // Redirect to signed URL (lets the browser handle viewing/downloading)
+    window.location.href = signedUrl;
+  } catch (err: any) {
+    console.error("Certificate download failed:", err);
+    setError(err.message || "Download failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   // Payment functions
@@ -299,8 +329,25 @@ const FormDetails = () => {
               setShowAnimation('approved');
               await new Promise(resolve => setTimeout(resolve, 1500));
               setShowAnimation(null);
-              
-              // Refresh form details to show updated payment status
+
+              // Immediately fetch signed URL and redirect for download
+              try {
+                const res = await api.get(`/applications/files/urls`, {
+                  params: { applicationId: formDetails.applicationId },
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                  },
+                });
+                const signedUrl = res.data?.data?.url;
+                if (signedUrl) {
+                  window.location.href = signedUrl;
+                  return;
+                }
+              } catch (e) {
+                // Fall back to reloading details if URL fetch fails
+              }
+
+              // Fallback: reload to show updated status
               window.location.reload();
             }
           } catch (error: any) {
@@ -335,22 +382,9 @@ const FormDetails = () => {
   };
 
   // Navigation functions
-  const handleDownloadCertificate = () => {
-    // Check if payment is completed before allowing download
-    if (formDetails?.paymentDetails.paymentStatus !== 'completed') {
-      setError('Payment must be completed before downloading the certificate');
-      return;
-    }
-    navigate(`/certificate/${applicationId}`);
-  };
+  // Removed unused navigate-to-certificate route; using direct signed URL instead
 
-  const handleProtectedDownload = () => {
-    if (formDetails?.paymentDetails.paymentStatus !== 'completed') {
-      setError('Complete the payment first to download your certificate');
-      return;
-    }
-    handleDownloadCertificate();
-  };
+  // Removed unused handleProtectedDownload
 
   const handleBackNavigation = () => {
     if (user?.role === 'admin') {
@@ -576,7 +610,7 @@ const renderUserActions = () => {
               y: -2
             }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => window.open(generatedCertificate.filePath, '_blank')}
+            onClick={handleSecureCertificateDownload}
             className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-3 hover:from-green-700 hover:to-green-800 transition-all duration-300 font-semibold text-lg shadow-lg"
           >
             <FaDownload className="text-xl" />
