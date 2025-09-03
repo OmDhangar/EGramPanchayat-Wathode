@@ -2,12 +2,17 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import healthCheckRoutes from "./routes/healthCheck.routes.js"
+import paymentRoutes from "./routes/payment.routes.js"
 
 const app = express()
 
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173", // Set your frontend URL here
+    credentials: true, // Allow cookies to be sent with requests
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ["set-cookie"]
 }))
 
 app.use(express.json({limit: '16kb'})) //used to configure json data
@@ -22,7 +27,11 @@ import userRouter from "./routes/auth.routes.js"
 import applicationRouter from "./routes/application.routes.js"
 
 //routes declaration
+
+app.use("/api",paymentRoutes);
 app.use("/api",healthCheckRoutes);
-app.use("/api/v1/users",userRouter);
-app.use("/api/v1/applications", applicationRouter);
+app.use("/api/users",userRouter);
+app.use("/api/applications", applicationRouter);
+
+
 export default app
