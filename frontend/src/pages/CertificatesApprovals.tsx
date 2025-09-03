@@ -39,6 +39,11 @@ const CertificateApprovals = () => {
   const [forms, setForms] = useState<FormSubmission[]>([]);
   const [activeTab, setActiveTab] = useState<string>('pending');
   const [loading, setLoading] = useState(false);
+
+  const [fileUrls, setFileUrls] = useState<{ [key: string]: string }>({});
+  const [loadingUrls, setLoadingUrls] = useState<{ [key: string]: boolean }>({});
+  const [urlErrors, setUrlErrors] = useState<{ [key: string]: string }>({});
+
   const navigate = useNavigate();
 
   const filterFormByStatus = (forms:FormSubmission[]):FormSubmission[]=>{
@@ -59,9 +64,10 @@ const CertificateApprovals = () => {
           },
         } 
       );
-      const filteredForms = filterFormByStatus(res.data.data ||[])
-      console.log(res);
-      setForms(filteredForms);
+             const filteredForms = filterFormByStatus(res.data.data ||[])
+       console.log('Applications data:', res.data.data);
+       console.log('Filtered forms:', filteredForms);
+       setForms(filteredForms);
     } catch (err) {
       console.error('Error fetching forms:', err);
     } finally {
@@ -77,6 +83,67 @@ const CertificateApprovals = () => {
   const viewFormDetails = (formId: string) => {
     navigate(`/form-details/${formId}`);
   };
+
+
+  // Generate signed URL for a specific file on-demand
+  // This optimizes AWS S3 costs by only generating URLs when user clicks on files
+  const generateFileUrl = async (applicationId: string, fileId: string, fileType: 'certificate' | 'file') => {
+    try {
+      setLoadingUrls(prev => ({ ...prev, [fileId]: true }));
+      setUrlErrors(prev => ({ ...prev, [fileId]: '' }));
+
+      let url;
+      if (fileType === 'certificate') {
+        // For certificates, use the working route from FormDetails
+        const res = await api.get(`/applications/files/urls`, {
+          params: { applicationId },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          }
+        });
+        url = res.data?.data?.url;
+      } else {
+        // For uploaded files, use the secure-url route
+        const res = await api.get(`/applications/files/${applicationId}/${fileId}/signed-url`);
+        url = res.data?.data?.url;
+      }
+
+      if (!url) throw new Error('Signed URL not received');
+      
+      setFileUrls(prev => ({ ...prev, [fileId]: url }));
+      return url;
+    } catch (err: any) {
+      let errorMessage = 'Failed to generate file URL';
+      
+      if (err?.response?.status === 404) {
+        if (fileType === 'certificate') {
+          errorMessage = 'Certificate not available yet';
+        } else {
+          errorMessage = 'File not found';
+        }
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      
+      setUrlErrors(prev => ({ ...prev, [fileId]: errorMessage }));
+      throw err;
+    } finally {
+      setLoadingUrls(prev => ({ ...prev, [fileId]: false }));
+    }
+  };
+
+  // Handle file click to generate URL and open file
+  const handleFileClick = async (applicationId: string, fileId: string, fileType: 'certificate' | 'file') => {
+    try {
+      const url = await generateFileUrl(applicationId, fileId, fileType);
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('Error opening file:', err);
+    }
+  };
+
 
  return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -145,55 +212,98 @@ const CertificateApprovals = () => {
                       </span>
                     </div>
                     
-                    <div>
-                      <p className="mb-2 font-medium">Uploaded Files:</p>
-                      <ul className="space-y-2">
-                        {form.uploadedFiles.map((file) => (
-                          <li key={file._id} className="flex items-center gap-2">
-                            {file.fileType.includes('image') ? (
-                              <FaFileImage className="text-blue-500" />
-                            ) : file.fileType.includes('pdf') ? (
-                              <FaFilePdf className="text-red-500" />
-                            ) : (
-                              <FaFileAlt className="text-gray-500" />
-                            )}
-                            <a
-                              href={file.filePath}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 hover:underline truncate flex-1"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {file.originalName}
-                            </a>
-                            <span className="text-xs text-gray-500">
-                              ({(file.fileSize / 1024).toFixed(1)} KB)
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                      <div>
+                       <p className="mb-2 font-medium">Uploaded Files:</p>
+                       {form.uploadedFiles.filter(file => file.filePath).length > 0 ? (
+                         <ul className="space-y-2">
+                           {form.uploadedFiles.filter(file => file.filePath).map((file) => (
+                             <li key={file._id} className="flex items-center gap-2">
+                               {file.fileType.includes('image') ? (
+                                 <FaFileImage className="text-blue-500" />
+                               ) : file.fileType.includes('pdf') ? (
+                                 <FaFilePdf className="text-red-500" />
+                               ) : (
+                                 <FaFileAlt className="text-gray-500" />
+                               )}
+                               <div className="flex items-center gap-2">
+                                 {loadingUrls[file._id] ? (
+                                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500" />
+                                 ) : fileUrls[file._id] ? (
+                                   <a
+                                     href={fileUrls[file._id]}
+                                     target="_blank"
+                                     rel="noopener noreferrer"
+                                     className="text-blue-600 hover:text-blue-800 hover:underline truncate flex-1"
+                                     onClick={(e) => e.stopPropagation()}
+                                   >
+                                     {file.originalName}
+                                   </a>
+                                 ) : (
+                                   <button
+                                     className="text-blue-600 hover:text-blue-800 hover:underline truncate flex-1 text-left disabled:opacity-50"
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       handleFileClick(form.applicationId, file._id, 'file');
+                                     }}
+                                     disabled={loadingUrls[file._id]}
+                                   >
+                                     {file.originalName}
+                                   </button>
+                                 )}
+                               </div>
+                               {urlErrors[file._id] && (
+                                 <span className="text-red-500 text-xs">{urlErrors[file._id]}</span>
+                               )}
+                               <span className="text-xs text-gray-500">
+                                 ({(file.fileSize / 1024).toFixed(1)} KB)
+                               </span>
+                             </li>
+                           ))}
+                         </ul>
+                       ) : (
+                         <p className="text-gray-500 text-sm italic">No files available</p>
+                       )}
+                     </div>
 
-                    {form.generatedCertificate && (
-                      <div className="border-t pt-3">
-                        <p className="mb-2 font-medium">Generated Certificate:</p>
-                        <div className="flex items-center gap-2">
-                          <FaFilePdf className="text-red-500" />
-                          <a
-                            href={form.generatedCertificate.filePath}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 hover:underline flex-1"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            View Certificate
-                          </a>
-                          <span className="text-xs text-gray-500">
-                            ({new Date(form.generatedCertificate.generatedAt).toLocaleDateString()})
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                                         {form.generatedCertificate && (form.generatedCertificate.filePath || form.generatedCertificate.fileName) && (
+                       <div className="border-t pt-3">
+                         <p className="mb-2 font-medium">Generated Certificate:</p>
+                         <div className="flex items-center gap-2">
+                           <FaFilePdf className="text-red-500" />
+                           {loadingUrls[`cert-${form._id}`] ? (
+                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500" />
+                           ) : fileUrls[`cert-${form._id}`] ? (
+                             <a
+                               href={fileUrls[`cert-${form._id}`]}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="text-blue-600 hover:text-blue-800 hover:underline flex-1"
+                               onClick={(e) => e.stopPropagation()}
+                             >
+                               View Certificate
+                             </a>
+                           ) : (
+                             <button
+                               className="text-blue-600 hover:text-blue-800 hover:underline flex-1 disabled:opacity-50"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 console.log('Certificate data:', form.generatedCertificate);
+                                 handleFileClick(form.applicationId, `cert-${form._id}`, 'certificate');
+                               }}
+                               disabled={loadingUrls[`cert-${form._id}`]}
+                             >
+                               View Certificate
+                             </button>
+                           )}
+                           {urlErrors[`cert-${form._id}`] && (
+                             <span className="text-red-500 text-xs">{urlErrors[`cert-${form._id}`]}</span>
+                           )}
+                           <span className="text-xs text-gray-500">
+                             ({form.generatedCertificate.generatedAt ? new Date(form.generatedCertificate.generatedAt).toLocaleDateString() : 'Date not available'})
+                           </span>
+                         </div>
+                       </div>
+                     )}
 
                     <div className="flex justify-between text-xs text-gray-500 pt-2">
                       <span>Submitted: {new Date(form.createdAt).toLocaleDateString()}</span>
