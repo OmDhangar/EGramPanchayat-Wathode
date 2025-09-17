@@ -3,6 +3,8 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import healthCheckRoutes from "./routes/healthCheck.routes.js"
 import paymentRoutes from "./routes/payment.routes.js"
+import officerRoutes from "./routes/officer.routes.js"
+import blogRoutes from "./routes/blog.routes.js";
 
 const app = express()
 
@@ -32,6 +34,8 @@ app.use("/api",paymentRoutes);
 app.use("/api",healthCheckRoutes);
 app.use("/api/users",userRouter);
 app.use("/api/applications", applicationRouter);
+app.use("/api/officers", officerRoutes);
+app.use("/api/blogs", blogRoutes);
 
 
 export default app

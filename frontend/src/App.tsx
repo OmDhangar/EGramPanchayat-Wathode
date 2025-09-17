@@ -9,6 +9,7 @@ import Schemes from './pages/Schemes';
 import Gallery from './pages/Gallery';
 import SchemeDetails from './pages/SchemeDetails';
 import YearGallery from './pages/YearGallery';
+import Blogs from "./pages/Blogs";
 import NotFound from './pages/NotFound';
 import Dashboard from './components/dashboard';
 import Loader from './components/loader';
@@ -24,7 +25,7 @@ import UserNotifications from './pages/userNotification';
 import AboutVathode from './pages/AboutVathode';
 import BirthCertificate from './pages/BirthCertificate';
 import DeathCertificate from './pages/DeathCertificate';
-import MarriageCertificate from './pages/MarriageCertificateForm';
+
 
 import Members from './pages/Members';
 import FormsPage from './pages/applyforcertificates';
@@ -90,6 +91,7 @@ function AppContent() {
             <Route path="/gallery/:year" element={<YearGallery />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin/blogs" element={<Blogs />} />
             <Route path="/admin/users" element={<ManageUsers />} />
             <Route path="/form-details/:applicationId" element={<FormDetails />} />
             <Route path="/admin/approvals" element={<CertificateApprovals />} />

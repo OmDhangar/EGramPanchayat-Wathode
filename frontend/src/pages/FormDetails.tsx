@@ -96,6 +96,10 @@ const FormDetails = () => {
   const [showAnimation, setShowAnimation] = useState<null | 'approved' | 'rejected'>(null);
   const [remarks, setRemarks] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
+  const [loadingUrls, setLoadingUrls] = useState<Record<string, boolean>>({});
+  const [urlErrors, setUrlErrors] = useState<Record<string, string>>({});
+
   // Removed unused loadingFiles state
 
   // Initialize Razorpay script
@@ -131,6 +135,75 @@ const FormDetails = () => {
     
     getUserInfo();
   }, []);
+
+  //to generate the signed url for accessing the aws S3 files
+  const generateFileUrl = async (
+    applicationId: string,
+    fileId: string,
+    fileType: 'certificate' | 'file'
+  ) => {
+    try {
+      setLoadingUrls(prev => ({ ...prev, [fileId]: true }));
+      setUrlErrors(prev => ({ ...prev, [fileId]: '' }));
+
+      let url;
+      if (fileType === 'certificate') {
+        const res = await api.get(`/applications/files/urls`, {
+          params: { applicationId },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        });
+        url = res.data?.data?.url;
+      } else {
+        const res = await api.get(
+          `/applications/files/${applicationId}/${fileId}/signed-url`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            },
+          }
+        );
+        url = res.data?.data?.url;
+      }
+
+      if (!url) throw new Error('Signed URL not received');
+      setFileUrls(prev => ({ ...prev, [fileId]: url }));
+      return url;
+    } catch (err: any) {
+      let errorMessage = 'Failed to generate file URL';
+
+      if (err?.response?.status === 404) {
+        errorMessage =
+          fileType === 'certificate'
+            ? 'Certificate not available yet'
+            : 'File not found';
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      setUrlErrors(prev => ({ ...prev, [fileId]: errorMessage }));
+      throw err;
+    } finally {
+      setLoadingUrls(prev => ({ ...prev, [fileId]: false }));
+    }
+  };
+
+  const handleFileClick = async (
+    applicationId: string,
+    fileId: string,
+    fileType: 'certificate' | 'file'
+  ) => {
+    try {
+      const url = await generateFileUrl(applicationId, fileId, fileType);
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('Error opening file:', err);
+    }
+  };
+
 
 
   
@@ -906,49 +979,29 @@ const renderUserActions = () => {
           )}
 
           {/* Uploaded Files Section */}
-          {formDetails.uploadedFiles && formDetails.uploadedFiles.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="mb-8 pt-6 border-t"
-            >
-              <h3 className="text-lg font-semibold mb-4">Uploaded Files</h3>
-              <div className="space-y-2">
-                {formDetails.uploadedFiles.map((file, index) => (
-                  <motion.div
-                    key={file._id || index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    whileHover={{ 
-                      scale: 1.02, 
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                      backgroundColor: "#f8fafc"
-                    }}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg transition-all duration-300 border border-transparent hover:border-gray-200"
-                  >
-                    <div>
-                      <p className="font-medium text-gray-800">{file.originalName || file.fileName}</p>
-                      <p className="text-sm text-gray-600">
-                        {file.fileType} • {Math.round(file.fileSize / 1024)} KB
-                      </p>
-                    </div>
-                    <motion.a
-                      whileHover={{ scale: 1.1, color: "#1d4ed8" }}
-                      whileTap={{ scale: 0.95 }}
-                      href={file.filePath}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 transition-all duration-300"
+          {user?.role === 'admin' && formDetails?.uploadedFiles?.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3">Uploaded Files</h3>
+              <ul className="space-y-3">
+                {formDetails.uploadedFiles.map(file => (
+                  <li key={file._id} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                    <span>{file.originalName}</span>
+                    <button
+                      onClick={() => handleFileClick(formDetails.applicationId, file._id, 'file')}
+                      disabled={loadingUrls[file._id]}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                     >
-                      <FaEye /> View
-                    </motion.a>
-                  </motion.div>
+                      {loadingUrls[file._id] ? 'Loading...' : 'View File'}
+                    </button>
+                    {urlErrors[file._id] && (
+                      <span className="text-red-500 text-sm ml-2">{urlErrors[file._id]}</span>
+                    )}
+                  </li>
                 ))}
-              </div>
-            </motion.div>
+              </ul>
+            </div>
           )}
+
 
           {error && (
             <motion.div

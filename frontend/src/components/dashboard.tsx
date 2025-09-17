@@ -226,6 +226,14 @@ export default function Dashboard() {
                     delay={0}
                   />
                   <ServiceCard
+                    to="/admin/blogs"
+                    icon={<FaFileAlt className="text-2xl text-indigo-600" />}
+                    title="Blogs"
+                    description="Read our latest updates and articles."
+                    color="indigo"
+                    delay={0.3}
+                  />
+                  <ServiceCard
                     to="/admin/approvals"
                     icon={<FaCheckCircle className="text-2xl text-green-600" />}
                     title="Certificate Approvals"
