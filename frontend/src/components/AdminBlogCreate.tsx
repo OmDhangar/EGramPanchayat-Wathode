@@ -5,9 +5,19 @@ interface AdminBlogCreateProps {
   onBlogCreated?: () => void; // Optional callback to refresh blog list
 }
 
+const BLOG_CATEGORIES = [
+  "सार्वजनिक सूचना",
+  "जनसेवा",
+  "कर संग्रह",
+  "सण उत्सव",
+  "नियोजन",
+  "शिक्षण"
+];
+
 const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [category, setCategory] = useState(BLOG_CATEGORIES[0]);
   const [folder, setFolder] = useState<"unverified" | "verified">("unverified");
   const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,6 +40,7 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
+    formData.append("category", category);
     formData.append("folder", folder);
     // Make sure we're using 'documents' as the field name for files
     images.forEach((img) => formData.append("documents", img));
@@ -49,6 +60,7 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
       alert("Blog created successfully!");
       setTitle("");
       setContent("");
+      setCategory(BLOG_CATEGORIES[0]);
       setImages([]);
       setFolder("unverified");
       if (onBlogCreated) onBlogCreated();
@@ -81,6 +93,18 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
         onChange={(e) => setContent(e.target.value)}
         className="w-full p-3 border rounded-lg h-40"
       />
+
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        className="w-full p-3 border rounded-lg"
+      >
+        {BLOG_CATEGORIES.map((cat) => (
+          <option key={cat} value={cat}>
+            {cat}
+          </option>
+        ))}
+      </select>
 
       <select
         value={folder}

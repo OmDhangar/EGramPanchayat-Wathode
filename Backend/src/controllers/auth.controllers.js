@@ -34,7 +34,7 @@ const registerUser = asyncHandler(async function (req,res){
     //8.check for user creation
     //9.send response to user
     
-    const {fullName , email , password,confirmPassword } = req.body;
+    const {fullName , email , password, confirmPassword } = req.body;
     console.log("Email:",email);
     
     if(
@@ -68,7 +68,6 @@ const registerUser = asyncHandler(async function (req,res){
        fullName, 
         email ,
         password ,
-        //avatar:avatar.url || '' ,
     })
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"

@@ -54,7 +54,7 @@ const fadeIn = {
 };
 
 export default function Dashboard() {
-  const { user } = useAuthContext();
+  const { user, logout } = useAuthContext();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -70,6 +70,7 @@ export default function Dashboard() {
   if (!user) {
     return <Navigate to="/login" />;
   }
+
 
   const isAdmin = user.role === "admin";
   
@@ -144,39 +145,22 @@ export default function Dashboard() {
                   {user.fullName}
                 </span>
                 <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                  ID: {user.email.split('@')[0]}
+                  ID: {user.email?.split('@')[0] ?? ""}
                 </span>
               </div>
               <p className="text-slate-500 max-w-xl">
-                Welcome back, {user.fullName.split(' ')[0]}!{" "}
+                Welcome back, {user.fullName?.split(' ')[0] ?? ""}
                 {isAdmin
                   ? "Manage certificates, users, and approvals with ease."
                   : "Access your certificates and apply for new ones in just a few clicks."}
               </p>
             </div>
+            <button
+              className="bg-red-500 text-white h-full w-fit px-4 py-2 rounded-3xl font-bold hover:bg-red-600 transition"
+              onClick={logout}
+            >Logout</button>
             
-            {!isMobile && (
-              <motion.div 
-                className="hidden md:flex items-center"
-                whileHover={{ x: 5 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <div className="h-16 w-px bg-slate-200 mx-4"></div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-400 mb-1">Quick Stats</p>
-                  <div className="flex gap-4">
-                    <div className="text-center">
-                      <p className="text-lg font-bold text-slate-800">12</p>
-                      <p className="text-xs text-slate-500">{isAdmin ? "Pending" : "Your"}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-lg font-bold text-slate-800">5</p>
-                      <p className="text-xs text-slate-500">{isAdmin ? "Approved" : "Active"}</p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+            
           </div>
         </motion.div>
 

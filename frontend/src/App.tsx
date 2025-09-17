@@ -25,6 +25,7 @@ import UserNotifications from './pages/userNotification';
 import AboutVathode from './pages/AboutVathode';
 import BirthCertificate from './pages/BirthCertificate';
 import DeathCertificate from './pages/DeathCertificate';
+import UserDetails from "./components/UserDetails";
 
 
 import Members from './pages/Members';
@@ -93,6 +94,7 @@ function AppContent() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin/blogs" element={<Blogs />} />
             <Route path="/admin/users" element={<ManageUsers />} />
+            <Route path="/admin/user/:userId" element={<UserDetails />} />
             <Route path="/form-details/:applicationId" element={<FormDetails />} />
             <Route path="/admin/approvals" element={<CertificateApprovals />} />
             <Route path="/admin" element={<Dashboard />} />

@@ -14,6 +14,10 @@ i18n
       mr: { translation: translationMR },
     },
     fallbackLng: 'en',
+    debug: true, // Enable debug to help diagnose translation issues
+    react: {
+      useSuspense: false, // Prevents React from suspending while loading translations
+    },
     interpolation: {
       escapeValue: false,
     },
