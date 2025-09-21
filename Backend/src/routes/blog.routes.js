@@ -16,7 +16,7 @@ const upload = multer({ dest: "uploads/" });
 // Public routes
 router.get("/", getBlogs);
 router.get("/category/:category", getBlogsByCategory);
-router.get("/blogs/:id", getBlogById);
+router.get("/:id", getBlogById);
 
 // Admin routes
 router.post("/", verifyJWT, verifyAdmin, upload.array("documents"), createBlog);

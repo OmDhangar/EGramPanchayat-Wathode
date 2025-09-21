@@ -6,7 +6,7 @@ import AdminBlogCreate from "../components/AdminBlogCreate";
 import { api } from "../api/axios";
 import { toast } from "react-hot-toast";
 import { FaPlus, FaFilter } from "react-icons/fa";
-
+import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../Context/authContext";
 import { Link } from "react-router-dom";
 
@@ -41,6 +41,7 @@ export default function Blogs() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("सर्व");
   const { user } = useAuthContext();
+  const navigate =  useNavigate();
 
   const fetchBlogs = async (category?: string) => {
     try {
@@ -166,6 +167,7 @@ export default function Blogs() {
               isAdmin={user?.role === 'admin'}
               onDelete={() => handleDelete(blog._id)}
               onEdit={() => setEditingBlog(blog)}
+              onView={() => navigate(`/blogs/${blog._id}`)}
             />
           ))}
         </div>

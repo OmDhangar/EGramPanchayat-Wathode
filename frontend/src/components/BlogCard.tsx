@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Blog } from "../pages/Blogs";
 import { FaEdit, FaTrash, FaTag } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 interface BlogCardProps {
   blog: Blog;
   isAdmin?: boolean;
   onDelete?: () => void;
   onEdit?: () => void;
+  onView?: () => void;
 }
 
 const BlogCard: React.FC<BlogCardProps> = ({
@@ -15,23 +17,33 @@ const BlogCard: React.FC<BlogCardProps> = ({
   isAdmin = false,
   onDelete,
   onEdit,
+  onView
+  
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { title, content, category, images } = blog;
+  const { _id, title, content, category, images } = blog;
+  const navigate = useNavigate();
 
-  const handleNextImage = () => {
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
 
-  const handlePrevImage = () => {
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleNavigate = () => {
+    navigate(`/blogs/${_id}`);
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg shadow-md overflow-hidden"
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={handleNavigate} // ✅ whole card clickable
     >
       {/* Image carousel */}
       {images && images.length > 0 && (
@@ -66,13 +78,19 @@ const BlogCard: React.FC<BlogCardProps> = ({
           {isAdmin && (
             <div className="flex space-x-2">
               <button
-                onClick={onEdit}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.();
+                }}
                 className="text-blue-500 hover:text-blue-700"
               >
                 <FaEdit />
               </button>
               <button
-                onClick={onDelete}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.();
+                }}
                 className="text-red-500 hover:text-red-700"
               >
                 <FaTrash />
@@ -80,15 +98,21 @@ const BlogCard: React.FC<BlogCardProps> = ({
             </div>
           )}
         </div>
-        
+
         {/* Category tag */}
         <div className="flex items-center text-sm text-gray-600 mb-2">
           <FaTag className="mr-1" />
           <span>{category}</span>
         </div>
-        
+
         <p className="text-gray-700 line-clamp-3">{content}</p>
-        <button className="mt-3 text-blue-600 hover:text-blue-800 font-medium">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleNavigate();
+          }}
+          className="mt-3 text-blue-600 hover:text-blue-800 font-medium"
+        >
           Read More
         </button>
       </div>
