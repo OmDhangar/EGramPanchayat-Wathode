@@ -38,6 +38,7 @@ import { Toaster } from 'react-hot-toast';
 import '../src/i18n';
 import MarriageCertificateForm from './pages/MarriageCertificateForm';
 import CertificateDownload from './pages/certificateDownload';
+import BlogDetails from './components/blogDetails';
 
 function AppContent() {
   const location = useLocation();
@@ -106,6 +107,7 @@ function AppContent() {
             <Route path="/home" element={<Home />} />
             <Route path="/members" element={<Members />} />
             <Route path="/notices" element={<PublicInfo />} />
+             <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/contact" element={<Help/>} />
             <Route path="/apply-for-certificates" element={<FormsPage/>} />

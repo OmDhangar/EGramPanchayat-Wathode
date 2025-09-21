@@ -649,7 +649,7 @@ export default function Home() {
       
 
       {/* Notice Board / Current News Section */}
-      <section className="py-14 px-2 sm:px-8 bg-gradient-to-b from-yellow-50 to-yellow-100">
+      <section className="py-14 px-2 sm:px-8 bg-[#ececff]">
         <NoticeBoard />
       </section>
 

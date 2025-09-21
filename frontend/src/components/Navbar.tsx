@@ -38,6 +38,7 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
+    
     {
       label: t("nav.village"),
       icon: "🏡",

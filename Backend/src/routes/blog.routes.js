@@ -4,7 +4,8 @@ import {
   createBlog, 
   updateBlog, 
   deleteBlog, 
-  getBlogsByCategory 
+  getBlogsByCategory,
+  getBlogById, 
 } from "../controllers/blog.controller.js";
 import { verifyJWT, verifyAdmin } from "../middlewares/auth.middleware.js";
 import multer from "multer";
@@ -15,6 +16,7 @@ const upload = multer({ dest: "uploads/" });
 // Public routes
 router.get("/", getBlogs);
 router.get("/category/:category", getBlogsByCategory);
+router.get("/blogs/:id", getBlogById);
 
 // Admin routes
 router.post("/", verifyJWT, verifyAdmin, upload.array("documents"), createBlog);

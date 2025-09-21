@@ -1,5 +1,5 @@
 # Gram Panchayat Website - Complete Project Documentation
-
+//mongodb+srv://omdhangar24:1234@cluster0.3kksm.mongodb.net
 ## Table of Contents
 1. [Project Overview](#project-overview)
 2. [Architecture](#architecture)

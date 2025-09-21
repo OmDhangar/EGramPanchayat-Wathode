@@ -47,6 +47,37 @@ export const getBlogs = async (req, res) => {
   }
 };
 
+export const getBlogById = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      throw new ApiError(404, "Blog not found");
+    }
+
+    // Sign images (same logic as in getBlogs)
+    const signedImages = await Promise.all(
+      blog.images.map(async (img) => {
+        const url = await getFileDownloadUrl(img.s3Key, 60 * 60 * 24 * 7); // 7-day signed URL
+        return {
+          ...img.toObject?.() || img,
+          signedUrl: url,
+        };
+      })
+    );
+
+    res.status(200).json({
+      ...blog.toObject(),
+      images: signedImages,
+    });
+  } catch (error) {
+    console.error("Error fetching blog by ID:", error);
+    res.status(500).json({ error: "Failed to fetch blog" });
+  }
+});
+
+
 export const createBlog = async (req, res) => {
   try {
     const { title, content, category, folder = "unverified" } = req.body;
