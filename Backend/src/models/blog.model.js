@@ -11,7 +11,7 @@ const blogSchema = new mongoose.Schema({
   },
   images: [
     {
-      s3Key: { type: String, required: true }, // "unverified/1234-banner.png"
+      s3Key: { type: String, required: true }, 
       folder: {
         type: String,
         enum: ["unverified", "verified", "certificate"],
