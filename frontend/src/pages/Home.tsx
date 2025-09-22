@@ -83,7 +83,7 @@ export default function Home() {
   return (
     <div
       id="main-content"
-      className="min-h-screen font-tiro-marathi-sans text-[14px] sm:text-base relative"
+      className="min-h-screen font-tiro-marathi-sans text-xs xs:text-sm sm:text-base relative overflow-x-hidden"
     >
       {/* Background grid */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]" />
@@ -100,23 +100,29 @@ export default function Home() {
             </svg>
           </button>
           
-          <div className="relative w-full h-full">
-            <div className="flex transition-transform duration-[2000ms] ease-in-out h-full">
+          {/* Slideshow Container - Responsive height */}
+          <div className="
+            relative w-full 
+            h-[50vh] xs:h-[60vh] sm:h-[50vh] 
+            max-h-[50vh] 
+            overflow-hidden rounded-lg shadow-lg
+          ">
+            <div
+              className="flex transition-transform duration-[2000ms] ease-in-out h-full"
+              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+            >
               {imageGrid.map((img, index) => (
                 <img
                   key={index}
                   src={img.src}
                   alt={img.alt}
-                  className={`w-full flex-shrink-0 object-contain h-full transition-transform duration-[2000ms] ease-in-out ${
-                    index === currentIndex ? "scale-105 opacity-100" : "scale-100 opacity-60"
-                  }`}
-                  style={{
-                    transition: "transform 2s cubic-bezier(0.4,0,0.2,1), opacity 1.2s",
-                  }}
+                  className="w-full h-full max-h-[50vh]  object-cover flex-shrink-0"
                 />
               ))}
             </div>
           </div>
+
+
           
           <div className="absolute bottom-10 flex justify-center space-x-2">
             {imageGrid.map((_, idx) => (
@@ -137,7 +143,7 @@ export default function Home() {
       <section className="bg-gradient-to-r from-blue-700 via-green-500 to-green-300 text-white pb-6 sm:pb-10 px-2 pt-4 sm:pt-7 sm:pb-16 sm:px-6 relative overflow-hidden shadow-lg">
         <div className="max-w-8xl max-h-6xl mx-auto relative">
           {/* Slideshow Container - Now with full-screen button */}
-          <div className="relative w-full h-screen max-h-[80vh] overflow-hidden rounded-xl sm:rounded-2xl shadow-2xl mb-2 sm:mb-6">
+          <div className="relative mt-[4vh] w-full h-[40vh] xs:h-[50vh] sm:h-[60vh] overflow-hidden rounded-xl sm:rounded-2xl shadow-2xl mb-2 sm:mb-6">
             <div
               className="flex transition-transform duration-[2000ms] ease-in-out h-full"
               style={{ transform: `translateX(-${currentIndex * 100}%)` }}
@@ -171,16 +177,16 @@ export default function Home() {
             
             {/* Swacch Sundar Harit Vathode Title (left, overlay, visible on all screens) */}
             <div className="absolute left-2 top-2 sm:left-6 sm:top-6 bg-black/40 rounded-lg px-2 py-1 sm:px-4 sm:py-2 shadow">
-              <p className="text-base sm:text-2xl font-tiro-marathi leading-tight text-green-200">स्वच्छ सुंदर</p>
-              <p className="text-lg sm:text-3xl font-tiro-marathi text-green-400">हरित वाठोडे</p>
+              <p className="text-sm xs:text-base sm:text-2xl font-tiro-marathi leading-tight text-green-200">स्वच्छ सुंदर</p>
+              <p className="text-base xs:text-lg sm:text-3xl font-tiro-marathi text-green-400">हरित वाठोडे</p>
             </div>
           </div>
 
           {/* Village Title & Dots */}
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-0">
             <div className="text-center sm:text-right w-full">
-              <p className="text-lg sm:text-3xl font-tiro-marathi leading-tight drop-shadow">विकसित</p>
-              <p className="text-xl sm:text-4xl font-tiro-marathi text-yellow-200 drop-shadow">वाठोडे</p>
+              <p className="text-base xs:text-lg sm:text-3xl font-tiro-marathi leading-tight drop-shadow">विकसित</p>
+              <p className="text-lg xs:text-xl sm:text-4xl font-tiro-marathi text-yellow-200 drop-shadow">वाठोडे</p>
             </div>
             {/* Dots for slideshow */}
             <div className="flex justify-center sm:justify-end mt-2 sm:mt-0 w-full sm:w-auto">
@@ -201,8 +207,8 @@ export default function Home() {
       </section>
 
       {/* Marquee Strip */}
-      <div className="relative w-full bg-black overflow-hidden h-10 sm:h-12 flex items-center">
-        <div className="absolute left-0 top-0 h-full flex items-center px-3 bg-yellow-400 text-black font-tiro-marathi text-xs sm:text-sm rounded-br-md z-10">
+      <div className="relative w-full bg-black overflow-hidden h-8 xs:h-10 sm:h-12 flex items-center">
+        <div className="absolute left-0 top-0 h-full flex items-center px-3 bg-yellow-400 text-black font-tiro-marathi text-[0.6rem] xs:text-xs sm:text-sm rounded-br-md z-10">
           सूचना
         </div>
         <div className="w-full h-full flex items-center pl-24">
@@ -216,7 +222,7 @@ export default function Home() {
           >
             <div
               ref={marqueeRef}
-              className="whitespace-nowrap animate-marquee text-white text-xl sm:text-base font-tiro-marathi flex items-center gap-7 sm:gap-16 cursor-pointer"
+              className="whitespace-nowrap animate-marquee text-white text-sm xs:text-base sm:text-lg font-tiro-marathi flex items-center gap-7 sm:gap-16 cursor-pointer"
               style={{ animationPlayState: 'running' }}
             >
               <span className="relative">
@@ -278,25 +284,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-2 gap-5">
-              <div className="stat-card bg-white rounded-xl p-5 shadow-lg border border-blue-100 text-center">
-                <div className="text-3xl font-tiro-marathi font-bold text-blue-800 mb-2">२,०७२</div>
-                <div className="text-blue-600">एकूण लोकसंख्या</div>
-              </div>
-              <div className="stat-card bg-white rounded-xl p-5 shadow-lg border border-blue-100 text-center">
-                <div className="text-3xl font-tiro-marathi font-bold   text-blue-800 mb-2">७०.४%</div>
-                <div className="text-blue-600">साक्षरता दर</div>
-              </div>
-              <div className="stat-card bg-white rounded-xl p-5 shadow-lg border border-blue-100 text-center">
-                <div className="text-3xl font-tiro-marathi font-bold text-blue-800 mb-2">२९९</div>
-                <div className="text-blue-600">हेक्टर क्षेत्रफळ</div>
-              </div>
-              <div className="stat-card bg-white rounded-xl p-5 shadow-lg border border-blue-100 text-center">
-                <div className="text-3xl font-tiro-marathi font-bold text-blue-800 mb-2">४३३</div>
-                <div className="text-blue-600">कुटुंबे</div>
-              </div>
-            </div>
 
             {/* Google Maps Link */}
             <div className="text-center">
@@ -335,6 +322,25 @@ export default function Home() {
 
           {/* Right Side: Village Information */}
           <div className="w-full lg:w-3/5 relative">
+             {/* Statistics Cards */}
+            <div className="grid grid-cols-2 mb-5 gap-4">
+              <div className="stat-card bg-white rounded-xl p-5 shadow-lg border border-blue-100 text-center">
+                <div className="text-3xl font-tiro-marathi font-bold text-blue-800 mb-2">२,०७२</div>
+                <div className="text-blue-600">एकूण लोकसंख्या</div>
+              </div>
+              <div className="stat-card bg-white rounded-xl p-5 shadow-lg border border-blue-100 text-center">
+                <div className="text-3xl font-tiro-marathi font-bold   text-blue-800 mb-2">७०.४%</div>
+                <div className="text-blue-600">साक्षरता दर</div>
+              </div>
+              <div className="stat-card bg-white rounded-xl p-5 shadow-lg border border-blue-100 text-center">
+                <div className="text-3xl font-tiro-marathi font-bold text-blue-800 mb-2">२९९</div>
+                <div className="text-blue-600">हेक्टर क्षेत्रफळ</div>
+              </div>
+              <div className="stat-card bg-white rounded-xl p-5 shadow-lg border border-blue-100 text-center">
+                <div className="text-3xl font-tiro-marathi font-bold text-blue-800 mb-2">४३३</div>
+                <div className="text-blue-600">कुटुंबे</div>
+              </div>
+            </div>
             {/* Decorative elements */}
             <div className="decoration-circle w-64 h-64 -top-16 -right-16 bg-blue-400"></div>
             <div className="decoration-circle w-32 h-32 -bottom-8 -left-8 bg-cyan-300"></div>
@@ -347,7 +353,7 @@ export default function Home() {
               <h2 className="text-3xl font-tiro-marathi font-bold mb-6 text-center relative z-10"> ◆ ग्रामपंचायत वाठोडे माहिती  ◆</h2>
               <div className="w-20 h-1 bg-red-400 mx-auto mb-8 rounded-full"></div>
               
-              <div className="space-y-6 relative z-10">
+              <div className="space-y-2 relative z-10">
                 <div className="bg-blue-900 bg-opacity-50 p-5 rounded-xl hover:bg-opacity-70 transition-all duration-300">
                   <h3 className="text-xl font-tiro-marathi font-bold mb-3 flex items-center">
                     <i className="fas fa-users mr-3 text-cyan-300"></i>
@@ -397,7 +403,7 @@ export default function Home() {
       {/* Officers Section */}
       
         {/* Officers Section */}
-      <section className="py-14 px-2 sm:px-8 bg-gradient-to-b from-blue-50 to-indigo-50">
+       <section className="py-14 px-2 sm:px-8 bg-gradient-to-b from-blue-50 to-indigo-50">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-12 text-center">
@@ -408,38 +414,38 @@ export default function Home() {
           </div>
 
           {/* Officers Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-8">
             {/* Officer 1 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
               <div className="relative">
-                <div className="h-32 bg-gradient-to-r from-blue-500 to-blue-700"></div>
-                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                <div className="h-24 xs:h-32 bg-gradient-to-r from-blue-500 to-blue-700"></div>
+                <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
                   <div className="relative">
                     <img
                       src="/images/ceo.jpg"
                       alt="विशाल सविता तेजराव नरवाडे"
-                      className="w-28 h-28 rounded-full border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
+                      className="w-20 h-20 xs:w-28 xs:h-28 rounded-full border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 w-6 h-6 xs:w-8 xs:h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 xs:w-4 xs:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="pt-16 pb-6 px-6 text-center">
-                <h3 className="text-xl font-tiro-marathi font-bold text-gray-800 mb-1">विशाल सविता तेजराव नरवाडे</h3>
-                <p className="text-blue-600 font-tiro-marathi  mb-3">मुख्य कार्यकारी अधिकारी (IAS)</p>
-                <p className="text-gray-600 font-tiro-marathi text-sm mb-4">जिल्हा परिषद, धुळे</p>
-                <div className="flex justify-center space-x-3">
-                  <button className="bg-blue-100 text-blue-700 p-2 rounded-full hover:bg-blue-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
+                <h3 className="text-base xs:text-xl font-tiro-marathi font-bold text-gray-800 mb-1">विशाल सविता तेजराव नरवाडे</h3>
+                <p className="text-blue-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">मुख्य कार्यकारी अधिकारी (IAS)</p>
+                <p className="text-gray-600 font-tiro-marathi text-xs xs:text-sm mb-3 xs:mb-4">जिल्हा परिषद, धुळे</p>
+                <div className="flex justify-center space-x-2 xs:space-x-3">
+                  <button className="bg-blue-100 text-blue-700 p-1.5 xs:p-2 rounded-full hover:bg-blue-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                     </svg>
                   </button>
-                  <button className="bg-blue-100 text-blue-700 p-2 rounded-full hover:bg-blue-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <button className="bg-blue-100 text-blue-700 p-1.5 xs:p-2 rounded-full hover:bg-blue-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                       <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                     </svg>
@@ -451,34 +457,34 @@ export default function Home() {
             {/* Officer 2 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
               <div className="relative">
-                <div className="h-32 bg-gradient-to-r from-purple-500 to-purple-700"></div>
-                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                <div className="h-24 xs:h-32 bg-gradient-to-r from-purple-500 to-purple-700"></div>
+                <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
                   <div className="relative ">
                     <img
                       src="/images/vceo.jpg"
                       alt="गणेश कुसुम भास्कर मोरे"
-                      className="w-28 h-28 rounded-full  border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
+                      className="w-20 h-20 xs:w-28 xs:h-28 rounded-full  border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8  bg-purple-600 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 w-6 h-6 xs:w-8 xs:h-8  bg-purple-600 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 xs:w-4 xs:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 005 10a6 6 0 0012 0c0-1.003-.21-1.96-.59-2.808A5 5 0 0010 11z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="pt-16 pb-6 px-6 text-center">
-                <h3 className="text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">गणेश कुसुम भास्कर मोरे</h3>
-                <p className="text-purple-600 font-tiro-marathi  mb-3">उपमुख्य कार्यकारी अधिकारी (ग्रा.पं)</p>
-                <p className="text-gray-600 text-sm font-tiro-marathi  mb-4">जिल्हा परिषद, धुळे</p>
-                <div className="flex justify-center space-x-3">
-                  <button className="bg-purple-100 text-purple-700 p-2 rounded-full hover:bg-purple-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">गणेश कुसुम भास्कर मोरे</h3>
+                <p className="text-purple-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">उपमुख्य कार्यकारी अधिकारी (ग्रा.पं)</p>
+                <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">जिल्हा परिषद, धुळे</p>
+                <div className="flex justify-center space-x-2 xs:space-x-3">
+                  <button className="bg-purple-100 text-purple-700 p-1.5 xs:p-2 rounded-full hover:bg-purple-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                     </svg>
                   </button>
-                  <button className="bg-purple-100 text-purple-700 p-2 rounded-full hover:bg-purple-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <button className="bg-purple-100 text-purple-700 p-1.5 xs:p-2 rounded-full hover:bg-purple-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                       <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                     </svg>
@@ -490,34 +496,34 @@ export default function Home() {
             {/* Officer 3 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
               <div className="relative">
-                <div className="h-32 bg-gradient-to-r from-teal-500 to-teal-700"></div>
-                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                <div className="h-24 xs:h-32 bg-gradient-to-r from-teal-500 to-teal-700"></div>
+                <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
                   <div className="relative">
                     <img
                       src="/images/asceo.jpg"
                       alt="प्रदीप सुमनताई बाबूलाल पवार"
-                      className="w-28 h-28 rounded-full border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
+                      className="w-20 h-20 xs:w-28 xs:h-28 rounded-full  border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                    <div className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 w-6 h-6 xs:w-8 xs:h-8  bg-teal-600 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 xs:w-4 xs:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 005 10a6 6 0 0012 0c0-1.003-.21-1.96-.59-2.808A5 5 0 0010 11z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="pt-16 pb-6 px-6 text-center">
-                <h3 className="text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">प्रदीप सुमनताई बाबूलाल पवार</h3>
-                <p className="text-teal-600 font-tiro-marathi  mb-3">गटविकास अधिकारी</p>
-                <p className="text-gray-600 text-sm font-tiro-marathi  mb-4">पंचायत समिती, शिरपूर, जि. धुळे</p>
-                <div className="flex justify-center space-x-3">
-                  <button className="bg-teal-100 text-teal-700 p-2 rounded-full hover:bg-teal-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">प्रदीप सुमनताई बाबूलाल पवा</h3>
+                <p className="text-teal-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">गटविकास अधिकारी</p>
+                <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">समिती, शिरपूर, जि. धुळे</p>
+                <div className="flex justify-center space-x-2 xs:space-x-3">
+                  <button className="bg-teal-100 text-teal-700 p-1.5 xs:p-2 rounded-full hover:bg-teal-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                     </svg>
                   </button>
-                  <button className="bg-teal-100 text-teal-700 p-2 rounded-full hover:bg-teal-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <button className="bg-teal-100 text-teal-700 p-1.5 xs:p-2 rounded-full hover:bg-teal-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                       <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                     </svg>
@@ -529,34 +535,34 @@ export default function Home() {
             {/* Officer 4 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
               <div className="relative">
-                <div className="h-32 bg-gradient-to-r from-amber-500 to-amber-700"></div>
-                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                <div className="h-24 xs:h-32 bg-gradient-to-r from-red-500 to-red-700"></div>
+                <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
                   <div className="relative">
                     <img
                       src="/images/sarpanch.jpg"
                       alt="विकास पाटील"
-                      className="w-28 h-28 rounded-full border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
+                      className="w-20 h-20 xs:w-28 xs:h-28 rounded-full  border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    <div className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 w-6 h-6 xs:w-8 xs:h-8  bg-red-600 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 xs:w-4 xs:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 005 10a6 6 0 0012 0c0-1.003-.21-1.96-.59-2.808A5 5 0 0010 11z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="pt-16 pb-6 px-6 text-center">
-                <h3 className="text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">विकास पाटील</h3>
-                <p className="text-amber-600 font-tiro-marathi  mb-3">लोकनियुक्त सरपंच</p>
-                <p className="text-gray-600  font-tiro-marathi text-sm mb-4">ग्रामपंचायत, वाठोडे</p>
-                <div className="flex justify-center space-x-3">
-                  <button className="bg-amber-100 text-amber-700 p-2 rounded-full hover:bg-amber-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">विकास पाटील</h3>
+                <p className="text-red-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">लोकनियुक्त सरपंच</p>
+                <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत, वाठोडे</p>
+                <div className="flex justify-center space-x-2 xs:space-x-3">
+                  <button className="bg-red-100 text-red-700 p-1.5 xs:p-2 rounded-full hover:bg-red-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                     </svg>
                   </button>
-                  <button className="bg-amber-100 text-amber-700 p-2 rounded-full hover:bg-amber-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <button className="bg-red-100 text-red-700 p-1.5 xs:p-2 rounded-full hover:bg-red-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                       <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                     </svg>
@@ -568,34 +574,34 @@ export default function Home() {
             {/* Officer 5 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
               <div className="relative">
-                <div className="h-32 bg-gradient-to-r from-green-500 to-green-700"></div>
-                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                <div className="h-24 xs:h-32 bg-gradient-to-r from-green-500 to-green-700"></div>
+                <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
                   <div className="relative">
                     <img
                       src="/images/officer3.jpg"
                       alt="उपसरपंच"
-                      className="w-28 h-28 rounded-full border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
+                      className="w-20 h-20 xs:w-28 xs:h-28 rounded-full  border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
+                    <div className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 w-6 h-6 xs:w-8 xs:h-8  bg-green-600 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 xs:w-4 xs:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 005 10a6 6 0 0012 0c0-1.003-.21-1.96-.59-2.808A5 5 0 0010 11z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="pt-16 pb-6 px-6 text-center">
-                <h3 className="text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">उपसरपंच</h3>
-                <p className="text-green-600 font-tiro-marathi  mb-3">उपसरपंच</p>
-                <p className="text-gray-600 text-sm font-tiro-marathi  mb-4">ग्रामपंचायत वाठोडे</p>
-                <div className="flex justify-center space-x-3">
-                  <button className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">उपसरपंच</h3>
+                <p className="text-green-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">उपसरपंच</p>
+                <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत वाठोडे</p>
+                <div className="flex justify-center space-x-2 xs:space-x-3">
+                  <button className="bg-green-100 text-green-700 p-1.5 xs:p-2 rounded-full hover:bg-green-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                     </svg>
                   </button>
-                  <button className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <button className="bg-green-100 text-green-700 p-1.5 xs:p-2 rounded-full hover:bg-green-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                       <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                     </svg>
@@ -607,35 +613,34 @@ export default function Home() {
             {/* Officer 6 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
               <div className="relative">
-                <div className="h-32 bg-gradient-to-r from-indigo-500 to-indigo-700"></div>
-                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                <div className="h-24 xs:h-32 bg-gradient-to-r from-yellow-500 to-yellow-700"></div>
+                <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
                   <div className="relative">
                     <img
                       src="/images/gramsevak.jpeg"
                       alt="शरद पुंडलिक कोळी"
-                      className="w-28 h-28 rounded-full border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
+                      className="w-20 h-20 xs:w-28 xs:h-28 rounded-full  border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
-                        <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
+                    <div className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 w-6 h-6 xs:w-8 xs:h-8  bg-yellow-600 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 xs:w-4 xs:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 005 10a6 6 0 0012 0c0-1.003-.21-1.96-.59-2.808A5 5 0 0010 11z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="pt-16 pb-6 px-6 text-center">
-                <h3 className="text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">शरद पुंडलिक कोळी</h3>
-                <p className="text-indigo-600 font-tiro-marathi  mb-3">ग्रामपंचायत अधिकारी</p>
-                <p className="text-gray-600 font-tiro-marathi  text-sm mb-4">ग्रामपंचायत, वाठोडे</p>
-                <div className="flex justify-center space-x-3">
-                  <button className="bg-indigo-100 text-indigo-700 p-2 rounded-full hover:bg-indigo-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <div className="pt-10 xs:pt-16 pb-4 xs:pb-4 px-4 xs:px-6 text-center">
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">शरद कोळी</h3>
+                <p className="text-yellow-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">ग्रामपंचायत अधिकारी</p>
+                <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत, वाठोडे</p>
+                <div className="flex justify-center space-x-2 xs:space-x-3">
+                  <button className="bg-yellow-100 text-yellow-700 p-1.5 xs:p-2 rounded-full hover:bg-yellow-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                     </svg>
                   </button>
-                  <button className="bg-indigo-100 text-indigo-700 p-2 rounded-full hover:bg-indigo-200 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <button className="bg-yellow-100 text-yellow-700 p-1.5 xs:p-2 rounded-full hover:bg-yellow-200 transition-colors">
+                    <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                       <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                     </svg>
@@ -653,106 +658,111 @@ export default function Home() {
         <NoticeBoard />
       </section>
 
-      {/* Connect With Government Section */}
-      <section className="py-14 px-2 sm:px-8 bg-[#ececff]">
-        <h2 className="text-2xl sm:text-3xl font-tiro-marathi font-bold text-center mb-10 text-black">डिजिटल आपले सरकार </h2>
-        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          {/* Card 1 */}
-          <a
-            href="https://digitalindia.gov.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative rounded overflow-hidden shadow-lg group"
-          >
-            <img src="/images/digital_india.jpg" alt="Digital India" className="w-full h-48 object-cover" />
-            <div className="absolute bottom-0 left-0 w-full bg-gray-700 bg-opacity-80 text-white text-lg font-tiro-marathi text-center py-2 group-hover:bg-opacity-90 transition">
-              डिजिटल भारत  
-            </div>
-          </a>
-          {/* Card 2 */}
-          <a
-            href="https://www.makeinindia.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative rounded overflow-hidden shadow-lg group"
-          >
-            <img src="/images/make_in_india.jpg" alt="Make in India" className="w-full h-48 object-cover" />
-            <div className="absolute bottom-0 left-0 w-full bg-gray-700 bg-opacity-80 text-white text-lg font-tiro-marathi text-center py-2 group-hover:bg-opacity-90 transition">
-              मेक इन इंडिया 
-            </div>
-          </a>
-          {/* Card 3 */}
-          <a
-            href="https://swachhbharat.mygov.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative rounded overflow-hidden shadow-lg group"
-          >
-            <img src="/images/swatch-bharat.jpg" alt="Swachh Bharat Abhiyaan" className="w-full h-48 object-cover" />
-            <div className="absolute bottom-0 left-0 w-full bg-gray-700 bg-opacity-80 text-white text-lg font-tiro-marathi text-center py-2 group-hover:bg-opacity-90 transition">
-              स्वच्छ भारत अभियान 
-            </div>
-          </a>
-          {/* Card 4 */}
-          <a
-            href="https://bharatkeveer.gov.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative rounded overflow-hidden shadow-lg group"
-          >
-            <img src="/images/bharat-ke-veer.jpg" alt="Bharat ke Veer" className="w-full h-48 object-cover" />
-            <div className="absolute bottom-0 left-0 w-full bg-gray-700 bg-opacity-80 text-white text-lg font-tiro-marathi text-center py-2 group-hover:bg-opacity-90 transition">
-              भारत के वीर 
-            </div>
-          </a>
-          {/* Card 5 */}
-          <a
-            href="https://www.mygov.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative rounded overflow-hidden shadow-lg group"
-          >
-            <img src="/images/mygov.png" alt="MyGov" className="w-full h-48 object-cover" />
-            <div className="absolute bottom-0 left-0 w-full bg-gray-700 bg-opacity-80 text-white text-lg font-tiro-marathitext-center py-2 group-hover:bg-opacity-90 transition">
-              MyGov- Connect with Gov.
-            </div>
-          </a>
-          {/* Card 6 */}
-          <a
-            href="https://pmjdy.gov.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative rounded overflow-hidden shadow-lg group"
-          >
-            <img src="../../public/images/jan_dhan_yojna.jpg" alt="P.M Jan Dhan Yojana" className="w-full h-48 object-cover" />
-            <div className="absolute bottom-0 left-0 w-full bg-gray-700 bg-opacity-80 text-white text-lg font-tiro-marathi text-center py-2 group-hover:bg-opacity-90 transition">
-              प्रधानमंत्री जन धन योजना 
-            </div>
-          </a>
-          {/* Card 7 */}
-          <a
-            href="https://www.nsiindia.gov.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative rounded overflow-hidden shadow-lg group"
-          >
-            <img src="../../public/images/Sukanya_Samriddhi_Yojana_Scheme.jpg" alt="Sukanya Samriddhi Yojana" className="w-full h-48 object-cover" />
-            <div className="absolute bottom-0 left-0 w-full bg-gray-700 bg-opacity-80 text-white text-lg font-tiro-marathi text-center py-2 group-hover:bg-opacity-90 transition">
-            सुकन्या समृद्धी योजना
-            </div>
-          </a>
-          {/* Card 8 */}
-          <a
-            href="https://www.skillindia.gov.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative rounded overflow-hidden shadow-lg group"
-          >
-            <img src="/images/skill_india.jpg" alt="National Skill Dev. Mission" className="w-full h-48 object-cover" />
-            <div className="absolute bottom-0 left-0 w-full bg-gray-700 bg-opacity-80 text-white text-lg font-tiro-marathi text-center py-2 group-hover:bg-opacity-90 transition">
-           राष्ट्रीय कौशल्य विकास अभियान
-            </div>
-          </a>
+      {/* Connect with Government Section */}
+      <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-12">
+            Connect with Government
+          </h2>
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+
+            {/* Card 3 */}
+            <a
+              href="https://www.digitalindia.gov.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative rounded-xl overflow-hidden shadow-lg group transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            >
+              <img
+                src="/images/digital_india.jpg"
+                alt="Digital India"
+                className="w-full h-48 xs:h-32 object-cover"
+              />
+              <div className="absolute bottom-0 left-0 w-full bg-gray-800 bg-opacity-70 text-white text-lg xs:text-sm font-tiro-marathi text-center py-3 group-hover:bg-opacity-90 transition">
+                डिजिटल इंडिया
+              </div>
+            </a>
+            {/* Card 4 */}
+            <a
+              href="https://bharatkeveer.gov.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative rounded-xl overflow-hidden shadow-lg group transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            >
+              <img
+                src="/images/bharat-ke-veer.jpg"
+                alt="Bharat ke Veer"
+                className="w-full h-48 xs:h-32 object-cover"
+              />
+              <div className="absolute bottom-0 left-0 w-full bg-gray-800 bg-opacity-70 text-white text-lg xs:text-sm font-tiro-marathi text-center py-3 group-hover:bg-opacity-90 transition">
+                भारत के वीर
+              </div>
+            </a>
+            {/* Card 5 */}
+            <a
+              href="https://www.mygov.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative rounded-xl overflow-hidden shadow-lg group transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            >
+              <img
+                src="/images/mygov.png"
+                alt="MyGov"
+                className="w-full h-48 xs:h-32 object-cover"
+              />
+              <div className="absolute bottom-0 left-0 w-full bg-gray-800 bg-opacity-70 text-white text-lg xs:text-sm font-tiro-marathi text-center py-3 group-hover:bg-opacity-90 transition">
+                MyGov- Connect with Gov.
+              </div>
+            </a>
+            {/* Card 6 */}
+            <a
+              href="https://pmjdy.gov.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative rounded-xl overflow-hidden shadow-lg group transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            >
+              <img
+                src="../../public/images/jan_dhan_yojna.jpg"
+                alt="P.M Jan Dhan Yojana"
+                className="w-full h-48 xs:h-32 object-cover"
+              />
+              <div className="absolute bottom-0 left-0 w-full bg-gray-800 bg-opacity-70 text-white text-lg xs:text-sm font-tiro-marathi text-center py-3 group-hover:bg-opacity-90 transition">
+                प्रधानमंत्री जन धन योजना
+              </div>
+            </a>
+            {/* Card 7 */}
+            <a
+              href="https://www.nsiindia.gov.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative rounded-xl overflow-hidden shadow-lg group transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            >
+              <img
+                src="../../public/images/Sukanya_Samriddhi_Yojana_Scheme.jpg"
+                alt="Sukanya Samriddhi Yojana"
+                className="w-full h-48 xs:h-32 object-cover"
+              />
+              <div className="absolute bottom-0 left-0 w-full bg-gray-800 bg-opacity-70 text-white text-lg xs:text-sm font-tiro-marathi text-center py-3 group-hover:bg-opacity-90 transition">
+                सुकन्या समृद्धी योजना
+              </div>
+            </a>
+            {/* Card 8 */}
+            <a
+              href="https://www.skillindia.gov.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative rounded-xl overflow-hidden shadow-lg group transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+            >
+              <img
+                src="/images/skill_india.jpg"
+                alt="National Skill Dev. Mission"
+                className="w-full h-48 xs:h-32 object-cover"
+              />
+              <div className="absolute bottom-0 left-0 w-full bg-gray-800 bg-opacity-70 text-white text-lg xs:text-sm font-tiro-marathi text-center py-3 group-hover:bg-opacity-90 transition">
+                राष्ट्रीय कौशल्य विकास अभियान
+              </div>
+            </a>
+          </div>
         </div>
       </section>
 

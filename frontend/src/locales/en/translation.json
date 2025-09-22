@@ -1,12 +1,15 @@
 {
   "header": {
     "title": "Gram Panchayat Vathode, Shirpur Dist.Dhule",
+    "email":"gpwathode158@gmail.com",
+    "phone":"9876543210",
     "subtitle": "Let's connect digitally",
     "welcome": "🙏🏻 Welcome to Vathoda Gram Panchayat!",
     "login": "Login",
     "dashboard": "Dashboard"
   },
   "nav": {
+    "home":"Home",
     "village": "THE VILLAGE",
     "about": "About Vathode",
     "gp": "GRAM PANCHAYAT",

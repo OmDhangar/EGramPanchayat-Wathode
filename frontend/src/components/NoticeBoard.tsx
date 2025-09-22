@@ -34,9 +34,9 @@ const BLOG_CATEGORIES = [
 
 // Custom notice board header
 const NoticeBoardHeader = () => (
-  <div className="text-center mb-8 p-5 bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-xl shadow-lg border-b-4 border-purple-800">
-    <h1 className="text-3xl font-bold mb-2">सार्वजनिक सूचना फलक</h1>
-    <p className="text-blue-100">महानगर पालिका, पुणे</p>
+  <div className="text-center mb-8 p-3 xs:p-5 bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-xl shadow-lg border-b-4 border-purple-800">
+    <h1 className="text-xl xs:text-3xl font-bold mb-1 xs:mb-2">सार्वजनिक सूचना फलक</h1>
+    <p className="text-blue-100 text-xs xs:text-base">महानगर पालिका, पुणे</p>
   </div>
 );
 
@@ -90,21 +90,21 @@ export default function NoticeBoard() {
   );
 
   return (
-    <div className="bg-[#ececff] min-h-screen p-6">
+    <div className="bg-[#ececff] min-h-screen p-3 xs:p-6">
       <div className="max-w-6xl mx-auto">
         <NoticeBoardHeader />
         
         {/* Category Filter */}
-        <div className="mb-6 bg-white p-5 rounded-xl shadow-md border-l-4 border-purple-500">
-          <h3 className="text-base font-semibold mb-3 flex items-center text-gray-700">
+        <div className="mb-4 xs:mb-6 bg-white p-3 xs:p-5 rounded-xl shadow-md border-l-4 border-purple-500">
+          <h3 className="text-sm xs:text-base font-semibold mb-2 xs:mb-3 flex items-center text-gray-700">
             <FaFilter className="mr-2 text-purple-600" /> श्रेणी निवडा
           </h3>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1 xs:gap-2">
             {BLOG_CATEGORIES.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all transform hover:scale-105 ${
+                className={`px-3 py-1 xs:px-4 xs:py-2 rounded-full text-xs xs:text-sm whitespace-nowrap transition-all transform hover:scale-105 ${
                   selectedCategory === category
                     ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md"
                     : "bg-white text-purple-700 border border-purple-200 hover:bg-purple-50"
@@ -119,7 +119,7 @@ export default function NoticeBoard() {
         {blogs.length === 0 ? (
           <BlogEmptyState />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-6">
             {blogs.map((blog) => (
               <div 
                 key={blog._id} 
