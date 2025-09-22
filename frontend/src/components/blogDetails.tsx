@@ -62,8 +62,8 @@ export default function BlogDetails() {
     <div className="max-w-4xl mx-auto p-6">
       {/* Back Button */}
       <Link
-        to="/blogs"
-        className="flex items-center text-blue-600 mb-6 hover:underline"
+        to="/"
+        className="flex pt-6 items-center text-blue-600 mb-3 hover:underline"
       >
         <FaArrowLeft className="mr-2" /> परत जा
       </Link>
@@ -71,56 +71,44 @@ export default function BlogDetails() {
       {/* Card Style */}
       <div className="bg-white shadow-lg rounded-lg p-6">
         {/* Title */}
-        <h1 className="text-3xl font-bold mb-3">{blog.title}</h1>
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-4">
+          {blog.title}
+        </h1>
 
         {/* Meta Info */}
-        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4 mb-4">
-          <span className="flex items-center">
+        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4 mb-6">
+          <span className="flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
             <FaTag className="mr-1" /> {blog.category}
           </span>
           <span>{blog.date}</span>
-          <span className="flex items-center">
-            <FaFlag className="mr-1" /> Priority:{" "}
-            <span
-              className={`ml-1 px-2 py-0.5 rounded text-white text-xs ${
-                blog.priority === "high"
-                  ? "bg-red-500"
-                  : blog.priority === "medium"
-                  ? "bg-yellow-500"
-                  : "bg-green-500"
-              }`}
-            >
-              {blog.priority}
-            </span>
-          </span>
         </div>
 
         {/* Author & Dates */}
         {blog.author && (
-          <p className="text-sm text-gray-600 mb-1">लेखक: {blog.author}</p>
+          <p className="text-sm text-gray-600 mb-2">लेखक: {blog.author}</p>
         )}
         {blog.createdAt && (
-          <p className="text-xs text-gray-400 mb-4">
-            Posted on {new Date(blog.createdAt).toLocaleDateString()}
+          <p className="text-xs text-gray-500 mb-6">
+            Last updated on {new Date(blog.createdAt).toLocaleDateString()}
           </p>
         )}
 
         {/* Images */}
         {blog.images?.length > 0 && (
-          <div className="mb-6 space-y-4">
+          <div className="mb-8 space-y-6">
             {blog.images.map((img, idx) => (
               <img
                 key={idx}
                 src={img.url}
                 alt={blog.title}
-                className="w-1/2  h-1/2 rounded-lg shadow-md"
+                className="w-full h-64 object-cover rounded-lg shadow-md"
               />
             ))}
           </div>
         )}
 
         {/* Content */}
-        <div className="prose max-w-none text-gray-800 leading-relaxed">
+        <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
           {blog.content}
         </div>
       </div>

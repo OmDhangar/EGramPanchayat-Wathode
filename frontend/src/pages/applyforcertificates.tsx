@@ -107,7 +107,7 @@ export default function CertificateForms() {
         </motion.div>
 
         {/* Certificate Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {cards.map((card, index) => (
             <motion.div
               key={index}
@@ -159,7 +159,7 @@ export default function CertificateForms() {
                           <div className="w-2 h-2 bg-white/60 rounded-full mt-2 flex-shrink-0"></div>
                           <span>{point}</span>
                         </motion.li>
-                      ))}
+                      ))}\
                     </ul>
                   </div>
 
