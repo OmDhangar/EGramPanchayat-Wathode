@@ -238,32 +238,25 @@ export default function Home() {
           सूचना
         </div>
         <div className="w-full h-full flex items-center pl-24">
-          <a
-            href="https://maharashtra.gov.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full h-full"
+          <div
+            ref={marqueeRef}
+            className="whitespace-nowrap animate-marquee text-white text-sm xs:text-base sm:text-lg font-tiro-marathi flex items-center gap-7 sm:gap-16 cursor-pointer"
+            style={{ animationPlayState: 'running' }}
             onMouseEnter={handleMarqueeMouseEnter}
             onMouseLeave={handleMarqueeMouseLeave}
           >
-            <div
-              ref={marqueeRef}
-              className="whitespace-nowrap animate-marquee text-white text-sm xs:text-base sm:text-lg font-tiro-marathi flex items-center gap-7 sm:gap-16 cursor-pointer"
-              style={{ animationPlayState: 'running' }}
-            >
-              <span className="relative">
-                पारदर्शक प्रशासन आणि समाजाच्या सहभागामाधून एक सक्षम, आत्मनिर्भर गाव निर्माण करूया. पारदर्शक प्रशासन आणि समाजाच्या सहभागामाधून एक सक्षम, आत्मनिर्भर गाव निर्माण करूया.
-                <span className="absolute -top-2 right-0 flex items-center">
-                  <span className="relative flex h-4 w-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-600 opacity-90"></span>
-                    <span className="relative inline-flex rounded-full h-4 w-4 bg-red-700 border-2 border-white"></span>
-                    <span className="absolute inset-0 flex items-center justify-center text-[0.55rem] font-tiro-marathi-bold text-white">New</span>
-                  </span>
+            <span className="relative">
+              पारदर्शक प्रशासन आणि समाजाच्या सहभागामाधून एक सक्षम, आत्मनिर्भर गाव निर्माण करूया. पारदर्शक प्रशासन आणि समाजाच्या सहभागामाधून एक सक्षम, आत्मनिर्भर गाव निर्माण करूया.
+              <span className="absolute -top-2 right-0 flex items-center">
+                <span className="relative flex h-4 w-4">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-600 opacity-90"></span>
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-red-700 border-2 border-white"></span>
+                  <span className="absolute inset-0 flex items-center justify-center text-[0.55rem] font-tiro-marathi-bold text-white">New</span>
                 </span>
               </span>
-              <span>अधिक माहितीसाठी ग्रामपंचायत कार्यालयला संपर्क करा</span>
-            </div>
-          </a>
+            </span>
+            <span>अधिक माहितीसाठी ग्रामपंचायत कार्यालयला संपर्क करा</span>
+          </div>
         </div>
         <style>
           {`
@@ -448,8 +441,8 @@ export default function Home() {
                 <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
                   <div className="relative">
                     <img
-                      src="/images/ceo.jpg"
-                      alt="विशाल सविता तेजराव नरवाडे"
+                      src="/images/ceo.jpeg"
+                      alt="ceo"
                       className="w-20 h-20 xs:w-28 xs:h-28 rounded-full border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
                     />
                     <div className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 w-6 h-6 xs:w-8 xs:h-8 bg-blue-600 rounded-full flex items-center justify-center">
@@ -461,7 +454,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
-                <h3 className="text-base xs:text-xl font-tiro-marathi font-bold text-gray-800 mb-1">विशाल सविता तेजराव नरवाडे</h3>
+                <h3 className="text-base xs:text-xl font-tiro-marathi font-bold text-gray-800 mb-1"> मा.श्री. अजीज करीम शेख </h3>
                 <p className="text-blue-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">मुख्य कार्यकारी अधिकारी (IAS)</p>
                 <p className="text-gray-600 font-tiro-marathi text-xs xs:text-sm mb-3 xs:mb-4">जिल्हा परिषद, धुळे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
@@ -487,8 +480,8 @@ export default function Home() {
                 <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
                   <div className="relative ">
                     <img
-                      src="/images/vceo.jpg"
-                      alt="गणेश कुसुम भास्कर मोरे"
+                      src="/images/vceo.jpeg"
+                      alt="vceo"
                       className="w-20 h-20 xs:w-28 xs:h-28 rounded-full  border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
                     />
                     <div className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 w-6 h-6 xs:w-8 xs:h-8  bg-purple-600 rounded-full flex items-center justify-center">
@@ -500,8 +493,8 @@ export default function Home() {
                 </div>
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
-                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">गणेश कुसुम भास्कर मोरे</h3>
-                <p className="text-purple-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">उपमुख्य कार्यकारी अधिकारी (ग्रा.पं)</p>
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1"> मा.श्री. राजेश इंगळे </h3>
+                <p className="text-purple-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">अतिरिक्त मुख्य कार्यकारी अधिकारी </p>
                 <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">जिल्हा परिषद, धुळे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
                   <button className="bg-purple-100 text-purple-700 p-1.5 xs:p-2 rounded-full hover:bg-purple-200 transition-colors">
@@ -518,7 +511,66 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
+            {/* Officer 3 */}
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
+              <div className="relative">
+                <div className="h-24 xs:h-32 bg-gradient-to-r from-orange-500 to-orange-700"></div>
+                <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
+                  <div className="relative ">
+                    <img
+                      src="/images/ceogp.jpeg"
+                      alt="vceo"
+                      className="w-20 h-20 xs:w-28 xs:h-28 rounded-full border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 w-6 h-6 xs:w-8 xs:h-8 bg-orange-600 rounded-full flex items-center justify-center">
+                      <svg
+                        className="w-3 h-3 xs:w-4 xs:h-4 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 005 10a6 6 0 0012 0c0-1.003-.21-1.96-.59-2.808A5 5 0 0010 11z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi text-gray-800 mb-1">
+                  मा.श्रीमती. स्नेहा पवार
+                </h3>
+                <p className="text-orange-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">
+                  उप मुख्य कार्यकारी अधिकारी (ग्रा.पं)
+                </p>
+                <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi mb-3 xs:mb-4">
+                  जिल्हा परिषद, धुळे
+                </p>
+                <div className="flex justify-center space-x-2 xs:space-x-3">
+                  <button className="bg-orange-100 text-orange-700 p-1.5 xs:p-2 rounded-full hover:bg-orange-200 transition-colors">
+                    <svg
+                      className="w-3 h-3 xs:w-4 xs:h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                    </svg>
+                  </button>
+                  <button className="bg-orange-100 text-orange-700 p-1.5 xs:p-2 rounded-full hover:bg-orange-200 transition-colors">
+                    <svg
+                      className="w-3 h-3 xs:w-4 xs:h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
             {/* Officer 3 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
               <div className="relative">
@@ -539,9 +591,9 @@ export default function Home() {
                 </div>
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
-                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">प्रदीप सुमनताई बाबूलाल पवा</h3>
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1"> मा.श्री. प्रदीप पवार</h3>
                 <p className="text-teal-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">गटविकास अधिकारी</p>
-                <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">समिती, शिरपूर, जि. धुळे</p>
+                <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">पंचायत समिती, शिरपूर, जि. धुळे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
                   <button className="bg-teal-100 text-teal-700 p-1.5 xs:p-2 rounded-full hover:bg-teal-200 transition-colors">
                     <svg className="w-3 h-3 xs:w-4 xs:h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -557,6 +609,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            
 
             {/* Officer 4 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
@@ -578,7 +631,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
-                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">विकास पाटील</h3>
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">श्री. नारायण कोंडुसिंग चौधरी </h3>
                 <p className="text-red-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">लोकनियुक्त सरपंच</p>
                 <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत, वाठोडे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
@@ -604,7 +657,7 @@ export default function Home() {
                 <div className="absolute -bottom-8 xs:-bottom-12 left-1/2 transform -translate-x-1/2">
                   <div className="relative">
                     <img
-                      src="/images/officer3.jpg"
+                      src="/images/upsarpanch.jpg"
                       alt="उपसरपंच"
                       className="w-20 h-20 xs:w-28 xs:h-28 rounded-full  border-4 border-white object-cover shadow-lg transition-all duration-300 group-hover:scale-110"
                     />
@@ -617,7 +670,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
-                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">उपसरपंच</h3>
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">श्रीमती. वंदनाबाई देविदास सावळे </h3>
                 <p className="text-green-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">उपसरपंच</p>
                 <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत वाठोडे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
@@ -656,7 +709,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-4 px-4 xs:px-6 text-center">
-                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">शरद कोळी</h3>
+                <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">श्री. शरद पुंडलिक कोळी </h3>
                 <p className="text-yellow-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">ग्रामपंचायत अधिकारी</p>
                 <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत, वाठोडे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">

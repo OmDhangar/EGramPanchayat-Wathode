@@ -1,16 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaCheck, FaTimes, FaArrowLeft, FaCreditCard, FaDownload, FaEye, FaLock } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaArrowLeft, FaDownload, FaReceipt } from 'react-icons/fa';
 import { api } from '../api/axios';
 import { Helmet } from "react-helmet";
 
-// Razorpay types
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
+// Payment gateway removed
 
 interface UploadedFile {
   _id: string;
@@ -20,6 +15,7 @@ interface UploadedFile {
   fileType: string;
   fileSize: number;
   uploadedAt: string;
+  isPaymentReceipt?: boolean; // Flag to identify payment receipt
 }
 
 // PaymentDetails interface inlined in FormDetails.paymentDetails
@@ -36,6 +32,9 @@ interface FormDetails {
     paymentId?: string;
     paymentAmount?: number;
     paymentDate?: string;
+    amount?: number;
+    utrNumber?: string;
+    receiptUrl?: string; // Added receipt URL
   };
   createdAt: string;
   updatedAt: string;
@@ -93,27 +92,17 @@ const FormDetails = () => {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [paymentLoading, setPaymentLoading] = useState(false);
+  // Removed payment loading state
   const [showAnimation, setShowAnimation] = useState<null | 'approved' | 'rejected'>(null);
   const [remarks, setRemarks] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
+  // Removed unused fileUrls state
   const [loadingUrls, setLoadingUrls] = useState<Record<string, boolean>>({});
   const [urlErrors, setUrlErrors] = useState<Record<string, string>>({});
 
   // Removed unused loadingFiles state
 
-  // Initialize Razorpay script
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
-    
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  // Removed Razorpay script injection
 
   // Get user info from token or context
   useEffect(() => {
@@ -169,7 +158,6 @@ const FormDetails = () => {
       }
 
       if (!url) throw new Error('Signed URL not received');
-      setFileUrls(prev => ({ ...prev, [fileId]: url }));
       return url;
     } catch (err: any) {
       let errorMessage = 'Failed to generate file URL';
@@ -192,6 +180,31 @@ const FormDetails = () => {
     }
   };
 
+  // Handle payment receipt click using existing file logic
+  const handlePaymentReceiptClick = async () => {
+    if (!formDetails?.uploadedFiles || formDetails.uploadedFiles.length === 0) {
+      setError('No files available');
+      return;
+    }
+
+    try {
+      // Payment receipt is always the first file (index 0) in uploadedFiles
+      const receiptFile = formDetails.uploadedFiles[0];
+
+      // Use existing file URL generation logic
+      const url = await generateFileUrl(
+        formDetails.applicationId,
+        receiptFile._id,
+        "file"
+      );
+      window.open(url, "_blank");
+    } catch (err) {
+      console.error("Error opening payment receipt:", err);
+      setError('Failed to open payment receipt');
+    }
+  };
+  
+
   const handleFileClick = async (
     applicationId: string,
     fileId: string,
@@ -205,9 +218,6 @@ const FormDetails = () => {
     }
   };
 
-
-
-  
   useEffect(() => {
     const fetchData = async () => {
       if (!applicationId) {
@@ -310,10 +320,7 @@ const FormDetails = () => {
     return;
   }
 
-  if (formDetails.paymentDetails.paymentStatus !== "completed") {
-    setError("Payment must be completed before downloading the certificate");
-    return;
-  }
+  // Payment is not required anymore
 
   try {
     setLoading(true);
@@ -344,116 +351,7 @@ const FormDetails = () => {
 };
 
 
-  // Payment functions
-  const initiatePayment = async () => {
-    if (!formDetails || !formData) {
-      setError('Form details not available');
-      return;
-    }
-
-    try {
-      setPaymentLoading(true);
-      setError(null);
-
-      // Create order on backend
-      const orderResponse = await api.post(
-        '/payments/create-order',
-        {
-          applicationId: formDetails.applicationId,
-          amount: (formData as any).paymentAmount , // Default amount
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
-
-      const { orderId, amount, currency } = orderResponse.data.data;
-      console.log(import.meta.env.VITE_RAZORPAY_KEY_ID)
-
-      // Razorpay options
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID ,
-        amount: amount,
-        currency: currency,
-        name: 'Government Certificate Services',
-        description: `Payment for ${formDetails.documentType.replace('_', ' ')} - ${formDetails.applicationId}`,
-        order_id: orderId,
-        handler: async (response: any) => {
-          try {
-            // Verify payment on backend
-            const verifyResponse = await api.post(
-              '/payments/verify',
-              {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                applicationId: formDetails.applicationId,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-                }
-              }
-            );
-
-            if (verifyResponse.data.success) {
-              // Payment successful
-              setShowAnimation('approved');
-              await new Promise(resolve => setTimeout(resolve, 1500));
-              setShowAnimation(null);
-
-              // Immediately fetch signed URL and redirect for download
-              try {
-                const res = await api.get(`/applications/files/urls`, {
-                  params: { applicationId: formDetails.applicationId },
-                  headers: {
-                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-                  },
-                });
-                const signedUrl = res.data?.data?.url;
-                if (signedUrl) {
-                  window.location.href = signedUrl;
-                  return;
-                }
-              } catch (e) {
-                // Fall back to reloading details if URL fetch fails
-              }
-
-              // Fallback: reload to show updated status
-              window.location.reload();
-            }
-          } catch (error: any) {
-            console.error('Payment verification failed:', error);
-            setError('Payment verification failed. Please contact support.');
-          }
-        },
-        otp_autoread: false, // 👈 Disable OTP auto-read feature
-        prefill: {
-          name: (formData as any).childName || (formData as any).applicantName || '',
-          email: (formData as any).email || '',
-          contact: (formData as any).phone || '',
-        },
-        theme: {
-          color: '#3B82F6',
-        },
-        modal: {
-          ondismiss: () => {
-            setPaymentLoading(false);
-          },
-        },
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (error: any) {
-      console.error('Payment initiation failed:', error);
-      setError(error.response?.data?.message || 'Failed to initiate payment');
-    } finally {
-      setPaymentLoading(false);
-    }
-  };
+  // Payment flow removed
 
   // Navigation functions
   // Removed unused navigate-to-certificate route; using direct signed URL instead
@@ -530,9 +428,7 @@ const renderUserActions = () => {
   if (!formDetails) return `Formdetails are not available ${formDetails}`;
 
 
-  const { status, paymentDetails, generatedCertificate } = formDetails;
-  const isPaymentPending = paymentDetails.paymentStatus === 'pending';
-  const isPaymentCompleted = paymentDetails.paymentStatus === 'completed';
+  const { status, generatedCertificate } = formDetails;
 
   if (status === 'pending') {
     return (
@@ -579,7 +475,7 @@ const renderUserActions = () => {
     );
   }
 
-  if (status === 'certificate_generated' && isPaymentPending) {
+  if (status === 'certificate_generated' && generatedCertificate) {
     return (
       <><Helmet>
         <title>अर्ज तपशील - ग्रामपंचायत वाठोडे</title>
@@ -590,96 +486,7 @@ const renderUserActions = () => {
         transition={{ duration: 0.5 }}
         className="mt-8 space-y-6"
       >
-          {/* Certificate Generated but Payment Pending */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
-            <h3 className="text-lg font-semibold text-blue-800 mb-2">
-              📜 Certificate Generated - Payment Required
-            </h3>
-            <p className="text-blue-700">
-              Your certificate has been generated but payment is pending. Complete the payment to download.
-            </p>
-          </div>
-
-          {/* Payment Section */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="bg-white border-2 border-blue-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-300"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-xl font-semibold text-gray-800">Complete Payment</h4>
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Amount Due</p>
-                <span className="text-3xl font-bold text-blue-600">
-                  ₹{(formData as any)?.paymentAmount || 500}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <motion.button
-                whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(59, 130, 246, 0.3)" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={initiatePayment}
-                disabled={paymentLoading}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-3 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold"
-              >
-                <FaCreditCard className="text-lg" />
-                {paymentLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Processing...
-                  </div>
-                ) : (
-                  'Pay Now'
-                )}
-              </motion.button>
-
-              {/* Protected Download Button (disabled until payment) */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                  if (generatedCertificate) {
-                    window.open(generatedCertificate.filePath, '_blank');
-                  }
-                } }
-                className="px-6 py-4 bg-gray-100 text-gray-400 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed"
-                disabled
-              >
-                <FaLock className="text-lg" />
-                Download Certificate
-              </motion.button>
-            </div>
-
-            <p className="text-xs text-gray-500 mt-4 text-center">
-              🔒 Certificate download will be enabled after payment completion
-            </p>
-          </motion.div>
-        </motion.div></>
-    );
-  }
-
-  if (status === 'certificate_generated' && isPaymentCompleted) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mt-8 space-y-6"
-      >
-        {/* Certificate Generated and Payment Completed */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
-          <h3 className="text-lg font-semibold text-green-800 mb-2">
-            ✅ Certificate Ready for Download
-          </h3>
-          <p className="text-green-700">
-            Your payment has been processed. You can now download your certificate.
-          </p>
-        </div>
-
-        {generatedCertificate && (
+          {/* Certificate Generated - Download Available */}
           <motion.button
             whileHover={{ 
               scale: 1.02, 
@@ -693,10 +500,11 @@ const renderUserActions = () => {
             <FaDownload className="text-xl" />
             Download Certificate
           </motion.button>
-        )}
-      </motion.div>
+        </motion.div></>
     );
   }
+
+  // Removed separate branch for payment completion
 
   if (status === 'approved') {
     // ... (keep your existing approved status logic)
@@ -918,44 +726,6 @@ const renderUserActions = () => {
                   whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
                   className="p-3 rounded-lg transition-all duration-200"
                 >
-                  <label className="text-sm text-gray-600">Application ID</label>
-                  <p className="font-semibold">{formDetails.applicationId}</p>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
-                  className="p-3 rounded-lg transition-all duration-200"
-                >
-                  <label className="text-sm text-gray-600">Document Type</label>
-                  <p className="font-semibold capitalize">{formDetails.documentType.replace('_', ' ')}</p>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
-                  className="p-3 rounded-lg transition-all duration-200"
-                >
-                  <label className="text-sm text-gray-600">Applicant ID</label>
-                  <p className="font-semibold">{formDetails.applicantId}</p>
-                </motion.div>
-              </div>
-              
-              <div className="space-y-4">
-                <motion.div
-                  whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
-                  className="p-3 rounded-lg transition-all duration-200"
-                >
-                  <label className="text-sm text-gray-600">Created At</label>
-                  <p className="font-semibold">{new Date(formDetails.createdAt).toLocaleDateString()}</p>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
-                  className="p-3 rounded-lg transition-all duration-200"
-                >
-                  <label className="text-sm text-gray-600">Updated At</label>
-                  <p className="font-semibold">{new Date(formDetails.updatedAt).toLocaleDateString()}</p>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
-                  className="p-3 rounded-lg transition-all duration-200"
-                >
                   <label className="text-sm text-gray-600">Payment Status</label>
                   <p className={`font-semibold capitalize ${
                     formDetails.paymentDetails.paymentStatus === 'pending' ? 'text-yellow-600' :
@@ -968,6 +738,81 @@ const renderUserActions = () => {
               </div>
             </div>
           </motion.div>
+
+          {/* Payment Details Section */}
+          {formDetails.paymentDetails && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="mb-8 pt-6 border-t"
+            >
+              <h3 className="text-lg font-semibold mb-4">Payment Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  {formDetails.paymentDetails.amount && (
+                    <motion.div
+                      whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
+                      className="p-3 rounded-lg transition-all duration-200"
+                    >
+                      <label className="text-sm text-gray-600">Payment Amount</label>
+                      <p className="font-semibold">₹{formDetails.paymentDetails.amount}</p>
+                    </motion.div>
+                  )}
+                  {formDetails.paymentDetails.utrNumber && (
+                    <motion.div
+                      whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
+                      className="p-3 rounded-lg transition-all duration-200"
+                    >
+                      <label className="text-sm text-gray-600">UTR Number</label>
+                      <p className="font-semibold">{formDetails.paymentDetails.utrNumber}</p>
+                    </motion.div>
+                  )}
+                </div>
+                <div className="space-y-4">
+                  <motion.div
+                    whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
+                    className="p-3 rounded-lg transition-all duration-200"
+                  >
+                    <label className="text-sm text-gray-600">Payment Status</label>
+                    <p className={`font-semibold capitalize ${
+                      formDetails.paymentDetails.paymentStatus === 'pending' ? 'text-yellow-600' :
+                      formDetails.paymentDetails.paymentStatus === 'completed' ? 'text-green-600' :
+                      'text-red-600'
+                    }`}>
+                      {formDetails.paymentDetails.paymentStatus}
+                    </p>
+                  </motion.div>
+                  
+                  {/* Payment Receipt Button */}
+                  {formDetails.paymentDetails.receiptUrl && (
+                    <motion.div
+                      whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
+                      className="p-3 rounded-lg transition-all duration-200"
+                    >
+                      <label className="text-sm text-gray-600 block mb-2">Payment Receipt</label>
+                      <motion.button
+                        whileHover={{ 
+                          scale: 1.05, 
+                          boxShadow: "0 4px 15px rgba(59, 130, 246, 0.3)" 
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handlePaymentReceiptClick}
+                        disabled={loadingUrls['payment-receipt']}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all duration-300 font-semibold"
+                      >
+                        <FaReceipt className="text-sm" />
+                        {loadingUrls['payment-receipt'] ? 'Loading...' : 'View Receipt'}
+                      </motion.button>
+                      {urlErrors['payment-receipt'] && (
+                        <p className="text-red-500 text-sm mt-2">{urlErrors['payment-receipt']}</p>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Form Data Section */}
           {formData && (
@@ -984,28 +829,45 @@ const renderUserActions = () => {
 
           {/* Uploaded Files Section */}
           {user?.role === 'admin' && formDetails?.uploadedFiles?.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-3">Uploaded Files</h3>
-              <ul className="space-y-3">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="mb-8 pt-6 border-t"
+            >
+              <h3 className="text-lg font-semibold mb-4">Uploaded Files</h3>
+              <div className="space-y-3">
                 {formDetails.uploadedFiles.map(file => (
-                  <li key={file._id} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
-                    <span>{file.originalName}</span>
-                    <button
+                  <motion.div
+                    key={file._id}
+                    whileHover={{ scale: 1.01, backgroundColor: "#f9fafb" }}
+                    className="flex items-center justify-between bg-gray-50 p-4 rounded-lg transition-all duration-200"
+                  >
+                    <div>
+                      <p className="font-semibold text-gray-800">{file.originalName}</p>
+                      <p className="text-sm text-gray-600">
+                        Size: {(file.fileSize / 1024).toFixed(1)} KB • 
+                        Type: {file.fileType} • 
+                        Uploaded: {new Date(file.uploadedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => handleFileClick(formDetails.applicationId, file._id, 'file')}
                       disabled={loadingUrls[file._id]}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all duration-300 font-semibold"
                     >
                       {loadingUrls[file._id] ? 'Loading...' : 'View File'}
-                    </button>
+                    </motion.button>
                     {urlErrors[file._id] && (
-                      <span className="text-red-500 text-sm ml-2">{urlErrors[file._id]}</span>
+                      <p className="text-red-500 text-sm ml-2">{urlErrors[file._id]}</p>
                     )}
-                  </li>
+                  </motion.div>
                 ))}
-              </ul>
-            </div>
+              </div>
+            </motion.div>
           )}
-
 
           {error && (
             <motion.div

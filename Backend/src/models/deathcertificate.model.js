@@ -7,76 +7,26 @@ const deathCertificateSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  
-  // Form Fields
-  deceasedName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  dateOfDeath: {
-    type: Date,
-    required: true
-  },
-  placeOfDeath: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  age: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  gender: {
-    type: String,
-    enum: ['Male', 'Female', 'Other'],
-    required: true
-  },
-  causeOfDeath: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  fatherName: {
-    type: String,
-    trim: true
-  },
-  motherName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  spouseName: {
-    type: String,
-    trim: true
-  },
-  // Add these new fields
-  spouseAdhar: {
-    type: String,
-    trim: true
-  },
-  fatherAdhar: {
-    type: String,
-    trim: true
-  },
-  motherAdhar: {
-    type: String,
-    trim: true
-  },
-  permanentAddress: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  
-  // Payment Amount
-  paymentAmount: {
-    type: Number,
-    default: 50
-  }
-}, {
-  timestamps: true
-});
+
+  // New required fields
+  financialYear: { type: String, required: true, trim: true },
+  deceasedName: { type: String, required: true, trim: true },
+  aadhaarNumber: { type: String, trim: true },
+  address: { type: String, required: true, trim: true },
+  dateOfDeath: { type: Date, required: true },
+  timeOfDeath: { type: String, required: true, trim: true },
+  causeOfDeath: { type: String, required: true, trim: true },
+
+  applicantFullNameEnglish: { type: String, required: true, trim: true },
+  applicantFullNameDevanagari: { type: String, required: true, trim: true },
+  whatsappNumber: { type: String, required: true, trim: true },
+  email: { type: String, required: false, trim: true },
+
+  paymentOption: { type: String, enum: ['UPI'], default: 'UPI' },
+  utrNumber: { type: String, required: true, trim: true },
+
+  // Fixed payment
+  paymentAmount: { type: Number, default: 20 }
+}, { timestamps: true });
 
 export const DeathCertificate = mongoose.model("DeathCertificate", deathCertificateSchema);

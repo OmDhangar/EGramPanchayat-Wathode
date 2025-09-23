@@ -2,7 +2,6 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import healthCheckRoutes from "./routes/healthCheck.routes.js"
-import paymentRoutes from "./routes/payment.routes.js"
 import officerRoutes from "./routes/officer.routes.js"
 import blogRoutes from "./routes/blog.routes.js";
 import userRoutes from "./routes/user.routes.js";
@@ -31,7 +30,6 @@ import applicationRouter from "./routes/application.routes.js"
 
 //routes declaration
 
-app.use("/api",paymentRoutes);
 app.use("/api",healthCheckRoutes);
 app.use("/api/users",userRouter);
 app.use("/api/applications", applicationRouter);

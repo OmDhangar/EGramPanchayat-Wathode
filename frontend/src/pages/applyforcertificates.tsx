@@ -112,7 +112,8 @@ export default function CertificateForms() {
         </motion.div>
 
         {/* Certificate Cards Grid */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        {/* Certificate Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-16">
           {cards.map((card, index) => (
             <motion.div
               key={index}
@@ -123,71 +124,70 @@ export default function CertificateForms() {
               whileHover="hover"
               className="group relative"
             >
-              <div className={`
-                relative h-full bg-gradient-to-br ${card.bgColor} rounded-2xl shadow-xl 
-                overflow-hidden transition-all duration-300 ease-out
-                group-hover:shadow-2xl group-hover:${card.hoverColor}
-              `}>
+              <div
+                className={`
+                  relative bg-gradient-to-br ${card.bgColor} rounded-xl shadow-lg 
+                  overflow-hidden transition-all duration-300 ease-out
+                  group-hover:shadow-xl group-hover:${card.hoverColor}
+                  max-w-sm mx-auto
+                `}
+              >
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full -ml-12 -mb-12"></div>
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full -mr-12 -mt-12"></div>
+                  <div className="absolute bottom-0 left-0 w-16 h-16 bg-white rounded-full -ml-8 -mb-8"></div>
                 </div>
 
                 {/* Card Content */}
-                <div className="relative p-8 h-full flex flex-col">
+                <div className="relative p-6 flex flex-col h-full">
                   {/* Header */}
-                  <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-4 backdrop-blur-sm">
-                      <card.icon className={`text-3xl ${card.iconColor}`} />
+                  <div className="text-center mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-3 backdrop-blur-sm">
+                      <card.icon className={`text-2xl ${card.iconColor}`} />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">{card.title}</h2>
-                    <p className="text-white/80 text-lg font-medium">{card.subtitle}</p>
+                    <h2 className="text-xl font-bold text-white mb-1">{card.title}</h2>
+                    <p className="text-white/80 text-base font-medium">{card.subtitle}</p>
                   </div>
 
                   {/* Description */}
-                  <p className="text-white/90 text-center mb-6 flex-grow">
+                  <p className="text-white/90 text-center mb-4 flex-grow text-sm">
                     {card.description}
                   </p>
 
                   {/* Points List */}
-                  <div className="mb-8">
-                    <ul className="space-y-3">
-                      {card.points.map((point, idx) => (
-                        <motion.li
-                          key={idx}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.2 + idx * 0.1 }}
-                          className="flex items-start gap-3 text-white/90 text-sm"
-                        >
-                          <div className="w-2 h-2 bg-white/60 rounded-full mt-2 flex-shrink-0"></div>
-                          <span>{point}</span>
-                        </motion.li>
-                      ))}\
-                    </ul>
-                  </div>
+                  <ul className="space-y-2 mb-6">
+                    {card.points.map((point, idx) => (
+                      <motion.li
+                        key={idx}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.2 + idx * 0.1 }}
+                        className="flex items-start gap-2 text-white/90 text-xs"
+                      >
+                        <div className="w-1.5 h-1.5 bg-white/60 rounded-full mt-1 flex-shrink-0"></div>
+                        <span>{point}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
 
                   {/* Action Button */}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => { navigate(card.route); }}
-                    className="w-full bg-white text-gray-800 py-4 px-6 rounded-xl font-semibold 
-                             hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-3
-                             group-hover:shadow-lg"
+                    onClick={() => navigate(card.route)}
+                    className="w-full bg-white text-gray-800 py-3 px-4 rounded-lg text-sm font-semibold 
+                            hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2
+                            group-hover:shadow-md"
                   >
                     Apply Now
-                    <FaArrowRight className="text-sm group-hover:translate-x-1 transition-transform duration-300" />
+                    <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform duration-300" />
                   </motion.button>
                 </div>
-
-                {/* Hover Effect Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </motion.div>
           ))}
         </div>
+
 
         {/* Information Section */}
         <motion.div

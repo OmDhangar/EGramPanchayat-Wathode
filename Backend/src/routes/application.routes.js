@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyAdmin, verifyJWT } from "../middlewares/auth.middleware.js";
-import { upload } from "../middlewares/multer.middleware.js";
+import { upload, uploadImages } from "../middlewares/multer.middleware.js";
 import {
   getAdminApplications,
   getApplicationsByStatus,
@@ -27,17 +27,27 @@ router.use(verifyJWT);
 
 // Application submission routes
 router.route("/birth-certificate").post(
-  upload.array("documents", 5), // Allow up to 5 document uploads
+  // Accept required paymentReceipt image and optional documents
+  upload.fields([
+    { name: "paymentReceipt", maxCount: 1 },
+    { name: "documents", maxCount: 5 }
+  ]),
   submitBirthCertificateApplication
 );
 
 router.route("/death-certificate").post(
-  upload.array("documents", 5),
+  upload.fields([
+    { name: "paymentReceipt", maxCount: 1 },
+    { name: "documents", maxCount: 5 }
+  ]),
   submitDeathCertificateApplication
 );
 
 router.route("/marriage-certificate").post(
-  upload.array("documents", 5),
+  upload.fields([
+    { name: "paymentReceipt", maxCount: 1 },
+    { name: "documents", maxCount: 5 }
+  ]),
   submitMarriageCertificateApplication
 );
 
@@ -50,6 +60,7 @@ router.route("/admin/filter").get(verifyAdmin,getApplicationsByStatus);
 router.get("/files/urls",verifyJWT,asyncHandler(getFileUrls));
 // Certificate route must come before the file ID route to avoid conflicts
 router.get("/files/:applicationId/certificate/signed-url", verifyJWT, asyncHandler(generateFileSignedUrl));
+// All uploaded files (including payment receipts) use this route
 router.get("/files/:applicationId/:fileId/signed-url", verifyJWT, asyncHandler(generateFileSignedUrl));
 
 router.route("/:applicationId").get(verifyJWT,asyncHandler(getApplicationDetails));

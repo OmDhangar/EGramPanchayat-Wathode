@@ -67,6 +67,21 @@ const documentFileFilter = (req, file, cb) => {
   }
 };
 
+// File filter for images only (PNG/JPG/JPEG)
+const imageFileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png'
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only JPG and PNG images are allowed'), false);
+  }
+};
+
 // File filter for certificate uploads (PDF only - for admin generated certificates)
 const certificateFileFilter = (req, file, cb) => {
   console.log('Certificate file received:', {
@@ -89,6 +104,16 @@ export const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
     files: 5 // Maximum 5 files per request
+  }
+});
+
+// Images-only upload configuration (for payment receipt screenshots)
+export const uploadImages = multer({
+  storage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit for images
+    files: 1
   }
 });
 
@@ -221,6 +246,7 @@ export const validateFileFields = (requiredFields = []) => {
 
 export default {
   upload,
+  uploadImages,
   uploadPDF,
   uploadCertificate,
   uploadMultiple,
