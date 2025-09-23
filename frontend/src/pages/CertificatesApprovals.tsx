@@ -4,6 +4,7 @@ import { FaEye } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { FaFileAlt, FaFilePdf, FaFileImage } from 'react-icons/fa';
 import { api } from '../api/axios';
+import { Helmet } from "react-helmet";
 
 interface FormSubmission {
   _id: string;
@@ -144,6 +145,10 @@ const CertificateApprovals = () => {
 
  return (
     <div className="min-h-screen bg-gray-50 p-8">
+      <Helmet>
+        <title>प्रमाणपत्र मंजूरी - ग्रामपंचायत वाठोडे</title>
+        <meta name="description" content="ग्रामपंचायत वाठोडे येथील प्रमाणपत्र अर्जांची स्थिती पहा आणि मंजूर करा. जन्म, मृत्यू आणि विवाह प्रमाणपत्रांसाठी प्रशासकीय मंजूरी." />
+      </Helmet>
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Certificate Approvals</h1>
 

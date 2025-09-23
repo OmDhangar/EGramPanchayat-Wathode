@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion } from "framer-motion";
 import { Variants } from 'framer-motion';
 import NoticeBoard from '../components/NoticeBoard';
+import { Helmet } from 'react-helmet';
 
 const images = [
   "/images/vathode1.jpg",
@@ -85,6 +86,10 @@ export default function Home() {
       id="main-content"
       className="min-h-screen font-tiro-marathi-sans text-xs xs:text-sm sm:text-base relative overflow-x-hidden"
     >
+      <Helmet>
+        <title>ग्रामपंचायत वाठोडे - आपले गाव, आपला विकास</title>
+        <meta name="description" content="ग्रामपंचायत वाठोडे, शिरपूर, धुळे, महाराष्ट्र. गावातील विकासकामे, योजना, प्रमाणपत्रे आणि ताज्या बातम्यांसाठी अधिकृत वेबसाइट." />
+      </Helmet>
       {/* Background grid */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]" />
       
@@ -117,6 +122,16 @@ export default function Home() {
                   src={img.src}
                   alt={img.alt}
                   className="w-full h-full max-h-[50vh]  object-cover flex-shrink-0"
+                  loading="lazy" // Lazy load images in the full-screen slideshow
+                  // TODO: For further optimization, generate different sizes for these images (e.g., using a build tool or image optimization service)
+                  // and update srcset and sizes attributes.
+                  // Example srcset (replace with actual generated paths and sizes):
+                  // srcset={`${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-small.$1')} 640w,
+                  //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-medium.$1')} 768w,
+                  //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-large.$1')} 1024w,
+                  //          ${img.src} 1280w`}
+                  // sizes="(max-width: 640px) 640px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1280px"
+                  // TODO: Consider converting all images to AVIF format for better compression and quality.
                 />
               ))}
             </div>
@@ -132,7 +147,7 @@ export default function Home() {
                   idx === currentIndex ? "bg-white scale-110 shadow" : "bg-white/60"
                 }`}
                 onClick={() => setCurrentIndex(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
+                  aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
           </div>
@@ -160,6 +175,17 @@ export default function Home() {
                   style={{
                     transition: "transform 2s cubic-bezier(0.4,0,0.2,1), opacity 1.2s",
                   }}
+                  loading={index === 0 ? "eager" : "lazy"} // Eager load the first image, lazy load the rest
+                  fetchPriority={index === 0 ? "high" : undefined} // High priority for the first image
+                  // TODO: For further optimization, generate different sizes for these images (e.g., using a build tool or image optimization service)
+                  // and update srcset and sizes attributes.
+                  // Example srcset (replace with actual generated paths and sizes):
+                  // srcset={`${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-small.$1')} 640w,
+                  //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-medium.$1')} 768w,
+                  //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-large.$1')} 1024w,
+                  //          ${img.src} 1280w`}
+                  // sizes="(max-width: 640px) 640px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1280px"
+                  // TODO: Consider converting all images to AVIF format for better compression and quality.
                 />
               ))}
             </div>
@@ -186,7 +212,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-0">
             <div className="text-center sm:text-right w-full">
               <p className="text-base xs:text-lg sm:text-3xl font-tiro-marathi leading-tight drop-shadow">विकसित</p>
-              <p className="text-lg xs:text-xl sm:text-4xl font-tiro-marathi text-yellow-200 drop-shadow">वाठोडे</p>
+              <p className="text-lg xs:text-xl sm:text-4xl font-tiro-marathi text-yellow-700 drop-shadow">वाठोडे</p>
             </div>
             {/* Dots for slideshow */}
             <div className="flex justify-center sm:justify-end mt-2 sm:mt-0 w-full sm:w-auto">

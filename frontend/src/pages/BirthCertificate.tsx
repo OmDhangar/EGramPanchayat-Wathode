@@ -11,6 +11,7 @@ import {
   FormSection,
   SuccessMessage
 } from "../components/FormComponents";
+import { Helmet } from 'react-helmet';
 
 // Form validation interface
 interface FormErrors {
@@ -189,6 +190,10 @@ const BirthCertificateForm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <Helmet>
+        <title>Birth Certificate Application - Grampanchayat Wathode</title>
+        <meta name="description" content="Apply for a birth certificate online. Fill in child's information, parents' details, and address. Grampanchayat Wathode, Shirpur, Dhule, Maharashtra." />
+      </Helmet>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div

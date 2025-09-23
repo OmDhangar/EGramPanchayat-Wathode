@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, X } from 'lucide-react';
 import { getGalleryByYear } from '../data/gallery';
+import { Helmet } from "react-helmet";
 
 const YearGallery = () => {
   const { year } = useParams<{ year: string }>();
@@ -37,6 +38,10 @@ const YearGallery = () => {
 
   return (
     <div className="bg-gray-50 py-12">
+      <Helmet>
+        <title>{year} गॅलरी - ग्रामपंचायत वाठोडे</title>
+        <meta name="description" content={`ग्रामपंचायत वाठोडे येथील ${year} वर्षातील कार्यक्रमांची आणि घडामोडींची छायाचित्रे. ग्रामपंचायत वाठोडे, शिरपूर, धुळे, महाराष्ट्र.`} />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <Link 

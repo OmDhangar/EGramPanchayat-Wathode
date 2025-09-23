@@ -2,10 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { galleryYears } from '../data/gallery';
+import { Helmet } from 'react-helmet';
 
 const Gallery = () => {
   return (
     <div className="bg-gray-50 py-12">
+      <Helmet>
+        <title>फोटो गॅलरी - ग्रामपंचायत वाठोडे</title>
+        <meta name="description" content="ग्रामपंचायत वाठोडे येथील विविध कार्यक्रम, विकास प्रकल्प आणि उपक्रमांचे फोटो गॅलरी एक्सप्लोर करा." />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Photo Gallery</h1>

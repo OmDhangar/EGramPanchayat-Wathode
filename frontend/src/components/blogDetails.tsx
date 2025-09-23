@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { api } from "../api/axios";
 import { toast } from "react-hot-toast";
 import { FaArrowLeft, FaTag, FaFlag } from "react-icons/fa";
+import { Helmet } from 'react-helmet';
 
 interface BlogImage {
   url: string;
@@ -60,6 +61,10 @@ export default function BlogDetails() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      <Helmet>
+        <title>{blog.title} - Grampanchayat Wathode</title>
+        <meta name="description" content={blog.content.substring(0, 160) + "..."} />
+      </Helmet>
       {/* Back Button */}
       <Link
         to="/"

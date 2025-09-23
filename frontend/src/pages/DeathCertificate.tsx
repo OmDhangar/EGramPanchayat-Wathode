@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FaSkull, FaUser, FaHome, FaHospital, FaFileAlt, FaPhone } from "react-icons/fa";
 import { api } from "../api/axios";
+import { Helmet } from "react-helmet";
 import {
   InputField,
   TextareaField,
@@ -207,6 +208,10 @@ const DeathCertificateForm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 py-8 px-4">
+      <Helmet>
+        <title>मृत्यू प्रमाणपत्र अर्ज - ग्रामपंचायत वाठोडे</title>
+        <meta name="description" content="मृत्यू प्रमाणपत्रासाठी अर्ज करा. ग्रामपंचायत वाठोडे, शिरपूर, धुळे, महाराष्ट्र." />
+      </Helmet>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
@@ -471,6 +476,7 @@ const DeathCertificateForm = () => {
                 variant="danger"
                 size="lg"
                 className="flex-1"
+                aria-label="Submit Death Certificate Application"
               >
                 Submit Application
               </SubmitButton>
@@ -479,6 +485,7 @@ const DeathCertificateForm = () => {
                 type="button"
                 onClick={resetForm}
                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+                aria-label="Reset Form"
               >
                 Reset Form
               </button>

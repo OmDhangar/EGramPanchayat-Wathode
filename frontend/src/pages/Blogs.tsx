@@ -9,6 +9,7 @@ import { FaPlus, FaFilter } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../Context/authContext";
 import { Link } from "react-router-dom";
+import { Helmet } from 'react-helmet';
 
 export interface BlogImage {
   s3Key: string;
@@ -103,6 +104,10 @@ export default function Blogs() {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
+      <Helmet>
+        <title>Blogs - Grampanchayat Wathode</title>
+        <meta name="description" content="Read the latest news, announcements, and information from Grampanchayat Wathode. Find articles in public notices, public services, tax collection, and other categories." />
+      </Helmet>
       {user?.role === 'admin' && (
         <div className="mb-8">
           {!showCreateForm ? (

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FaHeart, FaUser, FaHome, FaCalendarAlt, FaFileAlt } from "react-icons/fa";
 import { api } from "../api/axios";
+import { Helmet } from "react-helmet";
 import {
   InputField,
   TextareaField,
@@ -182,6 +183,10 @@ const MarriageCertificateForm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-100 py-8 px-4">
+      <Helmet>
+        <title>विवाह प्रमाणपत्र अर्ज - ग्रामपंचायत वाठोडे</title>
+        <meta name="description" content="विवाह प्रमाणपत्रासाठी अर्ज करा. ग्रामपंचायत वाठोडे, शिरपूर, धुळे, महाराष्ट्र." />
+      </Helmet>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
@@ -412,6 +417,7 @@ const MarriageCertificateForm = () => {
                 variant="success"
                 size="lg"
                 className="flex-1"
+                aria-label="Submit Marriage Certificate Application"
               >
                 Submit Application
               </SubmitButton>
@@ -420,6 +426,7 @@ const MarriageCertificateForm = () => {
                 type="button"
                 onClick={resetForm}
                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+                aria-label="Reset Form"
               >
                 Reset Form
               </button>

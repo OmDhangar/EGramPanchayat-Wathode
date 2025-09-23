@@ -52,6 +52,16 @@ const BlogCard: React.FC<BlogCardProps> = ({
             src={images[currentImageIndex]?.url || ""}
             alt={title}
             className="w-full h-full object-cover"
+            loading="lazy" // Lazy load images in blog cards
+            // TODO: For further optimization, generate different sizes for these images (e.g., using a build tool or image optimization service)
+            // and update srcset and sizes attributes.
+            // Example srcset (replace with actual generated paths and sizes):
+            // srcset={`${images[currentImageIndex]?.url.replace(/\.(webp|jpg|jpeg|png)$/, '-small.$1')} 640w,
+            //          ${images[currentImageIndex]?.url.replace(/\.(webp|jpg|jpeg|png)$/, '-medium.$1')} 768w,
+            //          ${images[currentImageIndex]?.url.replace(/\.(webp|jpg|jpeg|png)$/, '-large.$1')} 1024w,
+            //          ${images[currentImageIndex]?.url} 1280w`}
+            // sizes="(max-width: 640px) 640px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1280px"
+            // TODO: Consider converting all images to AVIF format for better compression and quality.
           />
           {images.length > 1 && (
             <>
