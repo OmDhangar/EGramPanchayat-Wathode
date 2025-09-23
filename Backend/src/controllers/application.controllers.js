@@ -38,30 +38,91 @@ const createNotification = async (userId, applicationId, type, title, message) =
   }
 };
 
-// Submit Birth Certificate Application
+// Submit Birth Certificate Application (manual payment with receipt image)
 const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
   const { 
-    childName, dateOfBirth, placeOfBirth, gender, motherAdharNumber, parentsAddressAtBirth,
-    fatherName, fatherAdharNumber, permanentAddressParent, motherName, fatherOccupation, 
-    motherOccupation, hospitalName 
+    financialYear,
+    childName,
+    dateOfBirth,
+    placeOfBirth,
+    gender,
+    fatherName,
+    motherName,
+    applicantFullNameEnglish,
+    applicantFullNameDevanagari,
+    whatsappNumber,
+    email,
+    address,
+    utrNumber,
+    // Aadhaar removed
+    permanentAddressParent,
+    parentsAddressAtBirth,
+    fatherOccupation,
+    motherOccupation,
+    // hospitalName removed
   } = req.body;
   
-  // Validate date format
-  const birthDate = new Date(dateOfBirth);
+  // Basic validations
+  if (!financialYear || !childName || !dateOfBirth || !fatherName || !motherName || !applicantFullNameEnglish || !applicantFullNameDevanagari || !whatsappNumber || !address || !utrNumber) {
+    throw new ApiError(400, "Missing required fields");
+  }
+
+  // Validate date: accept dd-mm-yyyy or yyyy-mm-dd (HTML date)
+  let birthDate;
+  if (/^([0-2]\d|3[01])-([0-1]\d)-(\d{4})$/.test(dateOfBirth)) {
+    const [dd, mm, yyyy] = dateOfBirth.split('-').map(Number);
+    birthDate = new Date(yyyy, mm - 1, dd);
+  } else if (/^(\d{4})-(\d{2})-(\d{2})$/.test(dateOfBirth)) {
+    const [yyyy, mm, dd] = dateOfBirth.split('-').map(Number);
+    birthDate = new Date(yyyy, mm - 1, dd);
+  } else {
+    throw new ApiError(400, "Invalid date format. Use dd-mm-yyyy or yyyy-mm-dd");
+  }
   if (isNaN(birthDate.getTime())) {
-    console.log(dateOfBirth);
-    throw new ApiError(400, "Invalid date format for date of birth");
+    throw new ApiError(400, "Invalid date provided");
+  }
+
+  // birthTime removed
+
+  // Validate email
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  // Validate whatsapp number (10 digits)
+  if (!/^\d{10}$/.test(whatsappNumber)) {
+    throw new ApiError(400, "Invalid WhatsApp number. Must be 10 digits");
   }
   
   // Validate gender
-  const trimmedGender = gender.trim();
-  console.log("Trimmed Gender:", trimmedGender);
-  if(gender !== 'Male' && gender !== 'Female' && gender !== 'Other'){
+  if (!['Male', 'Female', 'Other'].includes(gender)) {
     throw new ApiError(400, "Invalid gender");
   }
   
-  // Process uploaded files using S3 (files start as 'unverified')
-  const uploadedFiles = await processUploadedFilesS3(req.files, 'unverified');
+  // Require payment receipt image
+  const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
+  if (receiptFiles.length === 0) {
+    throw new ApiError(400, "Payment receipt image is required");
+  }
+
+  // Process uploaded files using S3 (receipt + optional documents) under 'unverified'
+  const documentFiles = req.files && req.files.documents ? req.files.documents : [];
+  // Enforce images-only for receipt
+  const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
+  if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
+    throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
+  }
+  const allFiles = [
+    ...receiptFiles,
+    ...documentFiles
+  ];
+  const uploadedFiles = await processUploadedFilesS3(allFiles, 'unverified');
+
+  // Mark the receipt file for easy identification
+  const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
+  if (receiptUpload) {
+    receiptUpload.isPaymentReceipt = true; // Add flag to identify receipt
+  }
   
   // Create application with unique ID
   const applicationId = generateApplicationId('BIRTH');
@@ -71,29 +132,39 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
     applicationId,
     applicantId: req.user._id,
     documentType: 'birth_certificate',
-    uploadedFiles
+    uploadedFiles,
+    paymentDetails: {
+      amount: 20,
+      paymentStatus: 'completed',
+      utrNumber,
+      receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
+    }
   };
   
   // Prepare form data
   const formData = {
+    financialYear,
     childName,
     dateOfBirth: birthDate,
     placeOfBirth,
-    motherAdharNumber: motherAdharNumber || "",
-    fatherAdharNumber: fatherAdharNumber || "",
+    // Aadhaar removed
     permanentAddressParent,
     parentsAddressAtBirth,
     gender,
     fatherName,
     motherName,
+    applicantFullNameEnglish,
+    applicantFullNameDevanagari,
+    whatsappNumber,
+    email,
+    address,
+    utrNumber,
     fatherOccupation,
-    motherOccupation,
-    hospitalName
+    motherOccupation
   };
   
   // Create application with form data using the static method
   const application = await Application.createWithFormData(applicationData, formData);
-  console.log(application);
   
   // Create notification for user
   await createNotification(
@@ -115,76 +186,111 @@ const submitBirthCertificateApplication = asyncHandler(async (req, res) => {
 // Submit Death Certificate Application
 const submitDeathCertificateApplication = asyncHandler(async (req, res) => {
   const { 
-    deceasedName, dateOfDeath, addressOfDeath, placeOfDeath, age, gender, causeOfDeath, deceasedAdharNumber,
-    fatherName, motherName, spouseName, spouseAdhar, motherAdhar, fatherAdhar, permanentAddress 
+    financialYear,
+    nameOfDeceased,
+    aadhaarNumber,
+    address,
+    dateOfDeath,
+    causeOfDeath,
+    applicantFullNameEnglish,
+    whatsappNumber,
+    email,
+    paymentOption,
+    utrNumber
   } = req.body;
   
-  // Validate date format
-  const deathDate = new Date(dateOfDeath);
-  if (isNaN(deathDate.getTime())) {
-    throw new ApiError(400, "Invalid date format for date of death");
+  if (!financialYear || !nameOfDeceased || !address || !dateOfDeath || !causeOfDeath || !applicantFullNameEnglish || !whatsappNumber || !utrNumber) {
+    throw new ApiError(400, 'Missing required fields');
   }
-  
-  // Validate age
-  if (isNaN(age) || age < 0) {
-    throw new ApiError(400, "Age must be a positive number");
+
+  let parsedDate;
+  if (/^([0-2]\d|3[01])-([0-1]\d)-(\d{4})$/.test(dateOfDeath)) {
+    const [dd, mm, yyyy] = dateOfDeath.split('-').map(Number);
+    parsedDate = new Date(yyyy, mm - 1, dd);
+  } else if (/^(\d{4})-(\d{2})-(\d{2})$/.test(dateOfDeath)) {
+    const [yyyy, mm, dd] = dateOfDeath.split('-').map(Number);
+    parsedDate = new Date(yyyy, mm - 1, dd);
+  } else {
+    throw new ApiError(400, 'Invalid date format. Use dd-mm-yyyy or yyyy-mm-dd');
   }
-  
-  // Validate gender
-  if (!['Male', 'Female', 'Other'].includes(gender)) {
-    throw new ApiError(400, "Gender must be Male, Female, or Other");
+  if (isNaN(parsedDate.getTime())) {
+    throw new ApiError(400, 'Invalid date provided');
   }
-  
-  // Process uploaded files using S3 (files start as 'unverified')
-  const uploadedFiles = await processUploadedFilesS3(req.files, 'unverified');
-  
-  // Create application with unique ID
+
+  if (aadhaarNumber && !/^\d{12}$/.test(aadhaarNumber)) {
+    throw new ApiError(400, 'Aadhaar must be 12 digits');
+  }
+
+  if (!/^\d{10}$/.test(whatsappNumber)) {
+    throw new ApiError(400, 'WhatsApp must be 10 digits');
+  }
+
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, 'Invalid email format');
+  }
+
+  if (paymentOption && paymentOption !== 'UPI') {
+    throw new ApiError(400, 'Only UPI payment is supported currently');
+  }
+
+  const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
+  if (receiptFiles.length === 0) {
+    throw new ApiError(400, 'Payment receipt image is required');
+  }
+  const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
+  if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
+    throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
+  }
+  const documentFiles = req.files && req.files.documents ? req.files.documents : [];
+  const allFiles = [...receiptFiles, ...documentFiles];
+  const uploadedFiles = await processUploadedFilesS3(allFiles, 'unverified');
+
+  // Mark the receipt file for easy identification
+  const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
+  if (receiptUpload) {
+    receiptUpload.isPaymentReceipt = true; // Add flag to identify receipt
+  }
+
   const applicationId = generateApplicationId('DEATH');
-  
-  // Prepare application data
   const applicationData = {
     applicationId,
     applicantId: req.user._id,
     documentType: 'death_certificate',
-    uploadedFiles
+    uploadedFiles,
+    paymentDetails: {
+      amount: 20,
+      paymentStatus: 'completed',
+      utrNumber,
+      receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
+    }
   };
-  
-  // Prepare form data
+
   const formData = {
-    deceasedName,
-    deceasedAdharNumber,
-    dateOfDeath: deathDate,
-    addressOfDeath,
-    placeOfDeath,
-    age: parseInt(age),
-    gender,
+    financialYear,
+    deceasedName: nameOfDeceased,
+    aadhaarNumber,
+    address,
+    dateOfDeath: parsedDate,
     causeOfDeath,
-    fatherName,
-    motherName,
-    spouseName: spouseName || "",
-    spouseAdhar: spouseAdhar || "",
-    fatherAdhar: fatherAdhar || "",
-    motherAdhar: motherAdhar || "",
-    permanentAddress,
+    applicantFullNameEnglish,
+    whatsappNumber,
+    email,
+    paymentOption: 'UPI',
+    utrNumber
   };
-  
-  // Create application with form data using the static method
+
   const application = await Application.createWithFormData(applicationData, formData);
   
-  // Create notification for user
   await createNotification(
     req.user._id,
     application._id,
     'application_submitted',
     'Death Certificate Application Submitted',
-    `Your application for ${deceasedName}'s death certificate has been submitted successfully.`
+    `Your application for ${nameOfDeceased}'s death certificate has been submitted successfully.`
   );
   
-  // Notify admin about new application
-  await notifyAdminNewApplication(application, req.user.fullName);
-  
   return res.status(201).json(
-    new ApiResponse(201, application, "Death certificate application submitted successfully")
+    new ApiResponse(201, application, 'Death certificate application submitted successfully')
   );
 });
 
@@ -192,9 +298,15 @@ const submitDeathCertificateApplication = asyncHandler(async (req, res) => {
 const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
   const { 
     dateOfMarriage, placeOfMarriage,
-    HusbandName, HusbandAge, HusbandFatherName, HusbandAddress, HusbandOccupation,
-    wifeName, wifeAge, wifeFatherName, wifeAddress, wifeOccupation, SolemnizedOn,
+    HusbandName, HusbandAadhaar, HusbandAge, HusbandFatherName, HusbandAddress, HusbandOccupation,
+    wifeName, wifeAadhaar, wifeAge, wifeFatherName, wifeAddress, wifeOccupation, SolemnizedOn,
+    applicantFullName, whatsappNumber, email, utrNumber
   } = req.body;
+  
+  // Basic validations
+  if (!dateOfMarriage || !placeOfMarriage || !HusbandName || !HusbandAadhaar || !wifeName || !wifeAadhaar || !applicantFullName || !whatsappNumber || !utrNumber) {
+    throw new ApiError(400, "Missing required fields");
+  }
   
   // Validate date format
   const marriageDate = new Date(dateOfMarriage);
@@ -211,8 +323,50 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Bride's age must be at least 18 years");
   }
   
-  // Process uploaded files using S3 (files start as 'unverified')
-  const uploadedFiles = await processUploadedFilesS3(req.files, 'unverified');
+  // Validate Aadhaar numbers
+  if (!/^\d{12}$/.test(HusbandAadhaar)) {
+    throw new ApiError(400, "Husband's Aadhaar must be 12 digits");
+  }
+  
+  if (!/^\d{12}$/.test(wifeAadhaar)) {
+    throw new ApiError(400, "Wife's Aadhaar must be 12 digits");
+  }
+  
+  // Validate WhatsApp number
+  if (!/^\d{10}$/.test(whatsappNumber)) {
+    throw new ApiError(400, "WhatsApp number must be 10 digits");
+  }
+  
+  // Validate email if provided
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+  
+  // Require payment receipt image
+  const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
+  if (receiptFiles.length === 0) {
+    throw new ApiError(400, "Payment receipt image is required");
+  }
+  
+  // Enforce images-only for receipt
+  const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
+  if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
+    throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
+  }
+  
+  // Process uploaded files using S3 (receipt + optional documents) under 'unverified'
+  const documentFiles = req.files && req.files.documents ? req.files.documents : [];
+  const allFiles = [
+    ...receiptFiles,
+    ...documentFiles
+  ];
+  const uploadedFiles = await processUploadedFilesS3(allFiles, 'unverified');
+  
+  // Mark the receipt file for easy identification
+  const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
+  if (receiptUpload) {
+    receiptUpload.isPaymentReceipt = true; // Add flag to identify receipt
+  }
   
   // Create application with unique ID
   const applicationId = generateApplicationId('MARRIAGE');
@@ -222,7 +376,13 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
     applicationId,
     applicantId: req.user._id,
     documentType: 'marriage_certificate',
-    uploadedFiles
+    uploadedFiles,
+    paymentDetails: {
+      amount: 20,
+      paymentStatus: 'completed',
+      utrNumber,
+      receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
+    }
   };
   
   // Prepare form data
@@ -230,16 +390,22 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
     dateOfMarriage: marriageDate,
     placeOfMarriage,
     HusbandName,
+    HusbandAadhaar,
     HusbandAge: parseInt(HusbandAge),
     HusbandFatherName,
     HusbandAddress,
     HusbandOccupation,
     wifeName,
+    wifeAadhaar,
     wifeAge: parseInt(wifeAge),
     wifeFatherName,
     wifeAddress,
     wifeOccupation,
     SolemnizedOn,
+    applicantFullName,
+    whatsappNumber,
+    email,
+    utrNumber
   };
   
   // Create application with form data using the static method
@@ -629,6 +795,7 @@ const getFileDetails = asyncHandler(async (req, res) => {
 // - Otherwise, return a list of signed URLs across the user's applications
 const getFileUrls = asyncHandler(async (req, res) => {
   const { applicationId } = req.query;
+  console.log("controller hit",applicationId)
 
   // Single certificate URL for a specific application (used by "View Certificate")
   if (applicationId) {
@@ -718,15 +885,24 @@ const generateFileSignedUrl = asyncHandler(async (req, res) => {
   let filePath;
   let fileName;
 
-  // Handle certificate files
-  if (fileType === 'certificate') {
+  // Determine fileType from param or path
+  const detectedType = fileType || (req.path.includes('/certificate/') ? 'certificate' : (req.path.includes('/receipt/') ? 'receipt' : undefined));
+
+  if (detectedType === 'certificate') {
     if (!application.generatedCertificate?.filePath) {
       throw new ApiError(404, "Certificate not found or not yet generated");
     }
     filePath = application.generatedCertificate.filePath;
     fileName = application.generatedCertificate.fileName;
+  } else if (detectedType === 'receipt') {
+    const receiptUrl = application.paymentDetails?.receiptUrl;
+    if (!receiptUrl) {
+      throw new ApiError(404, "Payment receipt not found");
+    }
+    filePath = receiptUrl;
+    fileName = 'payment-receipt';
   } else {
-    // Handle uploaded files
+    // Handle uploaded files by fileId
     const file = application.uploadedFiles.find(f => f._id.toString() === fileId);
     if (!file) {
       throw new ApiError(404, "File not found");
@@ -757,6 +933,58 @@ const generateFileSignedUrl = asyncHandler(async (req, res) => {
   }
 });
 
+// Generate signed URL for payment receipt - based on robust certificate logic
+const generatePaymentReceiptSignedUrl = asyncHandler(async (req, res) => {
+  const { applicationId } = req.params;
+  console.log("controllerhit")
+
+  if (!applicationId) {
+    throw new ApiError(400, "Application ID is required");
+  }
+
+  // Find the application using the same robust logic as certificate
+  const application = await Application.findOne({
+    $or: [
+      { _id: mongoose.isValidObjectId(applicationId) ? applicationId : null },
+      { applicationId }
+    ]
+  });
+  console.log("Application:",application);
+
+  if (!application) {
+    throw new ApiError(404, "Application not found");
+  }
+
+  // Authorization: owner or admin (same as certificate logic)
+  if (
+    req.user.role !== 'admin' &&
+    application.applicantId.toString() !== req.user._id.toString()
+  ) {
+    throw new ApiError(403, "Unauthorized access");
+  }
+
+  // Check if payment receipt exists (similar to certificate check)
+  if (!application.paymentDetails?.receiptUrl) {
+    throw new ApiError(404, "Payment receipt not available yet");
+  }
+
+
+  try {
+    // Use the same robust signing logic as certificate
+    const url = await getSecureFileUrl(application.paymentDetails.receiptUrl);
+    console.log(url);
+    return res.status(200).json(
+      new ApiResponse(200, { url }, "Payment receipt URL generated successfully")
+    );
+  } catch (error) {
+    console.error('Error generating payment receipt URL:', error);
+    if (error.message.includes('File not found') || error.message.includes('NoSuchKey')) {
+      throw new ApiError(404, "Payment receipt file not found in storage");
+    }
+    throw new ApiError(500, "Failed to generate payment receipt URL");
+  }
+});
+
 export {
   getAdminApplications,
   submitBirthCertificateApplication,
@@ -770,5 +998,6 @@ export {
   downloadFile,
   getFileDetails,
   getFileUrls,
-  generateFileSignedUrl
+  generateFileSignedUrl,
+  generatePaymentReceiptSignedUrl
 };

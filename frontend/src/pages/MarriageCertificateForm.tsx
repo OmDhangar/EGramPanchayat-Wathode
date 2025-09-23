@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaHeart, FaUser, FaHome, FaCalendarAlt, FaFileAlt } from "react-icons/fa";
+import { FaHeart } from "react-icons/fa";
 import { api } from "../api/axios";
 import { Helmet } from "react-helmet";
 import {
   InputField,
   TextareaField,
-  SelectField,
   FileUploadField,
   SubmitButton,
   FormSection,
@@ -23,16 +22,22 @@ interface MarriageCertificateFormData {
   dateOfMarriage: string;
   placeOfMarriage: string;
   HusbandName: string;
+  HusbandAadhaar: string;
   HusbandAge: string;
   HusbandFatherName: string;
   HusbandAddress: string;
   HusbandOccupation: string;
   wifeName: string;
+  wifeAadhaar: string;
   wifeAge: string;
   wifeFatherName: string;
   wifeAddress: string;
   wifeOccupation: string;
   SolemnizedOn: string;
+  applicantFullName: string;
+  whatsappNumber: string;
+  email: string;
+  utrNumber: string;
 }
 
 const MarriageCertificateForm = () => {
@@ -40,19 +45,28 @@ const MarriageCertificateForm = () => {
     dateOfMarriage: "",
     placeOfMarriage: "",
     HusbandName: "",
+    HusbandAadhaar: "",
     HusbandAge: "",
     HusbandFatherName: "",
     HusbandAddress: "",
     HusbandOccupation: "",
     wifeName: "",
+    wifeAadhaar: "",
     wifeAge: "",
     wifeFatherName: "",
     wifeAddress: "",
     wifeOccupation: "",
-    SolemnizedOn: ""
+    SolemnizedOn: "",
+    applicantFullName: "",
+    whatsappNumber: "",
+    email: "",
+    utrNumber: ""
   });
   
   const [files, setFiles] = useState<File[]>([]);
+  const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string>("");
+  const [qrText, setQrText] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -71,11 +85,53 @@ const MarriageCertificateForm = () => {
     setFiles(newFiles);
   };
 
+  const handleReceiptChange = (file?: File) => {
+    if (!file) return;
+    if (!['image/jpeg','image/jpg','image/png'].includes(file.type)) {
+      setErrors(prev => ({ ...prev, paymentReceipt: 'Only PNG/JPG images are allowed' }));
+      return;
+    }
+    setErrors(prev => ({ ...prev, paymentReceipt: "" }));
+    setPaymentReceipt(file);
+    setReceiptPreview(URL.createObjectURL(file));
+  };
+
+  useEffect(() => {
+    const tryDetectQR = async () => {
+      try {
+        // @ts-ignore
+        if (typeof window !== 'undefined' && window.BarcodeDetector) {
+          // @ts-ignore
+          const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = receiptPreview;
+          await new Promise(res => { img.onload = () => res(null); });
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width; canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const blobPromise: Promise<Blob> = new Promise(resolve => canvas.toBlob(b => resolve(b as Blob)));
+            const blob = await blobPromise;
+            const bitmap = await createImageBitmap(blob);
+            const codes = await detector.detect(bitmap);
+            if (codes && codes[0]?.rawValue) {
+              setQrText(codes[0].rawValue);
+            }
+          }
+        }
+      } catch {}
+    };
+    if (receiptPreview) tryDetectQR();
+  }, [receiptPreview]);
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Required field validation
-    Object.keys(formData).forEach(key => {
+    // Required field validation (excluding optional email field)
+    const requiredFields = Object.keys(formData).filter(key => key !== 'email');
+    requiredFields.forEach(key => {
       if (!formData[key as keyof MarriageCertificateFormData]) {
         newErrors[key] = "This field is required";
       }
@@ -98,8 +154,28 @@ const MarriageCertificateForm = () => {
       newErrors.wifeAge = "Bride's age must be at least 18 years";
     }
 
-    if (files.length === 0) {
-      newErrors.files = "Please upload at least one document";
+    // Aadhaar validation
+    if (formData.HusbandAadhaar && !/^\d{12}$/.test(formData.HusbandAadhaar)) {
+      newErrors.HusbandAadhaar = "Aadhaar must be 12 digits";
+    }
+
+    if (formData.wifeAadhaar && !/^\d{12}$/.test(formData.wifeAadhaar)) {
+      newErrors.wifeAadhaar = "Aadhaar must be 12 digits";
+    }
+
+    // WhatsApp number validation
+    if (formData.whatsappNumber && !/^\d{10}$/.test(formData.whatsappNumber)) {
+      newErrors.whatsappNumber = "WhatsApp number must be 10 digits";
+    }
+
+    // Email validation (optional)
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Enter a valid email";
+    }
+
+    // Payment receipt validation
+    if (!paymentReceipt) {
+      newErrors.paymentReceipt = "Payment receipt image is required";
     }
 
     setErrors(newErrors);
@@ -123,7 +199,12 @@ const MarriageCertificateForm = () => {
         formDataToSend.append(key, value);
       });
       
-      // Append files
+      // Append payment receipt
+      if (paymentReceipt) {
+        formDataToSend.append("paymentReceipt", paymentReceipt);
+      }
+      
+      // Append supporting documents
       files.forEach(file => {
         formDataToSend.append("documents", file);
       });
@@ -151,18 +232,27 @@ const MarriageCertificateForm = () => {
       dateOfMarriage: "",
       placeOfMarriage: "",
       HusbandName: "",
+      HusbandAadhaar: "",
       HusbandAge: "",
       HusbandFatherName: "",
       HusbandAddress: "",
       HusbandOccupation: "",
       wifeName: "",
+      wifeAadhaar: "",
       wifeAge: "",
       wifeFatherName: "",
       wifeAddress: "",
       wifeOccupation: "",
-      SolemnizedOn: ""
+      SolemnizedOn: "",
+      applicantFullName: "",
+      whatsappNumber: "",
+      email: "",
+      utrNumber: ""
     });
     setFiles([]);
+    setPaymentReceipt(null);
+    setReceiptPreview("");
+    setQrText("");
     setErrors({});
     setSubmitted(false);
   };
@@ -267,6 +357,15 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
+                  label="Groom's Aadhaar Number"
+                  name="HusbandAadhaar"
+                  placeholder="12-digit Aadhaar number"
+                  value={formData.HusbandAadhaar}
+                  onChange={handleInputChange}
+                  error={errors.HusbandAadhaar}
+                />
+                
+                <InputField
                   label="Groom's Age"
                   name="HusbandAge"
                   type="number"
@@ -326,6 +425,15 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
+                  label="Bride's Aadhaar Number"
+                  name="wifeAadhaar"
+                  placeholder="12-digit Aadhaar number"
+                  value={formData.wifeAadhaar}
+                  onChange={handleInputChange}
+                  error={errors.wifeAadhaar}
+                />
+                
+                <InputField
                   label="Bride's Age"
                   name="wifeAge"
                   type="number"
@@ -368,14 +476,102 @@ const MarriageCertificateForm = () => {
               </div>
             </FormSection>
 
+            {/* Applicant Details Section */}
+            <FormSection
+              title="Applicant Details"
+              description="Enter applicant information"
+              className="mb-8"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputField
+                  label="Applicant's Full Name"
+                  name="applicantFullName"
+                  placeholder="Enter applicant's full name"
+                  value={formData.applicantFullName}
+                  onChange={handleInputChange}
+                  error={errors.applicantFullName}
+                />
+                
+                <InputField
+                  label="WhatsApp Number"
+                  name="whatsappNumber"
+                  placeholder="10-digit mobile number"
+                  value={formData.whatsappNumber}
+                  onChange={handleInputChange}
+                  error={errors.whatsappNumber}
+                />
+                
+                <InputField
+                  label="Email ID (optional)"
+                  name="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  error={errors.email}
+                  required={false}
+                />
+                
+                <InputField
+                  label="UTR Number"
+                  name="utrNumber"
+                  placeholder="Enter UTR number"
+                  value={formData.utrNumber}
+                  onChange={handleInputChange}
+                  error={errors.utrNumber}
+                />
+              </div>
+            </FormSection>
+
             {/* Document Upload Section */}
             <FormSection
               title="Required Documents"
               description="Upload supporting documents (maximum 5 files, 10MB each)"
               className="mb-8"
             >
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Payment Receipt (PNG/JPG) - Rs. 20 *</label>
+                
+                {/* QR Code for Payment */}
+                <div className="mb-4 p-4 bg-pink-50 border border-pink-200 rounded-lg">
+                  <div className="flex flex-col md:flex-row items-center gap-4">
+                    <div className="flex-shrink-0">
+                      <img 
+                        src="/images/QR.jpg" 
+                        alt="Payment QR Code" 
+                        className="w-72 h-72 object-contain border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div className="text-sm text-pink-800">
+                      <p className="font-semibold mb-2">📱 Scan QR Code to Pay Rs. 20</p>
+                      <p className="mb-1">• Use any UPI app (PhonePe, GPay, Paytm)</p>
+                      <p className="mb-1">• After payment, upload screenshot below</p>
+                      <p className="text-pink-600 font-medium">• Enter UTR number in applicant details</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg"
+                  capture="environment"
+                  onChange={e => handleReceiptChange(e.target.files?.[0] || undefined)}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+                />
+                {errors.paymentReceipt && (<p className="text-red-600 text-sm mt-1">{errors.paymentReceipt}</p>)}
+                {receiptPreview && (
+                  <div className="mt-3 grid grid-cols-2 gap-3 items-start">
+                    <img src={receiptPreview} alt="Receipt Preview" className="rounded border max-h-40 object-contain" />
+                    <div className="text-xs text-gray-600 break-all">
+                      <div className="font-medium mb-1">QR Scan (if detected):</div>
+                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || 'No QR detected'}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
               <FileUploadField
-                label="Supporting Documents"
+                label="Supporting Documents (Optional)"
                 name="documents"
                 multiple={true}
                 maxFiles={5}
@@ -383,18 +579,13 @@ const MarriageCertificateForm = () => {
                 acceptedTypes={[".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"]}
                 onFilesChange={handleFilesChange}
                 error={errors.files}
-                required={true}
+                required={false}
               />
               
               <div className="bg-pink-50 border border-pink-200 rounded-lg p-4">
                 <h4 className="font-medium text-pink-900 mb-2">Required Documents:</h4>
                 <ul className="text-sm text-pink-800 space-y-1">
-                  <li>• Marriage invitation card</li>
-                  <li>• Wedding photographs</li>
-                  <li>• Identity proof of both parties</li>
-                  <li>• Address proof of both parties</li>
-                  <li>• Age proof documents</li>
-                  <li>• Any other relevant documents</li>
+                  <li>• Identity proof of both husband and wife (Aadhaar Card)</li>
                 </ul>
               </div>
             </FormSection>

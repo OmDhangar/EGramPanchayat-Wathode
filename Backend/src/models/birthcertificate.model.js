@@ -14,10 +14,16 @@ const birthCertificateSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  financialYear: {
+    type: String,
+    required: true,
+    trim: true
+  },
   dateOfBirth: {
     type: Date,
     required: true
   },
+  // birthTime removed
   placeOfBirth: {
     type: String,
     required: true,
@@ -29,17 +35,10 @@ const birthCertificateSchema = new mongoose.Schema({
     required: true
   },
   // Add these new fields
-  motherAdharNumber: {
-    type: String,
-    trim: true
-  },
-  fatherAdharNumber: {
-    type: String,
-    trim: true
-  },
+  // Aadhaar fields removed
   parentsAddressAtBirth: {
     type: String,
-    required: true,
+    required: false,
     trim: true
   },
   permanentAddressParent: {
@@ -57,6 +56,12 @@ const birthCertificateSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  applicantFullNameEnglish: { type: String, required: true, trim: true },
+  applicantFullNameDevanagari: { type: String, required: true, trim: true },
+  whatsappNumber: { type: String, required: true, trim: true },
+  email: { type: String, required: false, trim: true },
+  address: { type: String, required: true, trim: true },
+  utrNumber: { type: String, required: true, trim: true },
   fatherOccupation: {
     type: String,
     trim: true
@@ -65,15 +70,12 @@ const birthCertificateSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  hospitalName: {
-    type: String,
-    trim: true
-  },
+  // hospitalName removed
   
   // Payment Amount
   paymentAmount: {
     type: Number,
-    default: 50
+    default: 20
   }
 }, {
   timestamps: true

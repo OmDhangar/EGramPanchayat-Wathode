@@ -96,6 +96,9 @@ const applicationSchema = new mongoose.Schema({
       default: 'pending'
     },
     paidAt: Date,
+    amount: { type: Number, default: 20 },
+    utrNumber: { type: String },
+    receiptUrl: { type: String }
   }
 }, {
   timestamps: true

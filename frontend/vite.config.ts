@@ -22,7 +22,7 @@ export default defineConfig({
           });
 
         generateSitemap({
-          hostname: 'https://grampanchayatwathode.org.in/', // Replace with your actual hostname
+          hostname: 'https://grampanchayatwathode.com/', // Replace with your actual hostname
           outDir: path.resolve(__dirname, 'dist'),
           readable: true,
           dynamicRoutes,

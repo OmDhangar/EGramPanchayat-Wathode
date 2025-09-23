@@ -153,7 +153,7 @@ export default function Navbar() {
 
           {/* Center title */}
           <div className="hidden md:flex flex-col items-center flex-1 mx-2 xs:mx-4 my-1 xs:my-2 text-center">
-            <h1 className="text-xl xs:text-2xl lg:text-3xl text-blue-800 font-bold tracking-wide">
+            <h1 className="text-xl xs:text-3xl lg:text-3xl text-blue-800  font-bold font-tiro-marathi tracking-wide">
               {t("header.title")}
             </h1>
           </div>
@@ -201,7 +201,7 @@ export default function Navbar() {
 
         {/* Mobile title */}
         <div className="md:hidden mt-1 text-center px-2">
-          <h1 className="text-base xs:text-lg text-blue-800 font-bold">{t("header.title")}</h1>
+          <h1 className="text-base xs:text-lg text-blue-800 font-bold font-tiro-marathi">{t("header.title")}</h1>
         </div>
       </div>
 

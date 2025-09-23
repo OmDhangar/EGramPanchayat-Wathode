@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaBaby, FaUser, FaHome, FaHospital, FaFileAlt } from "react-icons/fa";
+import { FaBaby } from "react-icons/fa";
 import { api } from "../api/axios";
 import {
   InputField,
@@ -18,47 +18,58 @@ interface FormErrors {
   [key: string]: string;
 }
 
-// Form data interface
+// Form data interface - Fixed to match backend exactly
 interface BirthCertificateFormData {
+  financialYear: string;
   childName: string;
-  dateOfBirth: string;
+  dateOfBirth: string; // yyyy-mm-dd format from HTML date input
   placeOfBirth: string;
   gender: string;
   fatherName: string;
-  fatherAdharNumber: string;
-  fatherOccupation: string;
   motherName: string;
-  motherAdharNumber: string;
-  motherOccupation: string;
-  hospitalName: string;
-  parentsAddressAtBirth: string;
+  applicantFullNameEnglish: string;
+  applicantFullNameDevanagari: string;
+  whatsappNumber: string;
+  email: string;
+  address: string;
+  utrNumber: string;
+  fatherOccupation: string;
+  motherOccupation: string; // Added missing field
+  parentsAddressAtBirth: string; // Added missing field
   permanentAddressParent: string;
 }
 
 const BirthCertificateForm = () => {
   const [formData, setFormData] = useState<BirthCertificateFormData>({
+    financialYear: "",
     childName: "",
     dateOfBirth: "",
     placeOfBirth: "",
     gender: "",
     fatherName: "",
-    fatherAdharNumber: "",
-    fatherOccupation: "",
     motherName: "",
-    motherAdharNumber: "",
-    motherOccupation: "",
-    hospitalName: "",
-    parentsAddressAtBirth: "",
+    applicantFullNameEnglish: "",
+    applicantFullNameDevanagari: "",
+    whatsappNumber: "",
+    email: "",
+    address: "",
+    utrNumber: "",
+    fatherOccupation: "",
+    motherOccupation: "", // Added
+    parentsAddressAtBirth: "", // Added
     permanentAddressParent: ""
   });
   
   const [files, setFiles] = useState<File[]>([]);
+  const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string>("");
+  const [qrText, setQrText] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
 
   // Gender options for select field
-  const genderOptions = [
+  const genderOptions: { value: string; label: string }[] = [
     { value: "Male", label: "पुरुष (Male)" },
     { value: "Female", label: "स्त्री (Female)" },
     { value: "Other", label: "इतर (Other)" }
@@ -78,36 +89,67 @@ const BirthCertificateForm = () => {
     setFiles(newFiles);
   };
 
+  const handleReceiptChange = (file?: File) => {
+    if (!file) return;
+    if (!['image/jpeg','image/jpg','image/png'].includes(file.type)) {
+      setErrors(prev => ({ ...prev, paymentReceipt: 'Only PNG/JPG images are allowed' }));
+      return;
+    }
+    setErrors(prev => ({ ...prev, paymentReceipt: "" }));
+    setPaymentReceipt(file);
+    setReceiptPreview(URL.createObjectURL(file));
+  };
+
+  useEffect(() => {
+    const tryDetectQR = async () => {
+      try {
+        // @ts-ignore
+        if (typeof window !== 'undefined' && window.BarcodeDetector) {
+          // @ts-ignore
+          const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = receiptPreview;
+          await new Promise(res => { img.onload = () => res(null); });
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width; canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const blobPromise: Promise<Blob> = new Promise(resolve => canvas.toBlob(b => resolve(b as Blob)));
+            const blob = await blobPromise;
+            const bitmap = await createImageBitmap(blob);
+            const codes = await detector.detect(bitmap);
+            if (codes && codes[0]?.rawValue) {
+              setQrText(codes[0].rawValue);
+            }
+          }
+        }
+      } catch {}
+    };
+    if (receiptPreview) tryDetectQR();
+  }, [receiptPreview]);
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
-    // Required field validation
-    Object.keys(formData).forEach(key => {
-      if (!formData[key as keyof BirthCertificateFormData]) {
-        newErrors[key] = "This field is required";
-      }
-    });
-
-    // Specific validations
-    if (formData.dateOfBirth) {
-      const birthDate = new Date(formData.dateOfBirth);
-      const today = new Date();
-      if (birthDate > today) {
-        newErrors.dateOfBirth = "Date of birth cannot be in the future";
-      }
-    }
-
-    if (formData.fatherAdharNumber && !/^\d{12}$/.test(formData.fatherAdharNumber)) {
-      newErrors.fatherAdharNumber = "Aadhaar number must be 12 digits";
-    }
-
-    if (formData.motherAdharNumber && !/^\d{12}$/.test(formData.motherAdharNumber)) {
-      newErrors.motherAdharNumber = "Aadhaar number must be 12 digits";
-    }
-
-    if (files.length === 0) {
-      newErrors.files = "Please upload at least one document";
-    }
+    
+    // Required field validations matching backend exactly
+    if (!formData.financialYear) newErrors.financialYear = "Financial year is required";
+    if (!formData.childName) newErrors.childName = "Child name is required";
+    if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
+    if (!formData.placeOfBirth) newErrors.placeOfBirth = "Place of birth is required";
+    if (!formData.gender) newErrors.gender = "Gender is required";
+    if (!formData.fatherName) newErrors.fatherName = "Father name is required";
+    if (!formData.motherName) newErrors.motherName = "Mother name is required";
+    if (!formData.applicantFullNameEnglish) newErrors.applicantFullNameEnglish = "Applicant full name (English) is required";
+    if (!formData.applicantFullNameDevanagari) newErrors.applicantFullNameDevanagari = "Applicant full name (Devanagari) is required";
+    if (!formData.whatsappNumber || !/^\d{10}$/.test(formData.whatsappNumber)) newErrors.whatsappNumber = "WhatsApp must be 10 digits";
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Enter a valid email";
+    if (!formData.address) newErrors.address = "Address is required";
+    if (!formData.utrNumber) newErrors.utrNumber = "UTR number is required";
+    if (!paymentReceipt) newErrors.paymentReceipt = "Payment receipt image is required";
+    
+    // Note: parentsAddressAtBirth and occupations are not required in backend
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -117,6 +159,7 @@ const BirthCertificateForm = () => {
     e.preventDefault();
     
     if (!validateForm()) {
+      console.log("Validation failed:", errors);
       return;
     }
 
@@ -125,15 +168,21 @@ const BirthCertificateForm = () => {
     try {
       const formDataToSend = new FormData();
       
-      // Append form fields
+      // Append form fields exactly as backend expects
       Object.entries(formData).forEach(([key, value]) => {
         formDataToSend.append(key, value);
       });
       
-      // Append files
+      // Append files with correct field names
       files.forEach(file => {
         formDataToSend.append("documents", file);
       });
+
+      if (paymentReceipt) {
+        formDataToSend.append("paymentReceipt", paymentReceipt);
+      }
+
+      console.log("Submitting form data:", Object.fromEntries(formDataToSend.entries()));
 
       const response = await api.post("/applications/birth-certificate", formDataToSend, {
         headers: {
@@ -146,6 +195,7 @@ const BirthCertificateForm = () => {
       }
     } catch (error: any) {
       console.error("Submission error:", error);
+      console.error("Error response:", error?.response?.data);
       const errorMessage = error?.response?.data?.message || "Failed to submit application. Please try again.";
       setErrors({ general: errorMessage });
     } finally {
@@ -155,21 +205,28 @@ const BirthCertificateForm = () => {
 
   const resetForm = () => {
     setFormData({
+      financialYear: "",
       childName: "",
       dateOfBirth: "",
       placeOfBirth: "",
       gender: "",
       fatherName: "",
-      fatherAdharNumber: "",
-      fatherOccupation: "",
       motherName: "",
-      motherAdharNumber: "",
+      applicantFullNameEnglish: "",
+      applicantFullNameDevanagari: "",
+      whatsappNumber: "",
+      email: "",
+      address: "",
+      utrNumber: "",
+      fatherOccupation: "",
       motherOccupation: "",
-      hospitalName: "",
       parentsAddressAtBirth: "",
       permanentAddressParent: ""
     });
     setFiles([]);
+    setPaymentReceipt(null);
+    setReceiptPreview("");
+    setQrText("");
     setErrors({});
     setSubmitted(false);
   };
@@ -228,6 +285,14 @@ const BirthCertificateForm = () => {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
+                  label="Financial Year"
+                  name="financialYear"
+                  placeholder="2025-26"
+                  value={formData.financialYear}
+                  onChange={handleInputChange}
+                  error={errors.financialYear}
+                />
+                <InputField
                   label="Child's Full Name"
                   name="childName"
                   placeholder="Enter child's full name"
@@ -257,7 +322,7 @@ const BirthCertificateForm = () => {
                 <SelectField
                   label="Gender"
                   name="gender"
-                  options={genderOptions}
+                  options={genderOptions as any}
                   placeholder="Select gender"
                   value={formData.gender}
                   onChange={handleInputChange}
@@ -266,10 +331,10 @@ const BirthCertificateForm = () => {
               </div>
             </FormSection>
 
-            {/* Father's Information Section */}
+            {/* Parents Information Section - FIXED */}
             <FormSection
-              title="Father's Information"
-              description="Enter the father's details"
+              title="Parents Information"
+              description="Enter the parents' details"
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -281,36 +346,6 @@ const BirthCertificateForm = () => {
                   onChange={handleInputChange}
                   error={errors.fatherName}
                 />
-                
-                <InputField
-                  label="Father's Aadhaar Number"
-                  name="fatherAdharNumber"
-                  placeholder="12-digit Aadhaar number"
-                  maxLength={12}
-                  pattern="\d{12}"
-                  value={formData.fatherAdharNumber}
-                  onChange={handleInputChange}
-                  error={errors.fatherAdharNumber}
-                />
-                
-                <InputField
-                  label="Father's Occupation"
-                  name="fatherOccupation"
-                  placeholder="Enter occupation"
-                  value={formData.fatherOccupation}
-                  onChange={handleInputChange}
-                  error={errors.fatherOccupation}
-                />
-              </div>
-            </FormSection>
-
-            {/* Mother's Information Section */}
-            <FormSection
-              title="Mother's Information"
-              description="Enter the mother's details"
-              className="mb-8"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
                   label="Mother's Full Name"
                   name="motherName"
@@ -321,65 +356,120 @@ const BirthCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Mother's Aadhaar Number"
-                  name="motherAdharNumber"
-                  placeholder="12-digit Aadhaar number"
-                  maxLength={12}
-                  pattern="\d{12}"
-                  value={formData.motherAdharNumber}
+                  label="Father's Occupation"
+                  name="fatherOccupation"
+                  placeholder="Enter father's occupation"
+                  value={formData.fatherOccupation}
                   onChange={handleInputChange}
-                  error={errors.motherAdharNumber}
+                  error={errors.fatherOccupation}
+                  required={false}
                 />
-                
+
+                {/* Added missing Mother's Occupation field */}
                 <InputField
                   label="Mother's Occupation"
                   name="motherOccupation"
-                  placeholder="Enter occupation"
+                  placeholder="Enter mother's occupation"
                   value={formData.motherOccupation}
                   onChange={handleInputChange}
                   error={errors.motherOccupation}
+                  required={false}
                 />
               </div>
             </FormSection>
 
-            {/* Hospital & Address Information Section */}
+            {/* Address Information Section - FIXED */}
             <FormSection
-              title="Hospital & Address Information"
-              description="Enter hospital details and addresses"
+              title="Address Information"
+              description="Enter address details"
               className="mb-8"
             >
+              {/* Added missing Parents Address at Birth field */}
+              <TextareaField
+                label="Parents Address at Time of Birth"
+                name="parentsAddressAtBirth"
+                placeholder="Enter the address where parents lived when child was born"
+                rows={3}
+                value={formData.parentsAddressAtBirth}
+                onChange={handleInputChange}
+                error={errors.parentsAddressAtBirth}
+                required={false}
+                className="mb-4"
+              />
+
+              <TextareaField
+                label="Permanent Address of Parents"
+                name="permanentAddressParent"
+                placeholder="Enter current permanent address of parents"
+                rows={3}
+                value={formData.permanentAddressParent}
+                onChange={handleInputChange}
+                error={errors.permanentAddressParent}
+                className="mb-4"
+              />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Hospital Name"
-                  name="hospitalName"
-                  placeholder="Enter hospital name"
-                  value={formData.hospitalName}
+                  label="Applicant Full Name (English)"
+                  name="applicantFullNameEnglish"
+                  placeholder="John Doe"
+                  value={formData.applicantFullNameEnglish}
                   onChange={handleInputChange}
-                  error={errors.hospitalName}
+                  error={errors.applicantFullNameEnglish}
                 />
-                
-                <TextareaField
-                  label="Parents' Address at Birth"
-                  name="parentsAddressAtBirth"
-                  placeholder="Enter address where parents lived at the time of birth"
-                  rows={3}
-                  value={formData.parentsAddressAtBirth}
+                <InputField
+                  label="Applicant Full Name (Devanagari)"
+                  name="applicantFullNameDevanagari"
+                  placeholder="जॉन डो"
+                  value={formData.applicantFullNameDevanagari}
                   onChange={handleInputChange}
-                  error={errors.parentsAddressAtBirth}
-                  className="md:col-span-2"
+                  error={errors.applicantFullNameDevanagari}
                 />
-                
-                <TextareaField
-                  label="Permanent Address"
-                  name="permanentAddressParent"
-                  placeholder="Enter permanent address of parents"
-                  rows={3}
-                  value={formData.permanentAddressParent}
+                <InputField
+                  label="WhatsApp Number"
+                  name="whatsappNumber"
+                  placeholder="10-digit mobile"
+                  value={formData.whatsappNumber}
                   onChange={handleInputChange}
-                  error={errors.permanentAddressParent}
-                  className="md:col-span-2"
+                  error={errors.whatsappNumber}
+                />
+                <InputField
+                  label="Email (optional)"
+                  name="email"
+                  placeholder="name@example.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  error={errors.email}
+                  required={false}
                 />
               </div>
+              
+              <TextareaField
+                label="Current Address"
+                name="address"
+                placeholder="Full current address of applicant"
+                rows={3}
+                value={formData.address}
+                onChange={handleInputChange}
+                error={errors.address}
+                className="mt-4"
+              />
+            </FormSection>
+
+            {/* Payment Section */}
+            <FormSection
+              title="Payment Information"
+              description="Payment details for birth certificate (Rs. 20)"
+              className="mb-8"
+            >
+              <InputField
+                label="UTR Number"
+                name="utrNumber"
+                placeholder="Enter UTR number from payment receipt"
+                value={formData.utrNumber}
+                onChange={handleInputChange}
+                error={errors.utrNumber}
+              />
             </FormSection>
 
             {/* Document Upload Section */}
@@ -388,8 +478,49 @@ const BirthCertificateForm = () => {
               description="Upload supporting documents (maximum 5 files, 10MB each)"
               className="mb-8"
             >
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Payment Receipt (PNG/JPG) - Rs. 20 *</label>
+                
+                {/* QR Code for Payment */}
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex flex-col md:flex-row items-center gap-4">
+                    <div className="flex-shrink-0">
+                      <img 
+                        src="/images/QR.jpg" 
+                        alt="Payment QR Code" 
+                        className="w-72 h-72 object-contain border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <div className="text-sm text-blue-800">
+                      <p className="font-semibold mb-2">📱 Scan QR Code to Pay Rs. 20</p>
+                      <p className="mb-1">• Use any UPI app (PhonePe, GPay, Paytm)</p>
+                      <p className="mb-1">• After payment, upload screenshot below</p>
+                      <p className="text-blue-600 font-medium">• Enter UTR number in applicant details</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg"
+                  capture="environment"
+                  onChange={e => handleReceiptChange(e.target.files?.[0] || undefined)}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {errors.paymentReceipt && (<p className="text-red-600 text-sm mt-1">{errors.paymentReceipt}</p>)}
+                {receiptPreview && (
+                  <div className="mt-3 grid grid-cols-2 gap-3 items-start">
+                    <img src={receiptPreview} alt="Receipt Preview" className="rounded border max-h-40 object-contain" />
+                    <div className="text-xs text-gray-600 break-all">
+                      <div className="font-medium mb-1">QR Scan (if detected):</div>
+                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || 'No QR detected'}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
               <FileUploadField
-                label="Supporting Documents"
+                label="Supporting Documents (Optional)"
                 name="documents"
                 multiple={true}
                 maxFiles={5}
@@ -397,16 +528,13 @@ const BirthCertificateForm = () => {
                 acceptedTypes={[".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"]}
                 onFilesChange={handleFilesChange}
                 error={errors.files}
-                required={true}
+                required={false}
               />
               
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-medium text-blue-900 mb-2">Required Documents:</h4>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <h4 className="font-medium text-blue-900 mb-2">Recommended Documents:</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Hospital/Doctor's certificate</li>
-                  <li>• Identity proof of parents</li>
-                  <li>• Address proof</li>
-                  <li>• Any other relevant documents</li>
+                  <li>• Identity proof of parents(Aadhaar Card)</li>
                 </ul>
               </div>
             </FormSection>
@@ -429,14 +557,16 @@ const BirthCertificateForm = () => {
                 variant="primary"
                 size="lg"
                 className="flex-1"
+                type="submit"
               >
-                Submit Application
+                {loading ? 'Submitting...' : 'Submit Application'}
               </SubmitButton>
               
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+                disabled={loading}
+                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Reset Form
               </button>
