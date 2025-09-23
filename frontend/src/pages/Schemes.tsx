@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Filter } from 'lucide-react';
 import { schemeYears } from '../data/schemes';
+import { Helmet } from "react-helmet";
 
 const categories = [
   { key: 'all', label: 'सर्व योजना', color: 'bg-blue-600 text-white' },
@@ -22,6 +23,10 @@ const Schemes = () => {
 
   return (
     <div className="bg-gray-50 py-14 min-h-screen">
+      <Helmet>
+        <title>शासकीय योजना - ग्रामपंचायत वाठोडे</title>
+        <meta name="description" content="ग्रामपंचायत वाठोडे येथे राबविण्यात येणाऱ्या विविध शासकीय योजनांची माहिती. ग्रामपंचायत वाठोडे, शिरपूर, धुळे, महाराष्ट्र." />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         {/* शीर्षक */}
         <div className="text-center">

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaCheck, FaTimes, FaArrowLeft, FaCreditCard, FaDownload, FaEye, FaLock } from 'react-icons/fa';
 import { api } from '../api/axios';
+import { Helmet } from "react-helmet";
 
 // Razorpay types
 declare global {
@@ -580,80 +581,83 @@ const renderUserActions = () => {
 
   if (status === 'certificate_generated' && isPaymentPending) {
     return (
-      <motion.div
+      <><Helmet>
+        <title>अर्ज तपशील - ग्रामपंचायत वाठोडे</title>
+        <meta name="description" content="ग्रामपंचायत वाठोडे येथील प्रमाणपत्र अर्जांचे तपशील पहा आणि व्यवस्थापित करा. प्रशासकीय मंजूरी आणि प्रमाणपत्र निर्मिती." />
+      </Helmet><motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="mt-8 space-y-6"
       >
-        {/* Certificate Generated but Payment Pending */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">
-            📜 Certificate Generated - Payment Required
-          </h3>
-          <p className="text-blue-700">
-            Your certificate has been generated but payment is pending. Complete the payment to download.
-          </p>
-        </div>
+          {/* Certificate Generated but Payment Pending */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
+            <h3 className="text-lg font-semibold text-blue-800 mb-2">
+              📜 Certificate Generated - Payment Required
+            </h3>
+            <p className="text-blue-700">
+              Your certificate has been generated but payment is pending. Complete the payment to download.
+            </p>
+          </div>
 
-        {/* Payment Section */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="bg-white border-2 border-blue-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-300"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-xl font-semibold text-gray-800">Complete Payment</h4>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Amount Due</p>
-              <span className="text-3xl font-bold text-blue-600">
-                ₹{(formData as any)?.paymentAmount || 500}
-              </span>
+          {/* Payment Section */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="bg-white border-2 border-blue-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-300"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-xl font-semibold text-gray-800">Complete Payment</h4>
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Amount Due</p>
+                <span className="text-3xl font-bold text-blue-600">
+                  ₹{(formData as any)?.paymentAmount || 500}
+                </span>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex gap-4">
-            <motion.button
-              whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(59, 130, 246, 0.3)" }}
-              whileTap={{ scale: 0.98 }}
-              onClick={initiatePayment}
-              disabled={paymentLoading}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-3 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold"
-            >
-              <FaCreditCard className="text-lg" />
-              {paymentLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Processing...
-                </div>
-              ) : (
-                'Pay Now'
-              )}
-            </motion.button>
 
-            {/* Protected Download Button (disabled until payment) */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                if (generatedCertificate) {
-                  window.open(generatedCertificate.filePath, '_blank');
-                }
-              }}
-              className="px-6 py-4 bg-gray-100 text-gray-400 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed"
-              disabled
-            >
-              <FaLock className="text-lg" />
-              Download Certificate
-            </motion.button>
-          </div>
-          
-          <p className="text-xs text-gray-500 mt-4 text-center">
-            🔒 Certificate download will be enabled after payment completion
-          </p>
-        </motion.div>
-      </motion.div>
+            <div className="flex gap-4">
+              <motion.button
+                whileHover={{ scale: 1.02, boxShadow: "0 8px 25px rgba(59, 130, 246, 0.3)" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={initiatePayment}
+                disabled={paymentLoading}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-lg flex items-center justify-center gap-3 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold"
+              >
+                <FaCreditCard className="text-lg" />
+                {paymentLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Processing...
+                  </div>
+                ) : (
+                  'Pay Now'
+                )}
+              </motion.button>
+
+              {/* Protected Download Button (disabled until payment) */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  if (generatedCertificate) {
+                    window.open(generatedCertificate.filePath, '_blank');
+                  }
+                } }
+                className="px-6 py-4 bg-gray-100 text-gray-400 rounded-lg flex items-center justify-center gap-2 cursor-not-allowed"
+                disabled
+              >
+                <FaLock className="text-lg" />
+                Download Certificate
+              </motion.button>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-4 text-center">
+              🔒 Certificate download will be enabled after payment completion
+            </p>
+          </motion.div>
+        </motion.div></>
     );
   }
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Download, Users, Calendar, Landmark } from 'lucide-react';
 import { getSchemesByYear } from '../data/schemes';
+import { Helmet } from "react-helmet";
 
 const SchemeDetails = () => {
   const { year } = useParams<{ year: string }>();
@@ -26,6 +27,10 @@ const SchemeDetails = () => {
 
   return (
     <div className="bg-gray-50 py-12">
+      <Helmet>
+        <title>{`शासकीय योजना ${year} - ग्रामपंचायत वाठोडे`}</title>
+        <meta name="description" content={`ग्रामपंचायत वाठोडे येथे ${year} मध्ये राबविण्यात आलेल्या शासकीय योजनांची माहिती. ग्रामपंचायत वाठोडे, शिरपूर, धुळे, महाराष्ट्र.`} />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <Link 

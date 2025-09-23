@@ -5,6 +5,7 @@ import { FaBaby, FaSkull, FaHeart, FaFileAlt, FaArrowRight } from "react-icons/f
 import birthLogo from "../../public/utils/birthlogo.png";
 import deathLogo from "../../public/utils/deathlogo.png";
 import marriageLogo from "../../public/utils/marriagelogo.png";
+import { Helmet } from "react-helmet";
 
 export default function CertificateForms() {
   const navigate = useNavigate();
@@ -87,6 +88,10 @@ export default function CertificateForms() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4">
+      <Helmet>
+        <title>Certificate Applications - Grampanchayat Wathode</title>
+        <meta name="description" content="Apply online for birth, death, and marriage certificates. Grampanchayat Wathode, Shirpur, Dhule, Maharashtra." />
+      </Helmet>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <motion.div

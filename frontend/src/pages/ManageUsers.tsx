@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/axios";
+import { Helmet } from "react-helmet";
 
 type User = {
   _id: string;
@@ -53,6 +54,10 @@ export default function ManageUsers() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
+      <Helmet>
+        <title>वापरकर्ते व्यवस्थापित करा - ग्रामपंचायत वाठोडे</title>
+        <meta name="description" content="ग्रामपंचायत वाठोडे वेबसाइटवरील वापरकर्त्यांची यादी व्यवस्थापित करा. ग्रामपंचायत वाठोडे, शिरपूर, धुळे, महाराष्ट्र." />
+      </Helmet>
       <h2 className="text-2xl font-bold mb-4">Manage Users</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white rounded shadow">

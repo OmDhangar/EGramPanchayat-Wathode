@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../Context/authContext';
 import { api } from '../api/axios';
+import { Helmet } from 'react-helmet';
 
 function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -48,6 +49,10 @@ function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <Helmet>
+        <title>लॉगिन - ग्रामपंचायत वाठोडे</title>
+        <meta name="description" content="ग्रामपंचायत वाठोडे वेबसाइटवर लॉगिन करा. प्रमाणपत्र अर्ज, योजना आणि इतर सेवांमध्ये प्रवेश मिळवा." />
+      </Helmet>
       <motion.div
         className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md"
         initial={{ opacity: 0, y: 20 }}
