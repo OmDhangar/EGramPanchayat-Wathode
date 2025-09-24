@@ -299,7 +299,7 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
   const { 
     dateOfMarriage, placeOfMarriage,
     HusbandName, HusbandAadhaar, HusbandAge, HusbandFatherName, HusbandAddress, HusbandOccupation,
-    wifeName, wifeAadhaar, wifeAge, wifeFatherName, wifeAddress, wifeOccupation, SolemnizedOn,
+    wifeName, wifeAadhaar, wifeAge, wifeFatherName, wifeAddress, wifeOccupation,
     applicantFullName, whatsappNumber, email, utrNumber
   } = req.body;
   
@@ -401,7 +401,6 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
     wifeFatherName,
     wifeAddress,
     wifeOccupation,
-    SolemnizedOn,
     applicantFullName,
     whatsappNumber,
     email,
@@ -985,11 +984,346 @@ const generatePaymentReceiptSignedUrl = asyncHandler(async (req, res) => {
   }
 });
 
+// Submit 8A Land Record Digital Signature Application
+const submitLandRecord8AApplication = asyncHandler(async (req, res) => {
+  const { 
+    ownersName,
+    village,
+    whatsappNumber,
+    email,
+    taluka,
+    district,
+    accountNumber,
+    utrNumber,
+    paymentOption
+  } = req.body;
+  
+  // Basic validations
+  if (!ownersName || !village || !whatsappNumber || !taluka || !district || !accountNumber || !utrNumber) {
+    throw new ApiError(400, "Missing required fields");
+  }
+
+  // Validate email
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  // Validate whatsapp number (10 digits)
+  if (!/^\d{10}$/.test(whatsappNumber)) {
+    throw new ApiError(400, "Invalid WhatsApp number. Must be 10 digits");
+  }
+  
+  // Validate payment option
+  if (paymentOption && paymentOption !== 'UPI') {
+    throw new ApiError(400, "Only UPI payment is supported currently");
+  }
+  
+  // Require payment receipt image
+  const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
+  if (receiptFiles.length === 0) {
+    throw new ApiError(400, "Payment receipt image is required");
+  }
+
+  // Enforce images-only for receipt
+  const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
+  if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
+    throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
+  }
+  
+  // Process uploaded files using S3 under 'unverified'
+  const uploadedFiles = await processUploadedFilesS3(receiptFiles, 'unverified');
+
+  // Mark the receipt file for easy identification
+  const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
+  if (receiptUpload) {
+    receiptUpload.isPaymentReceipt = true;
+  }
+  
+  // Create application with unique ID
+  const applicationId = generateApplicationId('LAND8A');
+  
+  // Prepare application data
+  const applicationData = {
+    applicationId,
+    applicantId: req.user._id,
+    documentType: 'land_record_8a',
+    uploadedFiles,
+    paymentDetails: {
+      amount: 15,
+      paymentStatus: 'completed',
+      utrNumber,
+      receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
+    }
+  };
+  
+  // Prepare form data
+  const formData = {
+    ownersName,
+    village,
+    whatsappNumber,
+    email,
+    taluka,
+    district,
+    accountNumber,
+    utrNumber,
+    paymentOption: 'UPI'
+  };
+  
+  // Create application with form data using the static method
+  const application = await Application.createWithFormData(applicationData, formData);
+  
+  // Create notification for user
+  await createNotification(
+    req.user._id,
+    application._id,
+    'application_submitted',
+    '8A Land Record Application Submitted',
+    `Your application for 8A land record digital signature has been submitted successfully.`
+  );
+  
+  // Notify admin about new application
+  await notifyAdminNewApplication(application, req.user.fullName);
+  
+  return res.status(201).json(
+    new ApiResponse(201, application, "8A land record application submitted successfully")
+  );
+});
+
+// Submit Certificate of No Outstanding Debts Application
+const submitNoOutstandingDebtsApplication = asyncHandler(async (req, res) => {
+  const { 
+    financialYear,
+    propertyOwnerName,
+    aadhaarCardNumber,
+    whatsappNumber,
+    email,
+    villageName,
+    wardNo,
+    streetNameNumber,
+    propertyNumber,
+    applicantFullNameEnglish,
+    applicantAadhaarNumber,
+    utrNumber,
+    paymentOption
+  } = req.body;
+  
+  // Basic validations
+  if (!financialYear || !propertyOwnerName || !aadhaarCardNumber || !whatsappNumber || !villageName || !wardNo || !streetNameNumber || !propertyNumber || !applicantFullNameEnglish || !applicantAadhaarNumber || !utrNumber) {
+    throw new ApiError(400, "Missing required fields");
+  }
+
+  // Validate Aadhaar numbers
+  if (!/^\d{12}$/.test(aadhaarCardNumber)) {
+    throw new ApiError(400, "Property owner's Aadhaar must be 12 digits");
+  }
+  
+  if (!/^\d{12}$/.test(applicantAadhaarNumber)) {
+    throw new ApiError(400, "Applicant's Aadhaar must be 12 digits");
+  }
+
+  // Validate email
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  // Validate whatsapp number (10 digits)
+  if (!/^\d{10}$/.test(whatsappNumber)) {
+    throw new ApiError(400, "Invalid WhatsApp number. Must be 10 digits");
+  }
+  
+  // Validate payment option
+  if (paymentOption && paymentOption !== 'UPI') {
+    throw new ApiError(400, "Only UPI payment is supported currently");
+  }
+  
+  // Require payment receipt image
+  const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
+  if (receiptFiles.length === 0) {
+    throw new ApiError(400, "Payment receipt image is required");
+  }
+
+  // Enforce images-only for receipt
+  const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
+  if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
+    throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
+  }
+  
+  // Process uploaded files using S3 under 'unverified'
+  const uploadedFiles = await processUploadedFilesS3(receiptFiles, 'unverified');
+
+  // Mark the receipt file for easy identification
+  const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
+  if (receiptUpload) {
+    receiptUpload.isPaymentReceipt = true;
+  }
+  
+  // Create application with unique ID
+  const applicationId = generateApplicationId('NODEBTS');
+  
+  // Prepare application data
+  const applicationData = {
+    applicationId,
+    applicantId: req.user._id,
+    documentType: 'no_outstanding_debts',
+    uploadedFiles,
+    paymentDetails: {
+      amount: 20,
+      paymentStatus: 'completed',
+      utrNumber,
+      receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
+    }
+  };
+  
+  // Prepare form data
+  const formData = {
+    financialYear,
+    propertyOwnerName,
+    aadhaarCardNumber,
+    whatsappNumber,
+    email,
+    villageName,
+    wardNo,
+    streetNameNumber,
+    propertyNumber,
+    applicantFullNameEnglish,
+    applicantAadhaarNumber,
+    utrNumber,
+    paymentOption: 'UPI'
+  };
+  
+  // Create application with form data using the static method
+  const application = await Application.createWithFormData(applicationData, formData);
+  
+  // Create notification for user
+  await createNotification(
+    req.user._id,
+    application._id,
+    'application_submitted',
+    'No Outstanding Debts Certificate Application Submitted',
+    `Your application for certificate of no outstanding debts has been submitted successfully.`
+  );
+  
+  // Notify admin about new application
+  await notifyAdminNewApplication(application, req.user.fullName);
+  
+  return res.status(201).json(
+    new ApiResponse(201, application, "No outstanding debts certificate application submitted successfully")
+  );
+});
+
+// Submit Digitally Signed 7/12 Application
+const submitDigitalSigned712Application = asyncHandler(async (req, res) => {
+  const { 
+    ownersName,
+    village,
+    whatsappNumber,
+    email,
+    taluka,
+    district,
+    surveyNumber,
+    utrNumber,
+    paymentOption
+  } = req.body;
+  
+  // Basic validations
+  if (!ownersName || !village || !whatsappNumber || !taluka || !district || !surveyNumber || !utrNumber) {
+    throw new ApiError(400, "Missing required fields");
+  }
+
+  // Validate email
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  // Validate whatsapp number (10 digits)
+  if (!/^\d{10}$/.test(whatsappNumber)) {
+    throw new ApiError(400, "Invalid WhatsApp number. Must be 10 digits");
+  }
+  
+  // Validate payment option
+  if (paymentOption && paymentOption !== 'UPI') {
+    throw new ApiError(400, "Only UPI payment is supported currently");
+  }
+  
+  // Require payment receipt image
+  const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
+  if (receiptFiles.length === 0) {
+    throw new ApiError(400, "Payment receipt image is required");
+  }
+
+  // Enforce images-only for receipt
+  const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
+  if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
+    throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
+  }
+  
+  // Process uploaded files using S3 under 'unverified'
+  const uploadedFiles = await processUploadedFilesS3(receiptFiles, 'unverified');
+
+  // Mark the receipt file for easy identification
+  const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
+  if (receiptUpload) {
+    receiptUpload.isPaymentReceipt = true;
+  }
+  
+  // Create application with unique ID
+  const applicationId = generateApplicationId('SIGN712');
+  
+  // Prepare application data
+  const applicationData = {
+    applicationId,
+    applicantId: req.user._id,
+    documentType: 'digital_signed_712',
+    uploadedFiles,
+    paymentDetails: {
+      amount: 15,
+      paymentStatus: 'completed',
+      utrNumber,
+      receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
+    }
+  };
+  
+  // Prepare form data
+  const formData = {
+    ownersName,
+    village,
+    whatsappNumber,
+    email,
+    taluka,
+    district,
+    surveyNumber,
+    utrNumber,
+    paymentOption: 'UPI'
+  };
+  
+  // Create application with form data using the static method
+  const application = await Application.createWithFormData(applicationData, formData);
+  
+  // Create notification for user
+  await createNotification(
+    req.user._id,
+    application._id,
+    'application_submitted',
+    'Digitally Signed 7/12 Application Submitted',
+    `Your application for digitally signed 7/12 has been submitted successfully.`
+  );
+  
+  // Notify admin about new application
+  await notifyAdminNewApplication(application, req.user.fullName);
+  
+  return res.status(201).json(
+    new ApiResponse(201, application, "Digitally signed 7/12 application submitted successfully")
+  );
+});
+
 export {
   getAdminApplications,
   submitBirthCertificateApplication,
   submitDeathCertificateApplication,
   submitMarriageCertificateApplication,
+  submitLandRecord8AApplication,
+  submitNoOutstandingDebtsApplication,
+  submitDigitalSigned712Application,
   getUserApplications,
   getApplicationDetails,
   reviewApplication,

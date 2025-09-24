@@ -102,7 +102,7 @@ export default function Navbar() {
               <Calendar size={10} className="mr-1 xs:size-4 lg:size-4  " />
               <span className="text-[0.7rem] font-bold">
                 {new Date().toLocaleDateString(
-                  i18n.language === "mr" ? "hi-IN" : "en-IN"
+                  i18n.language === "mr" ? "hi-IN" : i18n.language === "hi" ? "hi-IN" : "en-IN"
                 )}
               </span>
             </div>
@@ -128,6 +128,16 @@ export default function Navbar() {
                 }`}
               >
                 MR
+              </button>
+              <button
+                onClick={() => i18n.changeLanguage("hi")}
+                className={`px-1.5 py-0.5 rounded text-[0.6rem] xs:text-xs font-bold lg:text-[0.6rem] ${
+                  i18n.language === "hi"
+                    ? "bg-orange-600 text-white"
+                    : "bg-gray-200 text-orange-700"
+                }`}
+              >
+                HI
               </button>
             </div>
           </div>

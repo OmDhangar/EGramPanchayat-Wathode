@@ -9,6 +9,9 @@ import {
   submitBirthCertificateApplication,
   submitDeathCertificateApplication,
   submitMarriageCertificateApplication,
+  submitLandRecord8AApplication,
+  submitNoOutstandingDebtsApplication,
+  submitDigitalSigned712Application,
   getUserApplications,
   getApplicationDetails,
   getFileUrls,
@@ -49,6 +52,27 @@ router.route("/marriage-certificate").post(
     { name: "documents", maxCount: 5 }
   ]),
   submitMarriageCertificateApplication
+);
+
+router.route("/land-record-8a").post(
+  upload.fields([
+    { name: "paymentReceipt", maxCount: 1 }
+  ]),
+  submitLandRecord8AApplication
+);
+
+router.route("/no-outstanding-debts").post(
+  upload.fields([
+    { name: "paymentReceipt", maxCount: 1 }
+  ]),
+  submitNoOutstandingDebtsApplication
+);
+
+router.route("/digital-signed-712").post(
+  upload.fields([
+    { name: "paymentReceipt", maxCount: 1 }
+  ]),
+  submitDigitalSigned712Application
 );
 
 // Application retrieval routes

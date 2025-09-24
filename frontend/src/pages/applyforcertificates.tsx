@@ -1,66 +1,83 @@
 // src/pages/CertificateForms.tsx
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaBaby, FaSkull, FaHeart, FaFileAlt, FaArrowRight } from "react-icons/fa";
+import { FaBaby, FaSkull, FaHeart, FaFileAlt, FaArrowRight, FaLandmark, FaFileInvoiceDollar, FaFileContract } from "react-icons/fa";
 import birthLogo from "../../public/utils/birthlogo.png";
 import deathLogo from "../../public/utils/deathlogo.png";
 import marriageLogo from "../../public/utils/marriagelogo.png";
 import { Helmet } from "react-helmet";
+import { useTranslation } from "react-i18next";
 
 export default function CertificateForms() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const cards = [
     {
-      title: "Birth Certificate",
+      title: t("certificates.birth.title"),
       subtitle: "जन्म प्रमाणपत्र",
-      description: "Apply for a birth certificate for newborns or children",
-      points: [
-        "Child's full name and details",
-        "Date and place of birth",
-        "Parents' information and address",
-        "Required documents: Hospital certificate, ID proof"
-      ],
+      description: t("certificates.birth.description"),
+      points: t("certificates.birth.points", { returnObjects: true }) as string[],
       bgColor: "from-blue-500 to-blue-600",
       hoverColor: "from-blue-600 to-blue-700",
       route: "/apply-for-certificates/birth-certificate",
       logo: birthLogo,
-      icon: FaBaby,
       iconColor: "text-blue-100"
     },
     {
-      title: "Death Certificate",
+      title: t("certificates.death.title"),
       subtitle: "मृत्यू प्रमाणपत्र",
-      description: "Apply for a death certificate for deceased persons",
-      points: [
-        "Deceased person's details",
-        "Date and place of death",
-        "Family member information",
-        "Required documents: Medical certificate, ID proof"
-      ],
+      description: t("certificates.death.description"),
+      points: t("certificates.death.points", { returnObjects: true }) as string[],
       bgColor: "from-red-500 to-red-600",
       hoverColor: "from-red-600 to-red-700",
       route: "/apply-for-certificates/death-certificate",
       logo: deathLogo,
-      icon: FaSkull,
       iconColor: "text-red-100"
     },
     {
-      title: "Marriage Certificate",
+      title: t("certificates.marriage.title"),
       subtitle: "विवाह प्रमाणपत्र",
-      description: "Apply for a marriage certificate for newlyweds",
-      points: [
-        "Bride and groom details",
-        "Date and place of marriage",
-        "Witness information",
-        "Required documents: Wedding photos, ID proof"
-      ],
+      description: t("certificates.marriage.description"),
+      points: t("certificates.marriage.points", { returnObjects: true }) as string[],
       bgColor: "from-pink-500 to-pink-600",
       hoverColor: "from-pink-600 to-pink-700",
       route: "/apply-for-certificates/marriage-certificate",
       logo: marriageLogo,
-      icon: FaHeart,
       iconColor: "text-pink-100"
+    },
+    {
+      title: t("certificates.landRecord8A.title"),
+      subtitle: "८अ भूमि अभिलेख डिजिटल स्वाक्षरी",
+      description: t("certificates.landRecord8A.description"),
+      points: t("certificates.landRecord8A.points", { returnObjects: true }) as string[],
+      bgColor: "from-green-500 to-green-600",
+      hoverColor: "from-green-600 to-green-700",
+      route: "/apply-for-certificates/land-record-8a",
+      logo: null,
+      iconColor: "text-green-100"
+    },
+    {
+      title: t("certificates.noOutstandingDebts.title"),
+      subtitle: "थकबाकी नसल्याचा दाखला",
+      description: t("certificates.noOutstandingDebts.description"),
+      points: t("certificates.noOutstandingDebts.points", { returnObjects: true }) as string[],
+      bgColor: "from-purple-500 to-purple-600",
+      hoverColor: "from-purple-600 to-purple-700",
+      route: "/apply-for-certificates/no-outstanding-debts",
+      logo: null,
+      iconColor: "text-purple-100"
+    },
+    {
+      title: t("certificates.digitalSigned712.title"),
+      subtitle: "डिजिटल स्वाक्षरी ७/१२",
+      description: t("certificates.digitalSigned712.description"),
+      points: t("certificates.digitalSigned712.points", { returnObjects: true }) as string[],
+      bgColor: "from-orange-500 to-orange-600",
+      hoverColor: "from-orange-600 to-orange-700",
+      route: "/apply-for-certificates/digital-signed-712",
+      logo: null,
+      iconColor: "text-orange-100"
     },
   ];
 
@@ -103,17 +120,16 @@ export default function CertificateForms() {
             <FaFileAlt className="text-4xl text-blue-600" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Certificate Applications
+            {t("certificates.title")}
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Choose the type of certificate you need and complete the online application form. 
-            Our streamlined process makes it easy to apply for government certificates.
+            {t("certificates.description")}
           </p>
         </motion.div>
 
         {/* Certificate Cards Grid */}
         {/* Certificate Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {cards.map((card, index) => (
             <motion.div
               key={index}
@@ -142,9 +158,6 @@ export default function CertificateForms() {
                 <div className="relative p-6 flex flex-col h-full">
                   {/* Header */}
                   <div className="text-center mb-4">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-3 backdrop-blur-sm">
-                      <card.icon className={`text-2xl ${card.iconColor}`} />
-                    </div>
                     <h2 className="text-xl font-bold text-white mb-1">{card.title}</h2>
                     <p className="text-white/80 text-base font-medium">{card.subtitle}</p>
                   </div>
@@ -179,7 +192,7 @@ export default function CertificateForms() {
                             hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2
                             group-hover:shadow-md"
                   >
-                    Apply Now
+                    {t("certificates.applyNow")}
                     <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform duration-300" />
                   </motion.button>
                 </div>
@@ -199,7 +212,7 @@ export default function CertificateForms() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                How It Works
+                {t("certificates.howItWorks")}
               </h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
@@ -207,8 +220,8 @@ export default function CertificateForms() {
                     <span className="text-blue-600 font-semibold text-sm">1</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Fill Application Form</h4>
-                    <p className="text-gray-600 text-sm">Complete the online form with all required information</p>
+                    <h4 className="font-semibold text-gray-900">{t("certificates.steps.fillForm.title")}</h4>
+                    <p className="text-gray-600 text-sm">{t("certificates.steps.fillForm.description")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -216,8 +229,8 @@ export default function CertificateForms() {
                     <span className="text-blue-600 font-semibold text-sm">2</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Upload Documents</h4>
-                    <p className="text-gray-600 text-sm">Upload supporting documents using our secure file upload</p>
+                    <h4 className="font-semibold text-gray-900">{t("certificates.steps.uploadDocs.title")}</h4>
+                    <p className="text-gray-600 text-sm">{t("certificates.steps.uploadDocs.description")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -225,21 +238,19 @@ export default function CertificateForms() {
                     <span className="text-blue-600 font-semibold text-sm">3</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Submit & Track</h4>
-                    <p className="text-gray-600 text-sm">Submit your application and track its progress online</p>
+                    <h4 className="font-semibold text-gray-900">{t("certificates.steps.submitTrack.title")}</h4>
+                    <p className="text-gray-600 text-sm">{t("certificates.steps.submitTrack.description")}</p>
                   </div>
                 </div>
               </div>
             </div>
             
             <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6">
-              <h4 className="font-semibold text-gray-900 mb-3">Important Notes:</h4>
+              <h4 className="font-semibold text-gray-900 mb-3">{t("certificates.importantNotes")}</h4>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li>• All fields marked with * are mandatory</li>
-                <li>• Maximum 5 documents can be uploaded</li>
-                <li>• Supported formats: JPG, PNG, PDF, DOC, DOCX</li>
-                <li>• Maximum file size: 10MB per file</li>
-                <li>• Applications are processed within 7-10 working days</li>
+                {(t("certificates.notes", { returnObjects: true }) as string[]).map((note, index) => (
+                  <li key={index}>{note}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -253,14 +264,14 @@ export default function CertificateForms() {
           className="mt-12 text-center"
         >
           <p className="text-gray-600 mb-4">
-            Need help with your application?
+            {t("certificates.needHelp")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200">
-              Contact Support
+              {t("certificates.contactSupport")}
             </button>
             <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-              View FAQ
+              {t("certificates.viewFAQ")}
             </button>
           </div>
         </motion.div>
