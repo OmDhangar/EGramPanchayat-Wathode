@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaHeart } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import { api } from "../api/axios";
 import { Helmet } from "react-helmet";
 import {
@@ -33,7 +34,6 @@ interface MarriageCertificateFormData {
   wifeFatherName: string;
   wifeAddress: string;
   wifeOccupation: string;
-  SolemnizedOn: string;
   applicantFullName: string;
   whatsappNumber: string;
   email: string;
@@ -41,6 +41,7 @@ interface MarriageCertificateFormData {
 }
 
 const MarriageCertificateForm = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<MarriageCertificateFormData>({
     dateOfMarriage: "",
     placeOfMarriage: "",
@@ -56,7 +57,6 @@ const MarriageCertificateForm = () => {
     wifeFatherName: "",
     wifeAddress: "",
     wifeOccupation: "",
-    SolemnizedOn: "",
     applicantFullName: "",
     whatsappNumber: "",
     email: "",
@@ -88,7 +88,7 @@ const MarriageCertificateForm = () => {
   const handleReceiptChange = (file?: File) => {
     if (!file) return;
     if (!['image/jpeg','image/jpg','image/png'].includes(file.type)) {
-      setErrors(prev => ({ ...prev, paymentReceipt: 'Only PNG/JPG images are allowed' }));
+      setErrors(prev => ({ ...prev, paymentReceipt: t("forms.validation.onlyImages") }));
       return;
     }
     setErrors(prev => ({ ...prev, paymentReceipt: "" }));
@@ -133,7 +133,7 @@ const MarriageCertificateForm = () => {
     const requiredFields = Object.keys(formData).filter(key => key !== 'email');
     requiredFields.forEach(key => {
       if (!formData[key as keyof MarriageCertificateFormData]) {
-        newErrors[key] = "This field is required";
+        newErrors[key] = t("forms.validation.required");
       }
     });
 
@@ -147,35 +147,35 @@ const MarriageCertificateForm = () => {
     }
 
     if (formData.HusbandAge && (isNaN(Number(formData.HusbandAge)) || Number(formData.HusbandAge) < 21)) {
-      newErrors.HusbandAge = "Groom's age must be at least 21 years";
+      newErrors.HusbandAge = t("forms.validation.minAge") + " 21";
     }
 
     if (formData.wifeAge && (isNaN(Number(formData.wifeAge)) || Number(formData.wifeAge) < 18)) {
-      newErrors.wifeAge = "Bride's age must be at least 18 years";
+      newErrors.wifeAge = t("forms.validation.minAge") + " 18";
     }
 
     // Aadhaar validation
     if (formData.HusbandAadhaar && !/^\d{12}$/.test(formData.HusbandAadhaar)) {
-      newErrors.HusbandAadhaar = "Aadhaar must be 12 digits";
+      newErrors.HusbandAadhaar = t("forms.validation.invalidAadhaar");
     }
 
     if (formData.wifeAadhaar && !/^\d{12}$/.test(formData.wifeAadhaar)) {
-      newErrors.wifeAadhaar = "Aadhaar must be 12 digits";
+      newErrors.wifeAadhaar = t("forms.validation.invalidAadhaar");
     }
 
     // WhatsApp number validation
     if (formData.whatsappNumber && !/^\d{10}$/.test(formData.whatsappNumber)) {
-      newErrors.whatsappNumber = "WhatsApp number must be 10 digits";
+      newErrors.whatsappNumber = t("forms.validation.invalidPhone");
     }
 
     // Email validation (optional)
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Enter a valid email";
+      newErrors.email = t("forms.validation.invalidEmail");
     }
 
     // Payment receipt validation
     if (!paymentReceipt) {
-      newErrors.paymentReceipt = "Payment receipt image is required";
+      newErrors.paymentReceipt = t("forms.validation.paymentReceiptRequired");
     }
 
     setErrors(newErrors);
@@ -220,7 +220,7 @@ const MarriageCertificateForm = () => {
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      const errorMessage = error?.response?.data?.message || "Failed to submit application. Please try again.";
+      const errorMessage = error?.response?.data?.message || t("forms.common.error");
       setErrors({ general: errorMessage });
     } finally {
       setLoading(false);
@@ -243,7 +243,6 @@ const MarriageCertificateForm = () => {
       wifeFatherName: "",
       wifeAddress: "",
       wifeOccupation: "",
-      SolemnizedOn: "",
       applicantFullName: "",
       whatsappNumber: "",
       email: "",
@@ -262,8 +261,8 @@ const MarriageCertificateForm = () => {
       <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-100 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <SuccessMessage
-            title="Application Submitted Successfully!"
-            message="Your marriage certificate application has been submitted and is now under review. You will receive updates on your application status."
+            title={t("forms.common.success")}
+            message={t("forms.common.successMessage")}
             onClose={resetForm}
           />
         </div>
@@ -272,7 +271,7 @@ const MarriageCertificateForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
       <Helmet>
         <title>विवाह प्रमाणपत्र अर्ज - ग्रामपंचायत वाठोडे</title>
         <meta name="description" content="विवाह प्रमाणपत्रासाठी अर्ज करा. ग्रामपंचायत वाठोडे, शिरपूर, धुळे, महाराष्ट्र." />
@@ -284,14 +283,11 @@ const MarriageCertificateForm = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-pink-100 rounded-full mb-4">
-            <FaHeart className="text-3xl text-pink-600" />
-          </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Marriage Certificate Application
+            {t("forms.marriage.title")}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Complete the form below to apply for a marriage certificate. All fields marked with * are required.
+            {t("forms.marriage.description")}
           </p>
         </motion.div>
 
@@ -305,13 +301,13 @@ const MarriageCertificateForm = () => {
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
             {/* Marriage Details Section */}
             <FormSection
-              title="Marriage Details"
-              description="Enter the basic marriage information"
+              title={t("forms.marriage.marriageInfo")}
+              description={t("forms.marriage.marriageInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Date of Marriage"
+                  label={t("forms.marriage.dateOfMarriage")}
                   name="dateOfMarriage"
                   type="date"
                   value={formData.dateOfMarriage}
@@ -320,35 +316,25 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Place of Marriage"
+                  label={t("forms.marriage.placeOfMarriage")}
                   name="placeOfMarriage"
                   placeholder="Enter place of marriage"
                   value={formData.placeOfMarriage}
                   onChange={handleInputChange}
                   error={errors.placeOfMarriage}
                 />
-                
-                <InputField
-                  label="Type of Marriage Ceremony"
-                  name="SolemnizedOn"
-                  placeholder="e.g., Traditional, Court, Temple, etc."
-                  value={formData.SolemnizedOn}
-                  onChange={handleInputChange}
-                  error={errors.SolemnizedOn}
-                  className="md:col-span-2"
-                />
               </div>
             </FormSection>
 
             {/* Groom Information Section */}
             <FormSection
-              title="Groom Information"
-              description="Enter the groom's details"
+              title={t("forms.marriage.husbandInfo")}
+              description={t("forms.marriage.husbandInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Groom's Full Name"
+                  label={t("forms.marriage.husbandName")}
                   name="HusbandName"
                   placeholder="Enter groom's full name"
                   value={formData.HusbandName}
@@ -357,7 +343,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Groom's Aadhaar Number"
+                  label={t("forms.marriage.husbandAadhaar")}
                   name="HusbandAadhaar"
                   placeholder="12-digit Aadhaar number"
                   value={formData.HusbandAadhaar}
@@ -366,7 +352,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Groom's Age"
+                  label={t("forms.marriage.husbandAge")}
                   name="HusbandAge"
                   type="number"
                   placeholder="Enter age"
@@ -378,7 +364,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Groom's Father's Name"
+                  label={t("forms.marriage.husbandFatherName")}
                   name="HusbandFatherName"
                   placeholder="Enter father's name"
                   value={formData.HusbandFatherName}
@@ -387,7 +373,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Groom's Occupation"
+                  label={t("forms.marriage.husbandOccupation")}
                   name="HusbandOccupation"
                   placeholder="Enter occupation"
                   value={formData.HusbandOccupation}
@@ -396,7 +382,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <TextareaField
-                  label="Groom's Address"
+                  label={t("forms.marriage.husbandAddress")}
                   name="HusbandAddress"
                   placeholder="Enter complete address"
                   rows={3}
@@ -410,13 +396,13 @@ const MarriageCertificateForm = () => {
 
             {/* Bride Information Section */}
             <FormSection
-              title="Bride Information"
-              description="Enter the bride's details"
+              title={t("forms.marriage.wifeInfo")}
+              description={t("forms.marriage.wifeInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Bride's Full Name"
+                  label={t("forms.marriage.wifeName")}
                   name="wifeName"
                   placeholder="Enter bride's full name"
                   value={formData.wifeName}
@@ -425,7 +411,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Bride's Aadhaar Number"
+                  label={t("forms.marriage.wifeAadhaar")}
                   name="wifeAadhaar"
                   placeholder="12-digit Aadhaar number"
                   value={formData.wifeAadhaar}
@@ -434,7 +420,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Bride's Age"
+                  label={t("forms.marriage.wifeAge")}
                   name="wifeAge"
                   type="number"
                   placeholder="Enter age"
@@ -446,7 +432,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Bride's Father's Name"
+                  label={t("forms.marriage.wifeFatherName")}
                   name="wifeFatherName"
                   placeholder="Enter father's name"
                   value={formData.wifeFatherName}
@@ -455,7 +441,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Bride's Occupation"
+                  label={t("forms.marriage.wifeOccupation")}
                   name="wifeOccupation"
                   placeholder="Enter occupation"
                   value={formData.wifeOccupation}
@@ -464,7 +450,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <TextareaField
-                  label="Bride's Address"
+                  label={t("forms.marriage.wifeAddress")}
                   name="wifeAddress"
                   placeholder="Enter complete address"
                   rows={3}
@@ -478,13 +464,13 @@ const MarriageCertificateForm = () => {
 
             {/* Applicant Details Section */}
             <FormSection
-              title="Applicant Details"
-              description="Enter applicant information"
+              title={t("forms.marriage.applicantInfo")}
+              description={t("forms.marriage.applicantInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Applicant's Full Name"
+                  label={t("forms.marriage.applicantFullName")}
                   name="applicantFullName"
                   placeholder="Enter applicant's full name"
                   value={formData.applicantFullName}
@@ -493,7 +479,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="WhatsApp Number"
+                  label={t("forms.marriage.whatsappNumber")}
                   name="whatsappNumber"
                   placeholder="10-digit mobile number"
                   value={formData.whatsappNumber}
@@ -502,7 +488,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Email ID (optional)"
+                  label={t("forms.marriage.email")}
                   name="email"
                   type="email"
                   placeholder="name@example.com"
@@ -513,7 +499,7 @@ const MarriageCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="UTR Number"
+                  label={t("forms.marriage.utrNumber")}
                   name="utrNumber"
                   placeholder="Enter UTR number"
                   value={formData.utrNumber}
@@ -525,12 +511,12 @@ const MarriageCertificateForm = () => {
 
             {/* Document Upload Section */}
             <FormSection
-              title="Required Documents"
-              description="Upload supporting documents (maximum 5 files, 10MB each)"
+              title={t("forms.birth.requiredDocs")}
+              description={t("forms.birth.requiredDocsDesc")}
               className="mb-8"
             >
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Payment Receipt (PNG/JPG) - Rs. 20 *</label>
+                <label className="block text-sm font-medium mb-1">{t("forms.common.paymentReceipt")} (PNG/JPG) - Rs. 20 *</label>
                 
                 {/* QR Code for Payment */}
                 <div className="mb-4 p-4 bg-pink-50 border border-pink-200 rounded-lg">
@@ -543,10 +529,10 @@ const MarriageCertificateForm = () => {
                       />
                     </div>
                     <div className="text-sm text-pink-800">
-                      <p className="font-semibold mb-2">📱 Scan QR Code to Pay Rs. 20</p>
-                      <p className="mb-1">• Use any UPI app (PhonePe, GPay, Paytm)</p>
-                      <p className="mb-1">• After payment, upload screenshot below</p>
-                      <p className="text-pink-600 font-medium">• Enter UTR number in applicant details</p>
+                      <p className="font-semibold mb-2">{t("forms.common.scanQR")}</p>
+                      <p className="mb-1">{t("forms.common.useUPI")}</p>
+                      <p className="mb-1">{t("forms.common.uploadScreenshot")}</p>
+                      <p className="text-pink-600 font-medium">{t("forms.common.enterUTR")}</p>
                     </div>
                   </div>
                 </div>
@@ -563,15 +549,15 @@ const MarriageCertificateForm = () => {
                   <div className="mt-3 grid grid-cols-2 gap-3 items-start">
                     <img src={receiptPreview} alt="Receipt Preview" className="rounded border max-h-40 object-contain" />
                     <div className="text-xs text-gray-600 break-all">
-                      <div className="font-medium mb-1">QR Scan (if detected):</div>
-                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || 'No QR detected'}</div>
+                      <div className="font-medium mb-1">{t("forms.common.qrDetected")}</div>
+                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || t("forms.common.noQR")}</div>
                     </div>
                   </div>
                 )}
               </div>
               
               <FileUploadField
-                label="Supporting Documents (Optional)"
+                label={t("forms.birth.supportingDocs")}
                 name="documents"
                 multiple={true}
                 maxFiles={5}
@@ -583,7 +569,7 @@ const MarriageCertificateForm = () => {
               />
               
               <div className="bg-pink-50 border border-pink-200 rounded-lg p-4">
-                <h4 className="font-medium text-pink-900 mb-2">Required Documents:</h4>
+                <h4 className="font-medium text-pink-900 mb-2">{t("forms.birth.recommendedDocs")}</h4>
                 <ul className="text-sm text-pink-800 space-y-1">
                   <li>• Identity proof of both husband and wife (Aadhaar Card)</li>
                 </ul>
@@ -610,7 +596,7 @@ const MarriageCertificateForm = () => {
                 className="flex-1"
                 aria-label="Submit Marriage Certificate Application"
               >
-                Submit Application
+                {loading ? t("forms.common.submitting") : t("forms.common.submit")}
               </SubmitButton>
               
               <button
@@ -619,7 +605,7 @@ const MarriageCertificateForm = () => {
                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
                 aria-label="Reset Form"
               >
-                Reset Form
+                {t("forms.common.reset")}
               </button>
             </div>
           </form>
@@ -633,10 +619,10 @@ const MarriageCertificateForm = () => {
           className="mt-8 text-center text-sm text-gray-600"
         >
           <p>
-            Your application will be reviewed by our team. You will receive updates via email and SMS.
+            {t("forms.common.reviewMessage")}
           </p>
           <p className="mt-2">
-            For any queries, please contact our support team.
+            {t("forms.common.supportMessage")}
           </p>
         </motion.div>
       </div>

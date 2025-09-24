@@ -22,5 +22,96 @@
     "notices": "Notices",
     "help": "HELP",
     "contact": "Contact"
+  },
+  "certificates": {
+    "title": "Certificate Applications",
+    "description": "Choose the type of certificate you need and complete the online application form. Our streamlined process makes it easy to apply for government certificates.",
+    "birth": {
+      "title": "Birth Certificate",
+      "description": "Apply for a birth certificate for newborns or children",
+      "points": [
+        "Child's full name and details",
+        "Date and place of birth",
+        "Parents' information and address",
+        "Required documents: Hospital certificate, ID proof"
+      ]
+    },
+    "death": {
+      "title": "Death Certificate",
+      "description": "Apply for a death certificate for deceased persons",
+      "points": [
+        "Deceased person's details",
+        "Date and place of death",
+        "Family member information",
+        "Required documents: Medical certificate, ID proof"
+      ]
+    },
+    "marriage": {
+      "title": "Marriage Certificate",
+      "description": "Apply for a marriage certificate for newlyweds",
+      "points": [
+        "Bride and groom details",
+        "Date and place of marriage",
+        "Witness information",
+        "Required documents: Wedding photos, ID proof"
+      ]
+    },
+    "landRecord8A": {
+      "title": "8A Land Record Digital Signature",
+      "description": "Apply for 8A land record with digital signature",
+      "points": [
+        "Land owner's name and details",
+        "Village and district information",
+        "Account number required",
+        "Fee: Rs. 15/- with payment receipt"
+      ]
+    },
+    "noOutstandingDebts": {
+      "title": "Certificate of No Outstanding Debts",
+      "description": "Apply for certificate of no outstanding debts",
+      "points": [
+        "Property owner's details",
+        "Property information and address",
+        "Applicant's Aadhaar details",
+        "Fee: Rs. 20/- with payment receipt"
+      ]
+    },
+    "digitalSigned712": {
+      "title": "Digitally Signed 7/12",
+      "description": "Apply for digitally signed 7/12 land record",
+      "points": [
+        "Land owner's name and details",
+        "Survey number or group number",
+        "Village and taluka information",
+        "Fee: Rs. 15/- with payment receipt"
+      ]
+    },
+    "applyNow": "Apply Now",
+    "howItWorks": "How It Works",
+    "steps": {
+      "fillForm": {
+        "title": "Fill Application Form",
+        "description": "Complete the online form with all required information"
+      },
+      "uploadDocs": {
+        "title": "Upload Documents",
+        "description": "Upload supporting documents using our secure file upload"
+      },
+      "submitTrack": {
+        "title": "Submit & Track",
+        "description": "Submit your application and track its progress online"
+      }
+    },
+    "importantNotes": "Important Notes:",
+    "notes": [
+      "• All fields marked with * are mandatory",
+      "• Maximum 5 documents can be uploaded",
+      "• Supported formats: JPG, PNG, PDF, DOC, DOCX",
+      "• Maximum file size: 10MB per file",
+      "• Applications are processed within 7-10 working days"
+    ],
+    "needHelp": "Need help with your application?",
+    "contactSupport": "Contact Support",
+    "viewFAQ": "View FAQ"
   }
 }

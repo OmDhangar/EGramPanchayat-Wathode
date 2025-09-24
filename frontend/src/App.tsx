@@ -36,6 +36,9 @@ import FormsPage from './pages/applyforcertificates';
 import PublicInfo from './pages/publicinfo';
 import Help from './pages/help';
 import MarriageCertificateForm from './pages/MarriageCertificateForm';
+import LandRecord8AForm from './pages/LandRecord8A';
+import NoOutstandingDebtsForm from './pages/NoOutstandingDebts';
+import DigitalSigned712Form from './pages/DigitalSigned712';
 import CertificateDownload from './pages/certificateDownload';
 import BlogDetails from './components/blogDetails';
 
@@ -115,6 +118,9 @@ function AppContent() {
             <Route path="/apply-for-certificates/birth-certificate" element={<BirthCertificate />} />
             <Route path="/apply-for-certificates/death-certificate" element={<DeathCertificate />} />
             <Route path="/apply-for-certificates/marriage-certificate" element={<MarriageCertificateForm />} />
+            <Route path="/apply-for-certificates/land-record-8a" element={<LandRecord8AForm />} />
+            <Route path="/apply-for-certificates/no-outstanding-debts" element={<NoOutstandingDebtsForm />} />
+            <Route path="/apply-for-certificates/digital-signed-712" element={<DigitalSigned712Form />} />
           </Routes>
         </main>
         <Footer />

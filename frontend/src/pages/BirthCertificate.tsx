@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaBaby } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import { api } from "../api/axios";
 import {
   InputField,
@@ -40,6 +41,7 @@ interface BirthCertificateFormData {
 }
 
 const BirthCertificateForm = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<BirthCertificateFormData>({
     financialYear: "",
     childName: "",
@@ -92,7 +94,7 @@ const BirthCertificateForm = () => {
   const handleReceiptChange = (file?: File) => {
     if (!file) return;
     if (!['image/jpeg','image/jpg','image/png'].includes(file.type)) {
-      setErrors(prev => ({ ...prev, paymentReceipt: 'Only PNG/JPG images are allowed' }));
+      setErrors(prev => ({ ...prev, paymentReceipt: t("forms.validation.onlyImages") }));
       return;
     }
     setErrors(prev => ({ ...prev, paymentReceipt: "" }));
@@ -134,20 +136,20 @@ const BirthCertificateForm = () => {
     const newErrors: FormErrors = {};
     
     // Required field validations matching backend exactly
-    if (!formData.financialYear) newErrors.financialYear = "Financial year is required";
-    if (!formData.childName) newErrors.childName = "Child name is required";
-    if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
-    if (!formData.placeOfBirth) newErrors.placeOfBirth = "Place of birth is required";
-    if (!formData.gender) newErrors.gender = "Gender is required";
-    if (!formData.fatherName) newErrors.fatherName = "Father name is required";
-    if (!formData.motherName) newErrors.motherName = "Mother name is required";
-    if (!formData.applicantFullNameEnglish) newErrors.applicantFullNameEnglish = "Applicant full name (English) is required";
-    if (!formData.applicantFullNameDevanagari) newErrors.applicantFullNameDevanagari = "Applicant full name (Devanagari) is required";
-    if (!formData.whatsappNumber || !/^\d{10}$/.test(formData.whatsappNumber)) newErrors.whatsappNumber = "WhatsApp must be 10 digits";
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Enter a valid email";
-    if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.utrNumber) newErrors.utrNumber = "UTR number is required";
-    if (!paymentReceipt) newErrors.paymentReceipt = "Payment receipt image is required";
+    if (!formData.financialYear) newErrors.financialYear = t("forms.validation.required");
+    if (!formData.childName) newErrors.childName = t("forms.validation.required");
+    if (!formData.dateOfBirth) newErrors.dateOfBirth = t("forms.validation.required");
+    if (!formData.placeOfBirth) newErrors.placeOfBirth = t("forms.validation.required");
+    if (!formData.gender) newErrors.gender = t("forms.validation.required");
+    if (!formData.fatherName) newErrors.fatherName = t("forms.validation.required");
+    if (!formData.motherName) newErrors.motherName = t("forms.validation.required");
+    if (!formData.applicantFullNameEnglish) newErrors.applicantFullNameEnglish = t("forms.validation.required");
+    if (!formData.applicantFullNameDevanagari) newErrors.applicantFullNameDevanagari = t("forms.validation.required");
+    if (!formData.whatsappNumber || !/^\d{10}$/.test(formData.whatsappNumber)) newErrors.whatsappNumber = t("forms.validation.invalidPhone");
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = t("forms.validation.invalidEmail");
+    if (!formData.address) newErrors.address = t("forms.validation.required");
+    if (!formData.utrNumber) newErrors.utrNumber = t("forms.validation.required");
+    if (!paymentReceipt) newErrors.paymentReceipt = t("forms.validation.paymentReceiptRequired");
     
     // Note: parentsAddressAtBirth and occupations are not required in backend
 
@@ -196,7 +198,7 @@ const BirthCertificateForm = () => {
     } catch (error: any) {
       console.error("Submission error:", error);
       console.error("Error response:", error?.response?.data);
-      const errorMessage = error?.response?.data?.message || "Failed to submit application. Please try again.";
+      const errorMessage = error?.response?.data?.message || t("forms.common.error");
       setErrors({ general: errorMessage });
     } finally {
       setLoading(false);
@@ -236,8 +238,8 @@ const BirthCertificateForm = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <SuccessMessage
-            title="Application Submitted Successfully!"
-            message="Your birth certificate application has been submitted and is now under review. You will receive updates on your application status."
+            title={t("forms.common.success")}
+            message={t("forms.common.successMessage")}
             onClose={resetForm}
           />
         </div>
@@ -258,14 +260,11 @@ const BirthCertificateForm = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-4">
-            <FaBaby className="text-3xl text-blue-600" />
-          </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Birth Certificate Application
+            {t("forms.birth.title")}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Complete the form below to apply for a birth certificate. All fields marked with * are required.
+            {t("forms.birth.description")}
           </p>
         </motion.div>
 
@@ -279,13 +278,13 @@ const BirthCertificateForm = () => {
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
             {/* Child Information Section */}
             <FormSection
-              title="Child Information"
-              description="Enter the details of the child for whom the birth certificate is requested"
+              title={t("forms.birth.childInfo")}
+              description={t("forms.birth.childInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Financial Year"
+                  label={t("forms.birth.financialYear")}
                   name="financialYear"
                   placeholder="2025-26"
                   value={formData.financialYear}
@@ -293,7 +292,7 @@ const BirthCertificateForm = () => {
                   error={errors.financialYear}
                 />
                 <InputField
-                  label="Child's Full Name"
+                  label={t("forms.birth.childName")}
                   name="childName"
                   placeholder="Enter child's full name"
                   value={formData.childName}
@@ -302,7 +301,7 @@ const BirthCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Date of Birth"
+                  label={t("forms.birth.dateOfBirth")}
                   name="dateOfBirth"
                   type="date"
                   value={formData.dateOfBirth}
@@ -311,7 +310,7 @@ const BirthCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Place of Birth"
+                  label={t("forms.birth.placeOfBirth")}
                   name="placeOfBirth"
                   placeholder="Enter place of birth"
                   value={formData.placeOfBirth}
@@ -320,7 +319,7 @@ const BirthCertificateForm = () => {
                 />
                 
                 <SelectField
-                  label="Gender"
+                  label={t("forms.birth.gender")}
                   name="gender"
                   options={genderOptions as any}
                   placeholder="Select gender"
@@ -333,13 +332,13 @@ const BirthCertificateForm = () => {
 
             {/* Parents Information Section - FIXED */}
             <FormSection
-              title="Parents Information"
-              description="Enter the parents' details"
+              title={t("forms.birth.parentsInfo")}
+              description={t("forms.birth.parentsInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Father's Full Name"
+                  label={t("forms.birth.fatherName")}
                   name="fatherName"
                   placeholder="Enter father's full name"
                   value={formData.fatherName}
@@ -347,7 +346,7 @@ const BirthCertificateForm = () => {
                   error={errors.fatherName}
                 />
                 <InputField
-                  label="Mother's Full Name"
+                  label={t("forms.birth.motherName")}
                   name="motherName"
                   placeholder="Enter mother's full name"
                   value={formData.motherName}
@@ -356,7 +355,7 @@ const BirthCertificateForm = () => {
                 />
                 
                 <InputField
-                  label="Father's Occupation"
+                  label={t("forms.birth.fatherOccupation")}
                   name="fatherOccupation"
                   placeholder="Enter father's occupation"
                   value={formData.fatherOccupation}
@@ -367,7 +366,7 @@ const BirthCertificateForm = () => {
 
                 {/* Added missing Mother's Occupation field */}
                 <InputField
-                  label="Mother's Occupation"
+                  label={t("forms.birth.motherOccupation")}
                   name="motherOccupation"
                   placeholder="Enter mother's occupation"
                   value={formData.motherOccupation}
@@ -380,13 +379,13 @@ const BirthCertificateForm = () => {
 
             {/* Address Information Section - FIXED */}
             <FormSection
-              title="Address Information"
-              description="Enter address details"
+              title={t("forms.birth.addressInfo")}
+              description={t("forms.birth.addressInfoDesc")}
               className="mb-8"
             >
               {/* Added missing Parents Address at Birth field */}
               <TextareaField
-                label="Parents Address at Time of Birth"
+                label={t("forms.birth.parentsAddressAtBirth")}
                 name="parentsAddressAtBirth"
                 placeholder="Enter the address where parents lived when child was born"
                 rows={3}
@@ -398,7 +397,7 @@ const BirthCertificateForm = () => {
               />
 
               <TextareaField
-                label="Permanent Address of Parents"
+                label={t("forms.birth.permanentAddressParent")}
                 name="permanentAddressParent"
                 placeholder="Enter current permanent address of parents"
                 rows={3}
@@ -410,7 +409,7 @@ const BirthCertificateForm = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Applicant Full Name (English)"
+                  label={t("forms.birth.applicantFullNameEnglish")}
                   name="applicantFullNameEnglish"
                   placeholder="John Doe"
                   value={formData.applicantFullNameEnglish}
@@ -418,7 +417,7 @@ const BirthCertificateForm = () => {
                   error={errors.applicantFullNameEnglish}
                 />
                 <InputField
-                  label="Applicant Full Name (Devanagari)"
+                  label={t("forms.birth.applicantFullNameDevanagari")}
                   name="applicantFullNameDevanagari"
                   placeholder="जॉन डो"
                   value={formData.applicantFullNameDevanagari}
@@ -426,7 +425,7 @@ const BirthCertificateForm = () => {
                   error={errors.applicantFullNameDevanagari}
                 />
                 <InputField
-                  label="WhatsApp Number"
+                  label={t("forms.birth.whatsappNumber")}
                   name="whatsappNumber"
                   placeholder="10-digit mobile"
                   value={formData.whatsappNumber}
@@ -434,7 +433,7 @@ const BirthCertificateForm = () => {
                   error={errors.whatsappNumber}
                 />
                 <InputField
-                  label="Email (optional)"
+                  label={t("forms.birth.email")}
                   name="email"
                   placeholder="name@example.com"
                   value={formData.email}
@@ -445,7 +444,7 @@ const BirthCertificateForm = () => {
               </div>
               
               <TextareaField
-                label="Current Address"
+                label={t("forms.birth.currentAddress")}
                 name="address"
                 placeholder="Full current address of applicant"
                 rows={3}
@@ -458,12 +457,12 @@ const BirthCertificateForm = () => {
 
             {/* Payment Section */}
             <FormSection
-              title="Payment Information"
-              description="Payment details for birth certificate (Rs. 20)"
+              title={t("forms.birth.paymentInfo")}
+              description={t("forms.birth.paymentInfoDesc")}
               className="mb-8"
             >
               <InputField
-                label="UTR Number"
+                label={t("forms.birth.utrNumber")}
                 name="utrNumber"
                 placeholder="Enter UTR number from payment receipt"
                 value={formData.utrNumber}
@@ -474,12 +473,12 @@ const BirthCertificateForm = () => {
 
             {/* Document Upload Section */}
             <FormSection
-              title="Required Documents"
-              description="Upload supporting documents (maximum 5 files, 10MB each)"
+              title={t("forms.birth.requiredDocs")}
+              description={t("forms.birth.requiredDocsDesc")}
               className="mb-8"
             >
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Payment Receipt (PNG/JPG) - Rs. 20 *</label>
+                <label className="block text-sm font-medium mb-1">{t("forms.common.paymentReceipt")} (PNG/JPG) - Rs. 20 *</label>
                 
                 {/* QR Code for Payment */}
                 <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -492,10 +491,10 @@ const BirthCertificateForm = () => {
                       />
                     </div>
                     <div className="text-sm text-blue-800">
-                      <p className="font-semibold mb-2">📱 Scan QR Code to Pay Rs. 20</p>
-                      <p className="mb-1">• Use any UPI app (PhonePe, GPay, Paytm)</p>
-                      <p className="mb-1">• After payment, upload screenshot below</p>
-                      <p className="text-blue-600 font-medium">• Enter UTR number in applicant details</p>
+                      <p className="font-semibold mb-2">{t("forms.common.scanQR")}</p>
+                      <p className="mb-1">{t("forms.common.useUPI")}</p>
+                      <p className="mb-1">{t("forms.common.uploadScreenshot")}</p>
+                      <p className="text-blue-600 font-medium">{t("forms.common.enterUTR")}</p>
                     </div>
                   </div>
                 </div>
@@ -512,15 +511,15 @@ const BirthCertificateForm = () => {
                   <div className="mt-3 grid grid-cols-2 gap-3 items-start">
                     <img src={receiptPreview} alt="Receipt Preview" className="rounded border max-h-40 object-contain" />
                     <div className="text-xs text-gray-600 break-all">
-                      <div className="font-medium mb-1">QR Scan (if detected):</div>
-                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || 'No QR detected'}</div>
+                      <div className="font-medium mb-1">{t("forms.common.qrDetected")}</div>
+                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || t("forms.common.noQR")}</div>
                     </div>
                   </div>
                 )}
               </div>
               
               <FileUploadField
-                label="Supporting Documents (Optional)"
+                label={t("forms.birth.supportingDocs")}
                 name="documents"
                 multiple={true}
                 maxFiles={5}
@@ -532,9 +531,9 @@ const BirthCertificateForm = () => {
               />
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                <h4 className="font-medium text-blue-900 mb-2">Recommended Documents:</h4>
+                <h4 className="font-medium text-blue-900 mb-2">{t("forms.birth.recommendedDocs")}</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Identity proof of parents(Aadhaar Card)</li>
+                  <li>{t("forms.birth.parentIdProof")}</li>
                 </ul>
               </div>
             </FormSection>
@@ -559,7 +558,7 @@ const BirthCertificateForm = () => {
                 className="flex-1"
                 type="submit"
               >
-                {loading ? 'Submitting...' : 'Submit Application'}
+                {loading ? t("forms.common.submitting") : t("forms.common.submit")}
               </SubmitButton>
               
               <button
@@ -568,7 +567,7 @@ const BirthCertificateForm = () => {
                 disabled={loading}
                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Reset Form
+                {t("forms.common.reset")}
               </button>
             </div>
           </form>
@@ -582,10 +581,10 @@ const BirthCertificateForm = () => {
           className="mt-8 text-center text-sm text-gray-600"
         >
           <p>
-            Your application will be reviewed by our team. You will receive updates via email and SMS.
+            {t("forms.common.reviewMessage")}
           </p>
           <p className="mt-2">
-            For any queries, please contact our support team.
+            {t("forms.common.supportMessage")}
           </p>
         </motion.div>
       </div>
