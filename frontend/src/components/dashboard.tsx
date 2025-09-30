@@ -17,6 +17,7 @@ import { Navigate } from "react-router-dom";
 import LogoutButton from "./LogoutButton";
 import { Variants } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 const cardVariants: Variants = {
   initial: { opacity: 0, y: 20, scale: 0.98 },
@@ -57,6 +58,7 @@ export default function Dashboard() {
   const { user, logout } = useAuthContext();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleResize = () => {
@@ -204,32 +206,36 @@ export default function Dashboard() {
                   <ServiceCard
                     to="/admin/users"
                     icon={<FaUsers className="text-2xl text-yellow-600" />}
-                    title="Manage Users"
-                    description="View and manage user requests and accounts."
+                    title={t("dashboard.admin.manageUsers.title")}
+                    subtitle="वापरकर्ते व्यवस्थापित करा"
+                    description={t("dashboard.admin.manageUsers.description")}
                     color="yellow"
                     delay={0}
                   />
                   <ServiceCard
                     to="/admin/blogs"
                     icon={<FaFileAlt className="text-2xl text-indigo-600" />}
-                    title="Blogs"
-                    description="Read our latest updates and articles."
+                    title={t("dashboard.admin.blogs.title")}
+                    subtitle="ब्लॉग्स"
+                    description={t("dashboard.admin.blogs.description")}
                     color="indigo"
                     delay={0.3}
                   />
                   <ServiceCard
                     to="/admin/approvals"
                     icon={<FaCheckCircle className="text-2xl text-green-600" />}
-                    title="Certificate Approvals"
-                    description="Approve or reject submitted certificate forms."
+                    title={t("dashboard.admin.certificateApprovals.title")}
+                    subtitle="प्रमाणपत्र मंजुरी"
+                    description={t("dashboard.admin.certificateApprovals.description")}
                     color="green"
                     delay={0.1}
                   />
                   <ServiceCard
                     to="/admin/upload"
                     icon={<FaUpload className="text-2xl text-blue-600" />}
-                    title="Upload Certificates"
-                    description="Upload finalized certificates for users to download."
+                    title={t("dashboard.admin.uploadCertificates.title")}
+                    subtitle="प्रमाणपत्र अपलोड करा"
+                    description={t("dashboard.admin.uploadCertificates.description")}
                     color="blue"
                     delay={0.2}
                   />
@@ -242,32 +248,36 @@ export default function Dashboard() {
                   <ServiceCard
                     to="/user/certificates"
                     icon={<FaCertificate className="text-2xl text-blue-600" />}
-                    title="View Certificates"
-                    description="Access and download your certificates."
+                    title={t("dashboard.user.viewCertificates.title")}
+                    subtitle="प्रमाणपत्र पहा"
+                    description={t("dashboard.user.viewCertificates.description")}
                     color="blue"
                     delay={0}
                   />
                   <ServiceCard
                     to="/apply-for-certificates"
                     icon={<FaCheckCircle className="text-2xl text-green-600" />}
-                    title="Apply for Certificate"
-                    description="Submit new requests for official certificates."
+                    title={t("dashboard.user.applyForCertificate.title")}
+                    subtitle="प्रमाणपत्रासाठी अर्ज करा"
+                    description={t("dashboard.user.applyForCertificate.description")}
                     color="green"
                     delay={0.1}
                   />
                   <ServiceCard
                     to="/user/notifications"
                     icon={<FaBell className="text-2xl text-yellow-600" />}
-                    title="Notifications"
-                    description="Get updates about your application status."
+                    title={t("dashboard.user.notifications.title")}
+                    subtitle="सूचना"
+                    description={t("dashboard.user.notifications.description")}
                     color="yellow"
                     delay={0.2}
                   />
                   <ServiceCard
                     to="/user/status"
                     icon={<FaChartLine className="text-2xl text-purple-600" />}
-                    title="Application Status"
-                    description="Track the progress of your applications."
+                    title={t("dashboard.user.applicationStatus.title")}
+                    subtitle="अर्जाची स्थिती"
+                    description={t("dashboard.user.applicationStatus.description")}
                     color="purple"
                     delay={0.3}
                   />
@@ -304,7 +314,7 @@ export default function Dashboard() {
 }
 
 // Service Card Component
-function ServiceCard({ to, icon, title, description, color, delay = 0 }) {
+function ServiceCard({ to, icon, title, subtitle, description, color, delay = 0 }) {
   const colorClasses = {
     blue: "from-blue-50 to-cyan-50 border-blue-100 hover:shadow-blue-100",
     green: "from-green-50 to-emerald-50 border-green-100 hover:shadow-green-100",
@@ -336,7 +346,8 @@ function ServiceCard({ to, icon, title, description, color, delay = 0 }) {
               <FaChevronRight />
             </motion.div>
           </div>
-          <h3 className={`text-lg font-semibold text-slate-800 mb-2`}>{title}</h3>
+          <h3 className={`text-lg font-semibold text-slate-800 mb-1`}>{title}</h3>
+          <p className={`text-${color}-700 text-sm mb-2 font-medium`}>{subtitle}</p>
           <p className="text-slate-600 text-sm flex-1">{description}</p>
           <div className="mt-4 pt-3 border-t border-slate-100/50 flex justify-between items-center">
             <span className={`text-xs font-medium text-${color}-700`}>Access now</span>
