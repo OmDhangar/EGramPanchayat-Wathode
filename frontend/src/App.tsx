@@ -41,6 +41,7 @@ import NoOutstandingDebtsForm from './pages/NoOutstandingDebts';
 import DigitalSigned712Form from './pages/DigitalSigned712';
 import CertificateDownload from './pages/certificateDownload';
 import BlogDetails from './components/blogDetails';
+import TaxationInfo from './components/taxation';
 
 function AppContent() {
   const location = useLocation();
@@ -96,6 +97,7 @@ function AppContent() {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/gallery/:year" element={<YearGallery />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/taxation" element={<TaxationInfo />} />
             //admin
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin/blogs" element={<Blogs />} />

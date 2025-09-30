@@ -9,13 +9,21 @@ import userRoutes from "./routes/user.routes.js";
 const app = express()
 
 
+const allowedOrigins = [
+  "https://grampanchayatwathode.com",
+  "https://www.grampanchayatwathode.com",
+  "https://www.api.grampanchayatwathode.com",
+  "https://api.grampanchayatwathode.com"
+];
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173", // Set your frontend URL here
-    credentials: true, // Allow cookies to be sent with requests
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ["set-cookie"]
-}))
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ["set-cookie"]
+}));
+
 
 app.use(express.json({limit: '16kb'})) //used to configure json data
 app.use(express.urlencoded({extended: true}))//used to configure url properties
