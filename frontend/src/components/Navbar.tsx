@@ -6,7 +6,6 @@ import { useAuthContext } from "../Context/authContext";
 import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
-  const [hovered, setHovered] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileDropdown, setMobileDropdown] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -128,16 +127,6 @@ export default function Navbar() {
                 }`}
               >
                 MR
-              </button>
-              <button
-                onClick={() => i18n.changeLanguage("hi")}
-                className={`px-1.5 py-0.5 rounded text-[0.6rem] xs:text-xs font-bold lg:text-[0.6rem] ${
-                  i18n.language === "hi"
-                    ? "bg-orange-600 text-white"
-                    : "bg-gray-200 text-orange-700"
-                }`}
-              >
-                HI
               </button>
             </div>
           </div>

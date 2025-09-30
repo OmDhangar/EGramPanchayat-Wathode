@@ -96,6 +96,7 @@ function AppContent() {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/gallery/:year" element={<YearGallery />} />
             <Route path="/register" element={<Register />} />
+            //admin
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin/blogs" element={<Blogs />} />
             <Route path="/admin/users" element={<ManageUsers />} />
@@ -108,12 +109,14 @@ function AppContent() {
             <Route path="/user/certificates" element={<UserCertificates />} />
             <Route path="/user/notifications" element={<UserNotifications />} />
             <Route path="/certificate/:applicationId" element={<CertificateDownload/>}/>
+            //common
             <Route path="/home" element={<Home />} />
             <Route path="/members" element={<Members />} />
             <Route path="/notices" element={<PublicInfo />} />
             <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/contact" element={<Help/>} />
+            //certificates
             <Route path="/apply-for-certificates" element={<FormsPage/>} />
             <Route path="/apply-for-certificates/birth-certificate" element={<BirthCertificate />} />
             <Route path="/apply-for-certificates/death-certificate" element={<DeathCertificate />} />

@@ -22,18 +22,18 @@ function Login() {
 
     try {
       const response = await api.post('/users/login', form);
-      const { accessToken, user ,refreshToken } = response.data.data;
+      const { accessToken, user, refreshToken } = response.data.data;
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('refreshToken',JSON.stringify(refreshToken));
+      localStorage.setItem('refreshToken', JSON.stringify(refreshToken));
 
       setUser(user);
       setIsAuthenticated(true);
       navigate('/dashboard');
     } catch (error: any) {
-      console.error('Login failed:', error.response?.data || error.message);
-      alert('Login failed. Please check your credentials and try again.');
+      console.error('लॉगिन अयशस्वी:', error.response?.data || error.message);
+      alert('लॉगिन अयशस्वी. कृपया आपली माहिती तपासा आणि पुन्हा प्रयत्न करा.');
     }
   };
 
@@ -41,9 +41,9 @@ function Login() {
     e.preventDefault();
     try {
       await api.post('/users/forgot-password', { email: resetEmail });
-      setMessage('Reset link sent to your email.');
+      setMessage('रीसेट लिंक आपल्या ई-मेलवर पाठवली आहे.');
     } catch (err) {
-      setMessage('Error sending reset link. Please try again.');
+      setMessage('रीसेट लिंक पाठवताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.');
     }
   };
 
@@ -51,7 +51,10 @@ function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <Helmet>
         <title>लॉगिन - ग्रामपंचायत वाठोडे</title>
-        <meta name="description" content="ग्रामपंचायत वाठोडे वेबसाइटवर लॉगिन करा. प्रमाणपत्र अर्ज, योजना आणि इतर सेवांमध्ये प्रवेश मिळवा." />
+        <meta
+          name="description"
+          content="ग्रामपंचायत वाठोडे वेबसाइटवर लॉगिन करा. प्रमाणपत्र अर्ज, योजना आणि इतर सेवांमध्ये प्रवेश मिळवा."
+        />
       </Helmet>
       <motion.div
         className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md"
@@ -60,12 +63,12 @@ function Login() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-2xl font-semibold text-indigo-600 mb-2">
-          {isForgotMode ? 'Forgot Password' : 'Login'}
+          {isForgotMode ? 'पासवर्ड विसरलात?' : 'लॉगिन'}
         </h1>
         <p className="text-sm text-gray-500 mb-6">
           {isForgotMode
-            ? 'Enter your email to receive a reset link.'
-            : 'Login now and get full access to our app.'}
+            ? 'रीसेट लिंक मिळवण्यासाठी आपला ई-मेल टाका.'
+            : 'आता लॉगिन करा आणि आमच्या सर्व सेवांचा लाभ घ्या.'}
         </p>
 
         {isForgotMode ? (
@@ -73,7 +76,7 @@ function Login() {
             <div className="mb-4">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="आपला ई-मेल टाका"
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
                 required
@@ -87,18 +90,18 @@ function Login() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Send Reset Link
+              रीसेट लिंक पाठवा
             </motion.button>
 
             {message && <p className="text-green-600 text-sm text-center mt-3">{message}</p>}
 
             <p className="text-sm text-gray-600 text-center mt-4">
-              Remembered your password?{' '}
+              पासवर्ड लक्षात आला का?{' '}
               <span
                 onClick={() => setIsForgotMode(false)}
                 className="text-indigo-600 hover:underline cursor-pointer"
               >
-                Back to Login
+                परत लॉगिनवर जा
               </span>
             </p>
           </form>
@@ -108,7 +111,7 @@ function Login() {
               <input
                 type="email"
                 name="email"
-                placeholder="Email"
+                placeholder="ई-मेल"
                 value={form.email}
                 onChange={handleChange}
                 required
@@ -120,7 +123,7 @@ function Login() {
               <input
                 type="password"
                 name="password"
-                placeholder="Password"
+                placeholder="पासवर्ड"
                 value={form.password}
                 onChange={handleChange}
                 required
@@ -133,7 +136,7 @@ function Login() {
                 className="text-indigo-600 hover:underline cursor-pointer"
                 onClick={() => setIsForgotMode(true)}
               >
-                Forgot Password?
+                पासवर्ड विसरलात?
               </span>
             </div>
 
@@ -143,16 +146,16 @@ function Login() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Submit
+              सबमिट करा
             </motion.button>
           </form>
         )}
 
         {!isForgotMode && (
           <p className="text-sm text-center text-gray-600 mt-6">
-            Don’t have an account?{' '}
+            खाते नाहीये का?{' '}
             <a href="/register" className="text-indigo-600 hover:underline">
-              Register
+              नोंदणी करा
             </a>
           </p>
         )}

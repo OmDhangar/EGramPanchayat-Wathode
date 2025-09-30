@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaHeart } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/axios";
 import { Helmet } from "react-helmet";
