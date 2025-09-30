@@ -59,7 +59,9 @@ export default function Navbar() {
     {
       label: t("nav.citizen"),
       icon: "👥",
-      links: [{ label: t("nav.apply"), path: "/apply-for-certificates" }],
+      links: [{ label: t("nav.apply"), path: "/apply-for-certificates" },
+        { label: t("nav.taxation"), path: "/taxation-info" }
+      ],
     },
     {
       label: t("nav.public"),
