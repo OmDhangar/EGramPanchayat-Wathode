@@ -17,16 +17,6 @@ import { useAuthContext } from "../Context/authContext";
 import { Variants } from "framer-motion";
 import { useState, useEffect } from "react";
 
-// Service Card Component
-type ServiceCardProps = {
-  to: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  color: string;
-  delay?: number;
-};
-
 const cardVariants: Variants = {
   initial: { opacity: 0, y: 20, scale: 0.98 },
   animate: { 
@@ -51,6 +41,7 @@ const fadeIn = {
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuthContext();
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -254,8 +245,8 @@ export default function Dashboard() {
   );
 }
 
-
-function ServiceCard({ to, icon, title, description, color, delay = 0 }: ServiceCardProps) {
+// Service Card Component
+function ServiceCard({ to, icon, title, description, color, delay = 0 }) {
   return (
     <motion.div variants={fadeIn} custom={delay}>
       <Link to={to}>

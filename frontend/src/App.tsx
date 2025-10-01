@@ -33,6 +33,7 @@ import DeathCertificate from './pages/DeathCertificate';
 import UserDetails from './components/UserDetails';
 import Members from './pages/Members';
 import FormsPage from './pages/applyforcertificates';
+import TaxationInfo from './pages/TaxationInfo';
 import PublicInfo from './pages/publicinfo';
 import Help from './pages/help';
 import MarriageCertificateForm from './pages/MarriageCertificateForm';
@@ -41,7 +42,6 @@ import NoOutstandingDebtsForm from './pages/NoOutstandingDebts';
 import DigitalSigned712Form from './pages/DigitalSigned712';
 import CertificateDownload from './pages/certificateDownload';
 import BlogDetails from './components/blogDetails';
-import TaxationInfo from './components/taxation';
 
 function AppContent() {
   const location = useLocation();
@@ -126,6 +126,7 @@ function AppContent() {
             <Route path="/apply-for-certificates/land-record-8a" element={<LandRecord8AForm />} />
             <Route path="/apply-for-certificates/no-outstanding-debts" element={<NoOutstandingDebtsForm />} />
             <Route path="/apply-for-certificates/digital-signed-712" element={<DigitalSigned712Form />} />
+            <Route path="/taxation-info" element={<TaxationInfo />} />
           </Routes>
         </main>
         <Footer />

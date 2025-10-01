@@ -29,14 +29,24 @@ const BLOG_CATEGORIES = [
   "कर संग्रह",
   "सण उत्सव",
   "नियोजन",
-  "शिक्षण"
+  "शिक्षण",
 ];
 
-// Custom notice board header
+// Redesigned Notice Board Header
 const NoticeBoardHeader = () => (
-  <div className="text-center mb-8 p-3 xs:p-5 bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-xl shadow-lg border-b-4 border-purple-800">
-    <h1 className="text-xl xs:text-3xl font-bold mb-1 xs:mb-2">सार्वजनिक सूचना फलक</h1>
-    <p className="text-blue-100 text-xs xs:text-base">महानगर पालिका, पुणे</p>
+  <div className="relative mb-10">
+    <div className="mx-auto max-w-3xl">
+      <div className="rounded-3xl border border-black bg-white/90 shadow-lg backdrop-blur">
+        <div className="px-6 py-8 text-center">
+          <h1 className="font-tiro-marathi text-3xl xs:text-4xl font-bold tracking-wide text-indigo-700">
+            ✦ सार्वजनिक सूचना फलक ✦
+          </h1>
+          <p className="mt-3 text-sm xs:text-base text-gray-600">
+            ग्रामपंचायतीच्या महत्वाच्या सूचना व अद्ययावत माहिती
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
@@ -61,11 +71,15 @@ export default function NoticeBoard() {
           ...img,
           url: img.signedUrl,
         })),
-        // Add random dates and priorities for demo
-        date: blog.date || new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toLocaleDateString('en-IN'),
-        priority: blog.priority || ["high", "medium", "low"][Math.floor(Math.random() * 3)]
+        date:
+          blog.date ||
+          new Date(
+            Date.now() - Math.floor(Math.random() * 10000000000)
+          ).toLocaleDateString("en-IN"),
+        priority:
+          blog.priority ||
+          ["high", "medium", "low"][Math.floor(Math.random() * 3)],
       }));
-      console.log(blogsWithUrls);
 
       setBlogs(blogsWithUrls);
     } catch (err) {
@@ -80,34 +94,36 @@ export default function NoticeBoard() {
     fetchBlogs(selectedCategory);
   }, [selectedCategory]);
 
-  if (loading) return (
-    <div className="bg-[#ececff] min-h-screen p-6">
-      <div className="max-w-6xl mx-auto">
-        <NoticeBoardHeader />
-        <BlogSkeleton />
+  if (loading)
+    return (
+      <div className="min-h-screen p-6 font-tiro-marathi bg-gradient-to-br from-[#f9f9ff] via-[#f5f6ff] to-[#f1f4ff]">
+        <div className="max-w-6xl mx-auto">
+          <NoticeBoardHeader />
+          <BlogSkeleton />
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
-    <div className="bg-[#ececff] min-h-screen p-3 xs:p-6">
+    <div className="min-h-screen p-4 xs:p-6 font-tiro-marathi bg-gradient-to-br from-[#f9f9ff] via-[#f5f6ff] to-[#f1f4ff]">
       <div className="max-w-6xl mx-auto">
         <NoticeBoardHeader />
-        
+
         {/* Category Filter */}
-        <div className="mb-4 xs:mb-6 bg-white p-3 xs:p-5 rounded-xl shadow-md border-l-4 border-purple-500">
-          <h3 className="text-sm xs:text-base font-semibold mb-2 xs:mb-3 flex items-center text-gray-700">
-            <FaFilter className="mr-2 text-purple-600" /> श्रेणी निवडा
+        <div className="sticky top-2 z-20 mb-6 rounded-2xl bg-white border border-black shadow-sm p-4">
+          <h3 className="text-sm xs:text-base font-semibold mb-3 flex items-center text-indigo-700">
+            <FaFilter className="mr-2 text-indigo-500" /> श्रेणी निवडा
           </h3>
-          <div className="flex flex-wrap gap-1 xs:gap-2">
+          <div className="flex flex-wrap gap-2">
             {BLOG_CATEGORIES.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1 xs:px-4 xs:py-2 rounded-full text-xs xs:text-sm whitespace-nowrap transition-all transform hover:scale-105 ${
+                aria-pressed={selectedCategory === category}
+                className={`px-4 py-2 rounded-full text-xs xs:text-sm whitespace-nowrap transition-all ${
                   selectedCategory === category
-                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md"
-                    : "bg-white text-purple-700 border border-purple-200 hover:bg-purple-50"
+                    ? "bg-indigo-600 text-white shadow-md"
+                    : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
                 }`}
               >
                 {category}
@@ -116,35 +132,42 @@ export default function NoticeBoard() {
           </div>
         </div>
 
+        {/* Blog Grid */}
         {blogs.length === 0 ? (
           <BlogEmptyState />
         ) : (
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-6">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6">
             {blogs.map((blog) => (
-              <div 
-                key={blog._id} 
-                className="relative transform transition-transform hover:-translate-y-1"
-                style={{
-                  transformStyle: 'preserve-3d',
-                }}
+              <div
+                key={blog._id}
+                className="relative group transition-transform hover:-translate-y-1"
               >
-                <div className="absolute -top-2 -left-2 text-purple-600 z-10">
-                  <FaThumbtack className="text-2xl rotate-12" />
+                <div className="absolute -top-3 -left-3 text-indigo-500 z-10">
+                  <FaThumbtack className="text-2xl rotate-12 drop-shadow" />
                 </div>
-                <div 
-                  className="h-full rounded-xl shadow-lg overflow-hidden border-2 border-purple-100 bg-white"
-                  style={{
-                    transform: 'rotateX(2deg) rotateY(2deg)',
-                    boxShadow: '2px 4px 12px rgba(0, 0, 0, 0.1)',
-                  }}
-                >
-                  {blog.priority === 'high' && (
-                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                <div className="relative h-full rounded-2xl overflow-hidden border border-black bg-white shadow-md hover:shadow-lg transition-all">
+                  {/* Priority Tags */}
+                  {blog.priority === "high" && (
+                    <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-3 py-1 rounded-full">
                       महत्वाचे
                     </div>
                   )}
+                  {blog.priority === "medium" && (
+                    <div className="absolute top-3 right-3 bg-amber-500 text-white text-xs px-3 py-1 rounded-full">
+                      सूचना
+                    </div>
+                  )}
+                  {blog.priority === "low" && (
+                    <div className="absolute top-3 right-3 bg-emerald-500 text-white text-xs px-3 py-1 rounded-full">
+                      सामान्य
+                    </div>
+                  )}
+
+                  {/* Blog Card */}
                   <BlogCard blog={blog} />
-                  <div className="p-3 bg-purple-50 border-t border-purple-200 text-xs text-purple-700">
+
+                  {/* Footer */}
+                  <div className="p-3 bg-indigo-50 border-t border-black text-xs text-indigo-600">
                     {blog.date}
                   </div>
                 </div>

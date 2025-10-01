@@ -1,94 +1,166 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Phone, Mail, MapPin } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-tr from-blue-900 via-blue-800 to-blue-900 text-white relative overflow-hidden text-[clamp(12px,2vw,15px)]">
-      {/* Decorative SVG wave */}
-      <div className="absolute top-0 left-0 w-full -translate-y-full pointer-events-none">
-        <svg
-          viewBox="0 0 1440 90"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-10 sm:h-16"
-        >
-          <path
-            fill="#1e3a8a"
-            fillOpacity="1"
-            d="M0,32L48,53.3C96,75,192,117,288,117.3C384,117,480,75,576,69.3C672,64,768,96,864,117.3C960,139,1056,149,1152,133.3C1248,117,1344,75,1392,53.3L1440,32L1440,0L0,0Z"
-          ></path>
-        </svg>
-      </div>
+    <footer
+      role="contentinfo"
+      className="font-tiro-marathi border-t-4 border-black bg-white"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            ग्रामपंचायत वाठोडे, ता. शिरपूर, जि. धुळे
+          </h2>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Gram Panchayat Vathode, Shirpur Dist. Dhule — Official Website
+          </p>
+        </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 py-6 sm:py-10 relative z-10">
-        {/* Responsive grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
+        {/* Grid Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 border-t border-black pt-8">
           {/* About */}
           <div>
-            <h3 className="text-[clamp(14px,2.2vw,18px)] font-bold mb-3 sm:mb-4 tracking-wide text-yellow-300">
-              ग्राम पंचायत
+            <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b border-black pb-1">
+              ग्रामपंचायतीबद्दल
             </h3>
-            <p className="mb-3 sm:mb-4 text-blue-100 leading-snug">
-              Serving the community with dedication and transparency.  
-              Working towards rural development and empowerment.
+            <p className="text-gray-700 text-sm leading-relaxed">
+              ग्रामपंचायत वाठोडे ग्रामविकास, पारदर्शक प्रशासन आणि नागरिकांच्या
+              कल्याणासाठी कटिबद्ध आहे.
             </p>
-            <div className="flex space-x-3 mt-3">
-              <a href="#" className="hover:text-yellow-300 transition-colors" aria-label="Facebook">
-                <Facebook className="h-4 w-4 sm:h-5 sm:w-5" />
-              </a>
-              <a href="#" className="hover:text-yellow-300 transition-colors" aria-label="Twitter">
-                <Twitter className="h-4 w-4 sm:h-5 sm:w-5" />
-              </a>
-              <a href="#" className="hover:text-yellow-300 transition-colors" aria-label="Instagram">
-                <Instagram className="h-4 w-4 sm:h-5 sm:w-5" />
-              </a>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b border-black pb-1">
+              त्वरित दुवे
+            </h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/" className="hover:underline">
+                  मुख्यपृष्ठ
+                </Link>
+              </li>
+              <li>
+                <Link to="/schemes" className="hover:underline">
+                  शासकीय योजना
+                </Link>
+              </li>
+              <li>
+                <Link to="/applyforcertificates" className="hover:underline">
+                  प्रमाणपत्रासाठी अर्ज
+                </Link>
+              </li>
+              <li>
+                <Link to="/notices" className="hover:underline">
+                  सार्वजनिक सूचना
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:underline">
+                  संपर्क
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Citizen Services */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b border-black pb-1">
+              नागरिक सुविधा
+            </h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/birthCertificate" className="hover:underline">
+                  जन्म प्रमाणपत्र
+                </Link>
+              </li>
+              <li>
+                <Link to="/deathCertificate" className="hover:underline">
+                  मृत्यू प्रमाणपत्र
+                </Link>
+              </li>
+              <li>
+                <Link to="/marriageCertificate" className="hover:underline">
+                  विवाह प्रमाणपत्र
+                </Link>
+              </li>
+              <li>
+                <Link to="/digitalSigned712" className="hover:underline">
+                  डिजिटल स्वाक्षरी ७/१२
+                </Link>
+              </li>
+              <li>
+                <Link to="/noOutstandingDebts" className="hover:underline">
+                  थकबाकी नसल्याचा दाखला
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b border-black pb-1">
+              संपर्क
+            </h3>
+            <ul className="space-y-3 text-sm text-gray-700">
+              <li className="flex items-start">
+                <MapPin className="h-4 w-4 mr-2 text-black" />
+                <span>
+                  ग्रामपंचायत कार्यालय, वाठोडे, ता. शिरपूर, जि. धुळे
+                </span>
+              </li>
+              <li className="flex items-center">
+                <Phone className="h-4 w-4 mr-2 text-black" />
+                <span>+91 9876543210</span>
+              </li>
+              <li className="flex items-center">
+                <Mail className="h-4 w-4 mr-2 text-black" />
+                <span>gpwathode158@gmail.com</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Info */}
+        <div className="mt-10 border-t border-black pt-6 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-gray-700">
+            <div>ही ग्रामपंचायतीची अधिकृत वेबसाईट आहे.</div>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              <Link to="/privacy" className="hover:underline">
+                गोपनीयता धोरण
+              </Link>
+              <Link to="/terms" className="hover:underline">
+                अटी व नियम
+              </Link>
+              <Link to="/accessibility" className="hover:underline">
+                अॅक्सेसीबिलिटी
+              </Link>
+              <Link to="/sitemap" className="hover:underline">
+                साइटमॅप
+              </Link>
+            </div>
+            <div className="sm:text-right">
+              शेवटचे अद्ययावत:{" "}
+              {new Date().toLocaleDateString("en-IN")}
             </div>
           </div>
 
-        <div className="grid grid-cols-2 gap-8 md:gap-12  sm:text-left">
-
-            {/* Quick Links */}
-            <div>
-              <h3 className="text-[clamp(14px,2.2vw,18px)] font-bold mb-3 sm:mb-4 tracking-wide text-yellow-300">
-                Quick Links
-              </h3>
-              <ul className="space-y-2 sm:space-y-3 text-blue-100">
-                <li><Link to="/" className="hover:text-yellow-300 transition-colors">Home</Link></li>
-                <li><Link to="/schemes" className="hover:text-yellow-300 transition-colors">Government Schemes</Link></li>
-                <li><Link to="/gallery" className="hover:text-yellow-300 transition-colors">Gallery</Link></li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h3 className="text-[clamp(14px,2.2vw,18px)] font-bold mb-3 sm:mb-4 tracking-wide text-yellow-300">
-                Contact Us
-              </h3>
-              <ul className="space-y-2 sm:space-y-3 text-blue-100">
-                <li className="flex items-start">
-                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mr-2 mt-0.5 text-yellow-300" />
-                  <span>Gram Panchayat Office,<br />Village Name, District,<br />State - PIN</span>
-                </li>
-                <li className="flex items-center">
-                  <Phone className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-yellow-300" />
-                  <span>+91 1234567890</span>
-                </li>
-                <li className="flex items-center">
-                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-yellow-300" />
-                  <span>grampanchayat@example.com</span>
-                </li>
-              </ul>
-            </div>
+          {/* Copyright */}
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between text-gray-600">
+            <p>
+              &copy; {new Date().getFullYear()} ग्रामपंचायत वाठोडे — सर्व हक्क
+              राखीव.
+            </p>
+            <p>
+              Powered by{" "}
+              <span className="font-semibold text-black">
+                AiGenic Solutions Pvt Ltd.
+              </span>
+            </p>
           </div>
-          </div>
-
-        {/* Divider */}
-        <div className="border-t border-blue-800 mt-6 sm:mt-10 pt-4 sm:pt-6 text-center text-blue-200 text-[clamp(11px,1.5vw,14px)]">
-          <p>
-            &copy; {new Date().getFullYear()} Powered By{" "}
-            <span className="text-yellow-300 font-semibold">AiGenic Solutions Pvt Ltd.</span>
-          </p>
         </div>
       </div>
     </footer>
