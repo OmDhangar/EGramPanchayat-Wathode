@@ -5,6 +5,7 @@ import { processUploadedFilesS3, moveFileToFolder, getFileDownloadUrl,getSecureF
 import { notifyAdminNewApplication, notifyUserStatusUpdate } from "../utils/emailService.js";
 import mongoose from "mongoose";
 import crypto from "crypto";
+import { Taxation } from "../models/taxation.model.js";
 
 // Import models
 import { User } from "../models/user.model.js";
@@ -1211,6 +1212,128 @@ const submitNoOutstandingDebtsApplication = asyncHandler(async (req, res) => {
   );
 });
 
+// Submit Taxation Application
+const submitTaxationApplication = asyncHandler(async (req, res) => {
+  const { 
+    financialYear,
+    applicantName,
+    mobileNumber,
+    email,
+    taxPayerNumber,
+    address,
+    groupName,
+    groupType,
+    oldTaxNumber,
+    newTaxNumber,
+    utrNumber
+  } = req.body;
+  
+  // Basic validations
+  if (!financialYear || !applicantName || !mobileNumber || !taxPayerNumber || 
+      !address || !utrNumber) {
+    throw new ApiError(400, "Missing required fields");
+  }
+
+  // Validate mobile number (10 digits)
+  if (!/^\d{10}$/.test(mobileNumber)) {
+    throw new ApiError(400, "Invalid mobile number. Must be 10 digits");
+  }
+
+  // Validate email if provided
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  // Require payment receipt image
+  const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
+  if (receiptFiles.length === 0) {
+    throw new ApiError(400, "Payment receipt image is required");
+  }
+
+  // Enforce images-only for receipt
+  const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
+  if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
+    throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
+  }
+
+  // Validate file size (max 5MB)
+  if (receiptFiles[0].size > 5 * 1024 * 1024) {
+    throw new ApiError(400, 'Payment receipt must be less than 5MB');
+  }
+
+  // Process uploaded files using S3 (receipt + optional documents) under 'unverified'
+  const documentFiles = req.files && req.files.documents ? req.files.documents : [];
+  
+  // Validate maximum 5 additional documents
+  if (documentFiles.length > 5) {
+    throw new ApiError(400, 'Maximum 5 additional documents allowed');
+  }
+
+  const allFiles = [
+    ...receiptFiles,
+    ...documentFiles
+  ];
+  const uploadedFiles = await processUploadedFilesS3(allFiles, 'unverified');
+
+  // Mark the receipt file for easy identification
+  const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
+  if (receiptUpload) {
+    receiptUpload.isPaymentReceipt = true; // Add flag to identify receipt
+  }
+
+  // Create application with unique ID
+  const applicationId = generateApplicationId('TAX');
+
+  // Prepare application data
+  const applicationData = {
+    applicationId,
+    applicantId: req.user._id,
+    documentType: 'taxation',
+    uploadedFiles,
+    paymentDetails: {
+      amount: 20, // Adjust the amount as per your requirement
+      paymentStatus: 'completed',
+      utrNumber,
+      receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
+    }
+  };
+
+  // Prepare form data
+  const formData = {
+    financialYear,
+    applicantName,
+    mobileNumber,
+    email,
+    taxPayerNumber,
+    address,
+    groupName,
+    groupType,
+    oldTaxNumber,
+    newTaxNumber,
+    utrNumber
+  };
+
+  // Create application with form data using the static method
+  const application = await Application.createWithFormData(applicationData, formData);
+
+  // Create notification for user
+  await createNotification(
+    req.user._id,
+    application._id,
+    'application_submitted',
+    'Taxation Application Submitted',
+    `Your taxation application has been submitted successfully for ${applicantName}.`
+  );
+
+  // Notify admin about new application
+  await notifyAdminNewApplication(application, req.user.fullName);
+
+  return res.status(201).json(
+    new ApiResponse(201, application, "Taxation application submitted successfully")
+  );
+});
+
+
 // Submit Digitally Signed 7/12 Application
 const submitDigitalSigned712Application = asyncHandler(async (req, res) => {
   const { 
@@ -1325,6 +1448,7 @@ export {
   submitNoOutstandingDebtsApplication,
   submitDigitalSigned712Application,
   getUserApplications,
+  submitTaxationApplication,
   getApplicationDetails,
   reviewApplication,
   uploadCertificate,

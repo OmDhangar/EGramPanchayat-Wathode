@@ -12,6 +12,7 @@ const app = express()
 const allowedOrigins = [
   "https://grampanchayatwathode.com",
   "https://www.grampanchayatwathode.com",
+  "http://localhost:5173",
   "https://www.api.grampanchayatwathode.com",
   "https://api.grampanchayatwathode.com"
 ];

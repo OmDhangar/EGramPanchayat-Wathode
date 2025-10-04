@@ -157,7 +157,7 @@ const Footer = () => {
             <p>
               Powered by{" "}
               <span className="font-semibold text-black">
-                AiGenic Solutions Pvt Ltd.
+              Om dhangar and Pushkar Deore
               </span>
             </p>
           </div>
