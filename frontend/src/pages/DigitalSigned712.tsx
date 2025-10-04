@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaFileContract } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import { api } from "../api/axios";
 import {
   InputField,
@@ -30,6 +31,7 @@ interface DigitalSigned712FormData {
 }
 
 const DigitalSigned712Form = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<DigitalSigned712FormData>({
     ownersName: "",
     village: "",
@@ -67,7 +69,7 @@ const DigitalSigned712Form = () => {
   const handleReceiptChange = (file?: File) => {
     if (!file) return;
     if (!['image/jpeg','image/jpg','image/png'].includes(file.type)) {
-      setErrors(prev => ({ ...prev, paymentReceipt: 'Only PNG/JPG images are allowed' }));
+      setErrors(prev => ({ ...prev, paymentReceipt: t("forms.validation.onlyImages") }));
       return;
     }
     setErrors(prev => ({ ...prev, paymentReceipt: "" }));
@@ -109,15 +111,15 @@ const DigitalSigned712Form = () => {
     const newErrors: FormErrors = {};
     
     // Required field validations
-    if (!formData.ownersName) newErrors.ownersName = "Owner's name is required";
-    if (!formData.village) newErrors.village = "Village is required";
-    if (!formData.whatsappNumber || !/^\d{10}$/.test(formData.whatsappNumber)) newErrors.whatsappNumber = "WhatsApp must be 10 digits";
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Enter a valid email";
-    if (!formData.taluka) newErrors.taluka = "Taluka is required";
-    if (!formData.district) newErrors.district = "District is required";
-    if (!formData.surveyNumber) newErrors.surveyNumber = "Survey Number / Group Number is required";
-    if (!formData.utrNumber) newErrors.utrNumber = "UTR number is required";
-    if (!paymentReceipt) newErrors.paymentReceipt = "Payment receipt image is required";
+    if (!formData.ownersName) newErrors.ownersName = t("forms.validation.required");
+    if (!formData.village) newErrors.village = t("forms.validation.required");
+    if (!formData.whatsappNumber || !/^\d{10}$/.test(formData.whatsappNumber)) newErrors.whatsappNumber = t("forms.validation.invalidPhone");
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = t("forms.validation.invalidEmail");
+    if (!formData.taluka) newErrors.taluka = t("forms.validation.required");
+    if (!formData.district) newErrors.district = t("forms.validation.required");
+    if (!formData.surveyNumber) newErrors.surveyNumber = t("forms.validation.required");
+    if (!formData.utrNumber) newErrors.utrNumber = t("forms.validation.required");
+    if (!paymentReceipt) newErrors.paymentReceipt = t("forms.validation.paymentReceiptRequired");
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -159,7 +161,7 @@ const DigitalSigned712Form = () => {
     } catch (error: any) {
       console.error("Submission error:", error);
       console.error("Error response:", error?.response?.data);
-      const errorMessage = error?.response?.data?.message || "Failed to submit application. Please try again.";
+      const errorMessage = error?.response?.data?.message || t("forms.common.error");
       setErrors({ general: errorMessage });
     } finally {
       setLoading(false);
@@ -190,8 +192,8 @@ const DigitalSigned712Form = () => {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <SuccessMessage
-            title="Application Submitted Successfully!"
-            message="Your digitally signed 7/12 application has been submitted and is now under review. You will receive updates on your application status."
+            title={t("forms.common.success")}
+            message={t("forms.common.successMessage")}
             onClose={resetForm}
           />
         </div>
@@ -216,10 +218,10 @@ const DigitalSigned712Form = () => {
             <FaFileContract className="text-3xl text-orange-600" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Digitally Signed 7/12
+            {t("forms.digitalSigned712.title")}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Complete the form below to apply for digitally signed 7/12 land record. All fields marked with * are required.
+            {t("forms.digitalSigned712.description")}
           </p>
         </motion.div>
 
@@ -233,13 +235,13 @@ const DigitalSigned712Form = () => {
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
             {/* Land Owner Information Section */}
             <FormSection
-              title="Land Owner Information"
-              description="Enter the details of the land owner"
+              title={t("forms.digitalSigned712.ownerInfo")}
+              description={t("forms.digitalSigned712.ownerInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
-                  label="Owner's Name"
+                  label={t("forms.digitalSigned712.ownersName")}
                   name="ownersName"
                   placeholder="Enter owner's full name"
                   value={formData.ownersName}
@@ -247,7 +249,7 @@ const DigitalSigned712Form = () => {
                   error={errors.ownersName}
                 />
                 <InputField
-                  label="Village"
+                  label={t("forms.digitalSigned712.village")}
                   name="village"
                   placeholder="Enter village name"
                   value={formData.village}
@@ -256,7 +258,7 @@ const DigitalSigned712Form = () => {
                 />
                 
                 <InputField
-                  label="WhatsApp Mobile Number"
+                  label={t("forms.digitalSigned712.whatsappNumber")}
                   name="whatsappNumber"
                   placeholder="10-digit mobile"
                   value={formData.whatsappNumber}
@@ -265,7 +267,7 @@ const DigitalSigned712Form = () => {
                 />
                 
                 <InputField
-                  label="Email ID"
+                  label={t("forms.digitalSigned712.email")}
                   name="email"
                   placeholder="name@example.com"
                   value={formData.email}
@@ -275,7 +277,7 @@ const DigitalSigned712Form = () => {
                 />
                 
                 <InputField
-                  label="Taluka"
+                  label={t("forms.digitalSigned712.taluka")}
                   name="taluka"
                   placeholder="Enter taluka name"
                   value={formData.taluka}
@@ -284,7 +286,7 @@ const DigitalSigned712Form = () => {
                 />
 
                 <InputField
-                  label="District"
+                  label={t("forms.digitalSigned712.district")}
                   name="district"
                   placeholder="Enter district name"
                   value={formData.district}
@@ -293,7 +295,7 @@ const DigitalSigned712Form = () => {
                 />
 
                 <InputField
-                  label="Survey Number / Group Number"
+                  label={t("forms.digitalSigned712.surveyNumber")}
                   name="surveyNumber"
                   placeholder="Enter survey number or group number"
                   value={formData.surveyNumber}
@@ -305,13 +307,13 @@ const DigitalSigned712Form = () => {
 
             {/* Payment Section */}
             <FormSection
-              title="Payment Information"
-              description="Payment details for digitally signed 7/12 (Rs. 15)"
+              title={t("forms.digitalSigned712.paymentInfo")}
+              description={t("forms.digitalSigned712.paymentInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <SelectField
-                  label="Payment Option"
+                  label={t("forms.landRecord8A.paymentOption")}
                   name="paymentOption"
                   options={paymentOptions as any}
                   placeholder="Select payment option"
@@ -321,7 +323,7 @@ const DigitalSigned712Form = () => {
                 />
                 
                 <InputField
-                  label="UTR Number"
+                  label={t("forms.landRecord8A.utrNumber")}
                   name="utrNumber"
                   placeholder="Enter UTR number from payment receipt"
                   value={formData.utrNumber}
@@ -333,12 +335,12 @@ const DigitalSigned712Form = () => {
 
             {/* Document Upload Section */}
             <FormSection
-              title="Payment Receipt"
+              title={t("forms.common.paymentReceipt")}
               description="Upload payment receipt (Rs. 15)"
               className="mb-8"
             >
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Payment Receipt Screenshot (PNG/JPG) - Rs. 15 *</label>
+                <label className="block text-sm font-medium mb-1">{t("forms.common.paymentReceipt")} Screenshot (PNG/JPG) - Rs. 15 *</label>
                 
                 {/* QR Code for Payment */}
                 <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
@@ -351,10 +353,10 @@ const DigitalSigned712Form = () => {
                       />
                     </div>
                     <div className="text-sm text-orange-800">
-                      <p className="font-semibold mb-2">📱 Scan QR Code to Pay Rs. 15</p>
-                      <p className="mb-1">• Use any UPI app (PhonePe, GPay, Paytm)</p>
-                      <p className="mb-1">• After payment, upload screenshot below</p>
-                      <p className="text-orange-600 font-medium">• Enter UTR number in payment details</p>
+                      <p className="font-semibold mb-2">{t("forms.common.scanQR")}</p>
+                      <p className="mb-1">{t("forms.common.useUPI")}</p>
+                      <p className="mb-1">{t("forms.common.uploadScreenshot")}</p>
+                      <p className="text-orange-600 font-medium">{t("forms.common.enterUTR")}</p>
                     </div>
                   </div>
                 </div>
@@ -371,18 +373,17 @@ const DigitalSigned712Form = () => {
                   <div className="mt-3 grid grid-cols-2 gap-3 items-start">
                     <img src={receiptPreview} alt="Receipt Preview" className="rounded border max-h-40 object-contain" />
                     <div className="text-xs text-gray-600 break-all">
-                      <div className="font-medium mb-1">QR Scan (if detected):</div>
-                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || 'No QR detected'}</div>
+                      <div className="font-medium mb-1">{t("forms.common.qrDetected")}</div>
+                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || t("forms.common.noQR")}</div>
                     </div>
                   </div>
                 )}
               </div>
               
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mt-4">
-                <h4 className="font-medium text-orange-900 mb-2">Important Note:</h4>
+                <h4 className="font-medium text-orange-900 mb-2">{t("forms.common.importantNote")}</h4>
                 <p className="text-sm text-orange-800">
-                  A fee of Rs. 15/- is required to be paid and the receipt of payment should be uploaded. 
-                  Please fill the information carefully as marked with (*). No additional documents are required.
+                  {t("forms.digitalSigned712.feeNote")}
                 </p>
               </div>
             </FormSection>
@@ -407,7 +408,7 @@ const DigitalSigned712Form = () => {
                 className="flex-1"
                 type="submit"
               >
-                {loading ? 'Submitting...' : 'Submit Application'}
+                {loading ? t("forms.common.submitting") : t("forms.common.submit")}
               </SubmitButton>
               
               <button
@@ -416,7 +417,7 @@ const DigitalSigned712Form = () => {
                 disabled={loading}
                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Reset Form
+                {t("forms.common.reset")}
               </button>
             </div>
           </form>
@@ -430,10 +431,10 @@ const DigitalSigned712Form = () => {
           className="mt-8 text-center text-sm text-gray-600"
         >
           <p>
-            Your application will be reviewed by our team. You will receive updates via email and SMS.
+            {t("forms.common.reviewMessage")}
           </p>
           <p className="mt-2">
-            For any queries, please contact our support team.
+            {t("forms.common.supportMessage")}
           </p>
         </motion.div>
       </div>

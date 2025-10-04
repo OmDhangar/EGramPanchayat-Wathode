@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaSkull } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import { api } from "../api/axios";
 import { Helmet } from "react-helmet";
 import {
@@ -33,6 +34,7 @@ interface DeathCertificateFormData {
 }
 
 const DeathCertificateForm = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<DeathCertificateFormData>({
     financialYear: "",
     nameOfDeceased: "",
@@ -74,7 +76,7 @@ const DeathCertificateForm = () => {
   const handleReceiptChange = (file?: File) => {
     if (!file) return;
     if (!['image/jpeg','image/jpg','image/png'].includes(file.type)) {
-      setErrors(prev => ({ ...prev, paymentReceipt: 'Only PNG/JPG images are allowed' }));
+      setErrors(prev => ({ ...prev, paymentReceipt: t("forms.validation.onlyImages") }));
       return;
     }
     setErrors(prev => ({ ...prev, paymentReceipt: "" }));
@@ -114,17 +116,17 @@ const DeathCertificateForm = () => {
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-    if (!formData.financialYear) newErrors.financialYear = 'Financial year is required';
-    if (!formData.nameOfDeceased) newErrors.nameOfDeceased = 'Name of deceased is required';
-    if (formData.aadhaarNumber && !/^\d{12}$/.test(formData.aadhaarNumber)) newErrors.aadhaarNumber = 'Aadhaar must be 12 digits';
-    if (!formData.address) newErrors.address = 'Address is required';
-    if (!formData.dateOfDeath) newErrors.dateOfDeath = 'Date of death is required';
-    if (!formData.causeOfDeath) newErrors.causeOfDeath = 'Cause of death is required';
-    if (!formData.applicantFullNameEnglish) newErrors.applicantFullNameEnglish = 'Applicant full name (English) is required';
-    if (!formData.whatsappNumber || !/^\d{10}$/.test(formData.whatsappNumber)) newErrors.whatsappNumber = 'WhatsApp must be 10 digits';
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Enter a valid email';
-    if (!formData.utrNumber) newErrors.utrNumber = 'UTR number is required';
-    if (!paymentReceipt) newErrors.paymentReceipt = 'Payment receipt image is required';
+    if (!formData.financialYear) newErrors.financialYear = t("forms.validation.required");
+    if (!formData.nameOfDeceased) newErrors.nameOfDeceased = t("forms.validation.required");
+    if (formData.aadhaarNumber && !/^\d{12}$/.test(formData.aadhaarNumber)) newErrors.aadhaarNumber = t("forms.validation.invalidAadhaar");
+    if (!formData.address) newErrors.address = t("forms.validation.required");
+    if (!formData.dateOfDeath) newErrors.dateOfDeath = t("forms.validation.required");
+    if (!formData.causeOfDeath) newErrors.causeOfDeath = t("forms.validation.required");
+    if (!formData.applicantFullNameEnglish) newErrors.applicantFullNameEnglish = t("forms.validation.required");
+    if (!formData.whatsappNumber || !/^\d{10}$/.test(formData.whatsappNumber)) newErrors.whatsappNumber = t("forms.validation.invalidPhone");
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = t("forms.validation.invalidEmail");
+    if (!formData.utrNumber) newErrors.utrNumber = t("forms.validation.required");
+    if (!paymentReceipt) newErrors.paymentReceipt = t("forms.validation.paymentReceiptRequired");
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -168,7 +170,7 @@ const DeathCertificateForm = () => {
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      const errorMessage = error?.response?.data?.message || "Failed to submit application. Please try again.";
+      const errorMessage = error?.response?.data?.message || t("forms.common.error");
       setErrors({ general: errorMessage });
     } finally {
       setLoading(false);
@@ -202,8 +204,8 @@ const DeathCertificateForm = () => {
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <SuccessMessage
-            title="Application Submitted Successfully!"
-            message="Your death certificate application has been submitted and is now under review. You will receive updates on your application status."
+            title={t("forms.common.success")}
+            message={t("forms.common.successMessage")}
             onClose={resetForm}
           />
         </div>
@@ -224,8 +226,11 @@ const DeathCertificateForm = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            {t("forms.death.title")}
+          </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Complete the form below to apply for a death certificate. All fields marked with * are required.
+            {t("forms.death.description")}
           </p>
         </motion.div>
 
@@ -239,48 +244,64 @@ const DeathCertificateForm = () => {
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
             {/* Deceased Person Information */}
             <FormSection
-              title="Deceased Person Information"
-              description="Enter the details of the deceased person"
+              title={t("forms.death.deceasedInfo")}
+              description={t("forms.death.deceasedInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField label="Financial Year" name="financialYear" placeholder="2025-26" value={formData.financialYear} onChange={handleInputChange} error={errors.financialYear} />
-                <InputField label="Name of Deceased" name="nameOfDeceased" placeholder="Enter full name" value={formData.nameOfDeceased} onChange={handleInputChange} error={errors.nameOfDeceased} />
-                <InputField label="Aadhaar Number (optional)" name="aadhaarNumber" placeholder="12-digit Aadhaar" value={formData.aadhaarNumber} onChange={handleInputChange} error={errors.aadhaarNumber} required={false} />
-                <InputField label="Date of Death" name="dateOfDeath" type="date" value={formData.dateOfDeath} onChange={handleInputChange} error={errors.dateOfDeath} />
-                <InputField label="Cause of Death" name="causeOfDeath" placeholder="Enter cause of death" value={formData.causeOfDeath} onChange={handleInputChange} error={errors.causeOfDeath} className="md:col-span-2" />
+                <InputField label={t("forms.death.financialYear")} name="financialYear" placeholder="2025-26" value={formData.financialYear} onChange={handleInputChange} error={errors.financialYear} />
+                <InputField label={t("forms.death.nameOfDeceased")} name="nameOfDeceased" placeholder="Enter full name" value={formData.nameOfDeceased} onChange={handleInputChange} error={errors.nameOfDeceased} />
+                <InputField label={t("forms.death.aadhaarNumber")} name="aadhaarNumber" placeholder="12-digit Aadhaar" value={formData.aadhaarNumber} onChange={handleInputChange} error={errors.aadhaarNumber} required={false} />
+                <InputField label={t("forms.death.dateOfDeath")} name="dateOfDeath" type="date" value={formData.dateOfDeath} onChange={handleInputChange} error={errors.dateOfDeath} />
+                <InputField label={t("forms.death.causeOfDeath")} name="causeOfDeath" placeholder="Enter cause of death" value={formData.causeOfDeath} onChange={handleInputChange} error={errors.causeOfDeath} className="md:col-span-2" />
               </div>
             </FormSection>
 
             {/* Address Information Section */}
             <FormSection
-              title="Address Information"
-              description="Enter address details"
+              title={t("forms.birth.addressInfo")}
+              description={t("forms.birth.addressInfoDesc")}
               className="mb-8"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TextareaField label="Address" name="address" placeholder="Enter address" rows={3} value={formData.address} onChange={handleInputChange} error={errors.address} className="md:col-span-2" />
+                <TextareaField label={t("forms.death.address")} name="address" placeholder="Enter address" rows={3} value={formData.address} onChange={handleInputChange} error={errors.address} className="md:col-span-2" />
               </div>
             </FormSection>
 
-            <FormSection title="Applicant Details" description="Enter applicant information" className="mb-8">
+            <FormSection title={t("forms.death.applicantInfo")} description={t("forms.death.applicantInfoDesc")} className="mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField label="Applicant Full Name (English)" name="applicantFullNameEnglish" placeholder="John Doe" value={formData.applicantFullNameEnglish} onChange={handleInputChange} error={errors.applicantFullNameEnglish} />
-                <InputField label="WhatsApp Number" name="whatsappNumber" placeholder="10-digit mobile" value={formData.whatsappNumber} onChange={handleInputChange} error={errors.whatsappNumber} />
-                <InputField label="Email (optional)" name="email" placeholder="name@example.com" value={formData.email} onChange={handleInputChange} error={errors.email} required={false} />
+                <InputField label={t("forms.death.applicantFullNameEnglish")} name="applicantFullNameEnglish" placeholder="John Doe" value={formData.applicantFullNameEnglish} onChange={handleInputChange} error={errors.applicantFullNameEnglish} />
+                <InputField label={t("forms.death.whatsappNumber")} name="whatsappNumber" placeholder="10-digit mobile" value={formData.whatsappNumber} onChange={handleInputChange} error={errors.whatsappNumber} />
+                <InputField label={t("forms.death.email")} name="email" placeholder="name@example.com" value={formData.email} onChange={handleInputChange} error={errors.email} required={false} />
               </div>
+            </FormSection>
+
+            {/* Payment Information Section */}
+            <FormSection
+              title={t("forms.death.paymentInfo")}
+              description={t("forms.death.paymentInfoDesc")}
+              className="mb-8"
+            >
+              <InputField
+                label={t("forms.death.utrNumber")}
+                name="utrNumber"
+                placeholder="Enter UTR number from payment receipt"
+                value={formData.utrNumber}
+                onChange={handleInputChange}
+                error={errors.utrNumber}
+              />
             </FormSection>
 
 
 
             {/* Document Upload Section */}
             <FormSection
-              title="Required Documents"
-              description="Upload supporting documents (maximum 5 files, 10MB each)"
+              title={t("forms.birth.requiredDocs")}
+              description={t("forms.birth.requiredDocsDesc")}
               className="mb-8"
             >
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Payment Receipt (PNG/JPG) - Rs. 20 *</label>
+                <label className="block text-sm font-medium mb-1">{t("forms.common.paymentReceipt")} (PNG/JPG) - Rs. 20 *</label>
                 
                 {/* QR Code for Payment */}
                 <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -293,10 +314,10 @@ const DeathCertificateForm = () => {
                       />
                     </div>
                     <div className="text-sm text-red-800">
-                      <p className="font-semibold mb-2">📱 Scan QR Code to Pay Rs. 20</p>
-                      <p className="mb-1">• Use any UPI app (PhonePe, GPay, Paytm)</p>
-                      <p className="mb-1">• After payment, upload screenshot below</p>
-                      <p className="text-red-600 font-medium">• Enter UTR number in applicant details</p>
+                      <p className="font-semibold mb-2">{t("forms.common.scanQR")}</p>
+                      <p className="mb-1">{t("forms.common.useUPI")}</p>
+                      <p className="mb-1">{t("forms.common.uploadScreenshot")}</p>
+                      <p className="text-red-600 font-medium">{t("forms.common.enterUTR")}</p>
                     </div>
                   </div>
                 </div>
@@ -313,15 +334,15 @@ const DeathCertificateForm = () => {
                   <div className="mt-3 grid grid-cols-2 gap-3 items-start">
                     <img src={receiptPreview} alt="Receipt Preview" className="rounded border max-h-40 object-contain" />
                     <div className="text-xs text-gray-600 break-all">
-                      <div className="font-medium mb-1">QR Scan (if detected):</div>
-                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || 'No QR detected'}</div>
+                      <div className="font-medium mb-1">{t("forms.common.qrDetected")}</div>
+                      <div className="p-2 bg-gray-50 rounded border min-h-16">{qrText || t("forms.common.noQR")}</div>
                     </div>
                   </div>
                 )}
               </div>
               
               <FileUploadField
-                label="Supporting Documents (Optional)"
+                label={t("forms.birth.supportingDocs")}
                 name="documents"
                 multiple={true}
                 maxFiles={5}
@@ -333,7 +354,7 @@ const DeathCertificateForm = () => {
               />
               
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
-                <h4 className="font-medium text-red-900 mb-2">Required Documents:</h4>
+                <h4 className="font-medium text-red-900 mb-2">{t("forms.birth.recommendedDocs")}</h4>
                 <ul className="text-sm text-red-800 space-y-1">
                   <li>• Identity proof of deceased person (Aadhaar Card)</li>
                 </ul>
@@ -360,7 +381,7 @@ const DeathCertificateForm = () => {
                 className="flex-1"
                 aria-label="Submit Death Certificate Application"
               >
-                Submit Application
+                {loading ? t("forms.common.submitting") : t("forms.common.submit")}
               </SubmitButton>
               
               <button
@@ -369,7 +390,7 @@ const DeathCertificateForm = () => {
                 className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
                 aria-label="Reset Form"
               >
-                Reset Form
+                {t("forms.common.reset")}
               </button>
             </div>
           </form>
@@ -383,10 +404,10 @@ const DeathCertificateForm = () => {
           className="mt-8 text-center text-sm text-gray-600"
         >
           <p>
-            Your application will be reviewed by our team. You will receive updates via email and SMS.
+            {t("forms.common.reviewMessage")}
           </p>
           <p className="mt-2">
-            For any queries, please contact our support team.
+            {t("forms.common.supportMessage")}
           </p>
         </motion.div>
       </div>

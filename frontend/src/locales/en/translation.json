@@ -18,6 +18,7 @@
     "schemes": "Schemes",
     "citizen": "CITIZEN FACILITIES",
     "apply": "Apply for Certificates",
+    "taxation": "Taxation",
     "public": "PUBLIC INFORMATION",
     "notices": "Notices",
     "help": "HELP",
@@ -113,5 +114,234 @@
     "needHelp": "Need help with your application?",
     "contactSupport": "Contact Support",
     "viewFAQ": "View FAQ"
-  }
+  },
+  "forms": {
+    "common": {
+      "required": "Required",
+      "optional": "Optional",
+      "submit": "Submit Application",
+      "submitting": "Submitting...",
+      "reset": "Reset Form",
+      "success": "Application submitted successfully!",
+      "successMessage": "Your application has been submitted and is now under review. You will receive updates about your application status.",
+      "error": "Failed to submit application. Please try again.",
+      "paymentReceipt": "Payment Receipt",
+      "paymentReceiptDesc": "Upload payment receipt",
+      "scanQR": "📱 Scan QR code to make payment",
+      "useUPI": "• Use any UPI app (PhonePe, GPay, Paytm)",
+      "uploadScreenshot": "• After payment, upload screenshot below",
+      "enterUTR": "• Enter UTR number in payment details",
+      "qrDetected": "QR Scan (if detected):",
+      "noQR": "No QR detected",
+      "importantNote": "Important Note:",
+      "reviewMessage": "Your application will be reviewed by our team. You will receive updates via email and SMS.",
+      "supportMessage": "For any questions, please contact our support team."
+    },
+    "landRecord8A": {
+      "title": "8A Land Record Digital Signature",
+      "description": "Complete the form below to apply for 8A land record with digital signature. All fields marked with * are required.",
+      "ownerInfo": "Land Owner Information",
+      "ownerInfoDesc": "Enter land owner details",
+      "ownersName": "Owner's Name",
+      "village": "Village",
+      "whatsappNumber": "WhatsApp Mobile Number",
+      "email": "Email ID",
+      "taluka": "Taluka",
+      "district": "District",
+      "accountNumber": "Account Number",
+      "paymentInfo": "Payment Information",
+      "paymentInfoDesc": "Payment details for 8A land record (Rs. 15)",
+      "paymentOption": "Payment Option",
+      "utrNumber": "UTR Number",
+      "feeNote": "A fee of Rs. 15/- needs to be paid and payment receipt must be uploaded. Please fill the information marked with (*) carefully."
+    },
+    "noOutstandingDebts": {
+      "title": "Certificate of No Outstanding Debts",
+      "description": "Complete the form below to apply for certificate of no outstanding debts. All fields marked with * are required.",
+      "basicInfo": "Basic Information",
+      "basicInfoDesc": "Enter basic details for the certificate",
+      "financialYear": "Financial Year",
+      "propertyOwnerName": "Property Owner's Name",
+      "aadhaarCardNumber": "Aadhaar Card Number",
+      "whatsappNumber": "WhatsApp Mobile Number",
+      "email": "Email ID",
+      "propertyInfo": "Property Information",
+      "propertyInfoDesc": "Enter property details",
+      "villageName": "Village Name",
+      "wardNo": "Ward No.",
+      "streetNameNumber": "Street Name / Street Number",
+      "propertyNumber": "Property Number",
+      "applicantInfo": "Applicant Information",
+      "applicantInfoDesc": "Enter applicant details",
+      "applicantFullNameEnglish": "Applicant's Full Name (English)",
+      "applicantAadhaarNumber": "Applicant's Aadhaar Card Number",
+      "paymentInfo": "Payment Information",
+      "paymentInfoDesc": "Payment details for certificate (Rs. 20)",
+      "certificateNote": "This certificate confirms that there are no outstanding debts on the specified property. No additional documents required - only payment receipt."
+    },
+    "digitalSigned712": {
+      "title": "Digitally Signed 7/12",
+      "description": "Complete the form below to apply for digitally signed 7/12 land record. All fields marked with * are required.",
+      "ownerInfo": "Land Owner Information",
+      "ownerInfoDesc": "Enter land owner details",
+      "ownersName": "Owner's Name",
+      "village": "Village",
+      "whatsappNumber": "WhatsApp Mobile Number",
+      "email": "Email ID",
+      "taluka": "Taluka",
+      "district": "District",
+      "surveyNumber": "Survey Number / Group Number",
+      "paymentInfo": "Payment Information",
+      "paymentInfoDesc": "Payment details for digitally signed 7/12 (Rs. 15)",
+      "feeNote": "A fee of Rs. 15/- needs to be paid and payment receipt must be uploaded. Please fill the information marked with (*) carefully. No additional documents required."
+    },
+    "birth": {
+      "title": "Birth Certificate Application",
+      "description": "Complete the form below to apply for birth certificate. All fields marked with * are required.",
+      "childInfo": "Child Information",
+      "childInfoDesc": "Enter details of the child for whom birth certificate is requested",
+      "financialYear": "Financial Year",
+      "childName": "Child's Full Name",
+      "dateOfBirth": "Date of Birth",
+      "placeOfBirth": "Place of Birth",
+      "gender": "Gender",
+      "parentsInfo": "Parents Information",
+      "parentsInfoDesc": "Enter parents details",
+      "fatherName": "Father's Full Name",
+      "motherName": "Mother's Full Name",
+      "fatherOccupation": "Father's Occupation",
+      "motherOccupation": "Mother's Occupation",
+      "addressInfo": "Address Information",
+      "addressInfoDesc": "Enter address details",
+      "parentsAddressAtBirth": "Parents' Address at Time of Child's Birth",
+      "permanentAddressParent": "Parents' Permanent Address",
+      "applicantFullNameEnglish": "Applicant's Full Name (English)",
+      "applicantFullNameDevanagari": "Applicant's Full Name (Devanagari)",
+      "whatsappNumber": "WhatsApp Number",
+      "email": "Email (Optional)",
+      "currentAddress": "Current Address",
+      "paymentInfo": "Payment Information",
+      "paymentInfoDesc": "Payment details for birth certificate (Rs. 20)",
+      "utrNumber": "UTR Number",
+      "requiredDocs": "Required Documents",
+      "requiredDocsDesc": "Upload supporting documents (Maximum 5 files, 10MB each)",
+      "supportingDocs": "Supporting Documents (Optional)",
+      "recommendedDocs": "Recommended Documents:",
+      "parentIdProof": "• Parents' ID proof (Aadhaar Card)"
+    },
+    "death": {
+      "title": "Death Certificate Application",
+      "description": "Complete the form below to apply for death certificate. All fields marked with * are required.",
+      "deceasedInfo": "Deceased Person Information",
+      "deceasedInfoDesc": "Enter deceased person details",
+      "financialYear": "Financial Year",
+      "nameOfDeceased": "Name of Deceased Person",
+      "aadhaarNumber": "Aadhaar Number",
+      "address": "Address",
+      "dateOfDeath": "Date of Death",
+      "causeOfDeath": "Cause of Death",
+      "applicantInfo": "Applicant Information",
+      "applicantInfoDesc": "Enter applicant details",
+      "applicantFullNameEnglish": "Applicant's Full Name (English)",
+      "whatsappNumber": "WhatsApp Number",
+      "email": "Email (Optional)",
+      "paymentInfo": "Payment Information",
+      "paymentInfoDesc": "Payment details for death certificate (Rs. 20)",
+      "paymentOption": "Payment Option",
+      "utrNumber": "UTR Number"
+    },
+    "marriage": {
+      "title": "Marriage Certificate Application",
+      "description": "Complete the form below to apply for marriage certificate. All fields marked with * are required.",
+      "marriageInfo": "Marriage Information",
+      "marriageInfoDesc": "Enter marriage details",
+      "dateOfMarriage": "Date of Marriage",
+      "placeOfMarriage": "Place of Marriage",
+      "husbandInfo": "Husband Information",
+      "husbandInfoDesc": "Enter husband details",
+      "husbandName": "Husband's Full Name",
+      "husbandAadhaar": "Husband's Aadhaar Number",
+      "husbandAge": "Husband's Age",
+      "husbandFatherName": "Husband's Father's Name",
+      "husbandAddress": "Husband's Address",
+      "husbandOccupation": "Husband's Occupation",
+      "wifeInfo": "Wife Information",
+      "wifeInfoDesc": "Enter wife details",
+      "wifeName": "Wife's Full Name",
+      "wifeAadhaar": "Wife's Aadhaar Number",
+      "wifeAge": "Wife's Age",
+      "wifeFatherName": "Wife's Father's Name",
+      "wifeAddress": "Wife's Address",
+      "wifeOccupation": "Wife's Occupation",
+      "applicantInfo": "Applicant Information",
+      "applicantInfoDesc": "Enter applicant details",
+      "applicantFullName": "Applicant's Full Name",
+      "whatsappNumber": "WhatsApp Number",
+      "email": "Email (Optional)",
+      "paymentInfo": "Payment Information",
+      "paymentInfoDesc": "Payment details for marriage certificate (Rs. 20)",
+      "utrNumber": "UTR Number"
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalidEmail": "Enter a valid email",
+      "invalidPhone": "WhatsApp number should be 10 digits",
+      "invalidAadhaar": "Aadhaar should be 12 digits",
+      "invalidAge": "Enter a valid age",
+      "minAge": "Minimum age required",
+      "paymentReceiptRequired": "Payment receipt image is required",
+      "onlyImages": "Only PNG/JPG images are allowed"
+    }
+  },
+
+    "common": {
+      "logout": "बाहेर पडा",
+      "accessNow": "आता पहा"
+    },
+    "dashboard": {
+      "adminTitle": "प्रशासक डॅशबोर्ड",
+      "userTitle": "नागरिक डॅशबोर्ड",
+      "welcome": "परत स्वागत आहे, {{name}}",
+      "adminSubtitle": "प्रमाणपत्रे, वापरकर्ते आणि मंजुरी सहज व्यवस्थापित करा.",
+      "userSubtitle": "तुमची प्रमाणपत्रे पहा आणि नवीन अर्ज काही क्लिकमध्ये करा."
+    },
+    "services": {
+      "adminTitle": "प्रशासक सेवा",
+      "userTitle": "वापरकर्ता सेवा",
+      "manageUsers": {
+        "title": "वापरकर्त्यांचे व्यवस्थापन",
+        "desc": "वापरकर्त्यांच्या विनंत्या आणि खाती पहा व व्यवस्थापित करा."
+      },
+      "blogs": {
+        "title": "ब्लॉग्स",
+        "desc": "आमच्या ताज्या अपडेट्स आणि लेख वाचा."
+      },
+      "certificateApprovals": {
+        "title": "प्रमाणपत्र मंजुरी",
+        "desc": "सबमिट केलेले प्रमाणपत्र अर्ज मंजूर किंवा नाकार करा."
+      },
+      "uploadCertificates": {
+        "title": "प्रमाणपत्र अपलोड",
+        "desc": "वापरकर्त्यांसाठी अंतिम प्रमाणपत्रे अपलोड करा."
+      },
+      "viewCertificates": {
+        "title": "प्रमाणपत्रे पहा",
+        "desc": "तुमची प्रमाणपत्रे पहा व डाउनलोड करा."
+      },
+      "applyCertificate": {
+        "title": "प्रमाणपत्रासाठी अर्ज",
+        "desc": "नवीन अधिकृत प्रमाणपत्रांसाठी अर्ज करा."
+      },
+      "notifications": {
+        "title": "सूचना",
+        "desc": "तुमच्या अर्ज स्थितीबद्दल अद्यतने मिळवा."
+      },
+      "applicationStatus": {
+        "title": "अर्जाची स्थिती",
+        "desc": "तुमच्या अर्जांची प्रगती तपासा."
+      }
+    }
+  
 }
+
+
