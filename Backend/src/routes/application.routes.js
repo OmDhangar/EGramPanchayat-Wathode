@@ -9,6 +9,7 @@ import {
   submitBirthCertificateApplication,
   submitDeathCertificateApplication,
   submitMarriageCertificateApplication,
+  submitTaxationApplication,
   submitLandRecord8AApplication,
   submitNoOutstandingDebtsApplication,
   submitDigitalSigned712Application,
@@ -73,6 +74,15 @@ router.route("/digital-signed-712").post(
     { name: "paymentReceipt", maxCount: 1 }
   ]),
   submitDigitalSigned712Application
+);
+
+router.route("/taxation/submit").post(
+  verifyJWT,
+  upload.fields([
+    { name: 'paymentReceipt', maxCount: 1 },
+    { name: 'documents', maxCount: 5 }
+  ]),
+  submitTaxationApplication
 );
 
 // Application retrieval routes

@@ -6,6 +6,7 @@ import { useAuthContext } from "../Context/authContext";
 import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
+  const [hovered, setHovered] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileDropdown, setMobileDropdown] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -60,7 +61,7 @@ export default function Navbar() {
       icon: "👥",
       links: [
         { label: t("nav.apply"), path: "/apply-for-certificates" },
-        { label: t("nav.taxation"), path: "/taxation" },
+        {label: t("nav.taxation"), path: "/taxation-info" }
       ],
     },
     {
@@ -81,7 +82,7 @@ export default function Navbar() {
 
  return (
     <div
-      className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 font-tiro-marathi ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${
         scrolled ? "shadow-md bg-white" : "bg-white"
       } ${showNavbar ? "translate-y-0" : "-translate-y-full"}`}
     >
@@ -104,7 +105,7 @@ export default function Navbar() {
               <Calendar size={10} className="mr-1 xs:size-4 lg:size-4  " />
               <span className="text-[0.7rem] font-bold">
                 {new Date().toLocaleDateString(
-                  i18n.language === "mr" ? "hi-IN" : i18n.language === "hi" ? "hi-IN" : "en-IN"
+                  i18n.language === "mr" ? "hi-IN" : "en-IN"
                 )}
               </span>
             </div>

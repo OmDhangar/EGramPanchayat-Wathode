@@ -15,10 +15,18 @@ const applicationSchema = new mongoose.Schema({
     required: true
   },
   
-  // Document Type
+  // Document Type - UPDATED to include taxation
   documentType: {
     type: String,
-    enum: ['marriage_certificate', 'birth_certificate', 'death_certificate'],
+    enum: [
+      'marriage_certificate', 
+      'birth_certificate', 
+      'death_certificate',
+      'land_record_8a',
+      'no_outstanding_debts',
+      'digital_signed_712',
+      'taxation'  // ADDED
+    ],
     required: true
   },
   
@@ -30,15 +38,22 @@ const applicationSchema = new mongoose.Schema({
   },
   
   // Form Data (Dynamic based on document type)
- formDataRef: {
+  formDataRef: {
     type: mongoose.Schema.Types.ObjectId,
     refPath: 'formDataModel'
   },
   formDataModel: {
     type: String,
-    enum: ['BirthCertificate', 'DeathCertificate', 'MarriageCertificate']
+    enum: [
+      'BirthCertificate', 
+      'DeathCertificate', 
+      'MarriageCertificate',
+      'LandRecord8A',
+      'NoOutstandingDebts',
+      'DigitalSigned712',
+      'Taxation'  // ADDED
+    ]
   },
-
 
   // File Uploads
   uploadedFiles: [{
@@ -47,7 +62,7 @@ const applicationSchema = new mongoose.Schema({
     filePath: String,
     fileType: String,
     fileSize: Number,
-    s3Key: String,  // Add S3 specific fields
+    s3Key: String,
     folder: {
       type: String,
       enum: ['unverified', 'verified', 'certificate'],
@@ -56,6 +71,10 @@ const applicationSchema = new mongoose.Schema({
     uploadedAt: {
       type: Date,
       default: Date.now
+    },
+    isPaymentReceipt: {  // ADDED to identify payment receipt
+      type: Boolean,
+      default: false
     }
   }],
   
@@ -72,7 +91,7 @@ const applicationSchema = new mongoose.Schema({
   generatedCertificate: {
     fileName: String,
     filePath: String,
-    s3Key: String,  // Add S3 key for certificate
+    s3Key: String,
     folder: {
       type: String,
       default: 'certificate'
@@ -104,7 +123,6 @@ const applicationSchema = new mongoose.Schema({
   timestamps: true
 });
 
-
 // Method to get payment amount from referenced form
 applicationSchema.methods.getPaymentAmount = async function() {
   if (!this.formDataRef) return 0;
@@ -122,7 +140,7 @@ applicationSchema.methods.getFormData = async function() {
   return await FormModel.findById(this.formDataRef);
 };
 
-// Static method to create application with form data
+// Static method to create application with form data - UPDATED
 applicationSchema.statics.createWithFormData = async function(applicationData, formData) {
   const { documentType } = applicationData;
 
@@ -138,6 +156,18 @@ applicationSchema.statics.createWithFormData = async function(applicationData, f
     case 'marriage_certificate':
       validationResult = validateMarriageCertificate(formData);
       break;
+    case 'land_record_8a':
+      validationResult = validateLandRecord8A(formData);
+      break;
+    case 'no_outstanding_debts':
+      validationResult = validateNoOutstandingDebts(formData);
+      break;
+    case 'digital_signed_712':
+      validationResult = validateDigitalSigned712(formData);
+      break;
+    case 'taxation':  // ADDED
+      validationResult = validateTaxation(formData);
+      break;
     default:
       throw new Error('Invalid document type');
   }
@@ -146,7 +176,6 @@ applicationSchema.statics.createWithFormData = async function(applicationData, f
   if (!validationResult.isValid) {
     throw new Error(`Missing required fields: ${validationResult.missingFields.join(', ')}`);
   }
-
   
   // Create the application first
   const application = new this(applicationData);
@@ -167,6 +196,22 @@ applicationSchema.statics.createWithFormData = async function(applicationData, f
     case 'marriage_certificate':
       FormModel = mongoose.model('MarriageCertificate');
       formDataModel = 'MarriageCertificate';
+      break;
+    case 'land_record_8a':
+      FormModel = mongoose.model('LandRecord8A');
+      formDataModel = 'LandRecord8A';
+      break;
+    case 'no_outstanding_debts':
+      FormModel = mongoose.model('NoOutstandingDebts');
+      formDataModel = 'NoOutstandingDebts';
+      break;
+    case 'digital_signed_712':
+      FormModel = mongoose.model('DigitalSigned712');
+      formDataModel = 'DigitalSigned712';
+      break;
+    case 'taxation':  // ADDED
+      FormModel = mongoose.model('Taxation');
+      formDataModel = 'Taxation';
       break;
     default:
       throw new Error('Invalid document type');
@@ -203,19 +248,60 @@ const validateBirthCertificate = (data) => {
 
 // Death Certificate Validation
 const validateDeathCertificate = (data) => {
-  const required = ['deceasedName', 'deceasedAdharNumber', 'dateOfDeath', 'addressOfDeath', 'placeOfDeath', 'age', 'gender', 'causeOfDeath', 'fatherName', 'motherName', 'permanentAddress'];
+  const required = ['deceasedName', 'dateOfDeath', 'causeOfDeath'];
   const missing = required.filter(field => !data[field]);
   return {
     isValid: missing.length === 0,
     missingFields: missing
   };
 };
+
 // Marriage Certificate Validation
 const validateMarriageCertificate = (data) => {
   const required = [
     'dateOfMarriage', 'placeOfMarriage', 'HusbandName', 'HusbandAge', 'HusbandFatherName',
-    'wifeName', 'wifeAge', 'wifeFatherName', 'SolemnizedOn'
+    'wifeName', 'wifeAge', 'wifeFatherName'
   ];
+  const missing = required.filter(field => !data[field]);
+  return {
+    isValid: missing.length === 0,
+    missingFields: missing
+  };
+};
+
+// Land Record 8A Validation
+const validateLandRecord8A = (data) => {
+  const required = ['ownersName', 'village', 'whatsappNumber', 'taluka', 'district', 'accountNumber', 'utrNumber'];
+  const missing = required.filter(field => !data[field]);
+  return {
+    isValid: missing.length === 0,
+    missingFields: missing
+  };
+};
+
+// No Outstanding Debts Validation
+const validateNoOutstandingDebts = (data) => {
+  const required = ['financialYear', 'propertyOwnerName', 'aadhaarCardNumber', 'whatsappNumber', 'villageName', 'wardNo', 'streetNameNumber', 'propertyNumber', 'applicantFullNameEnglish', 'applicantAadhaarNumber', 'utrNumber'];
+  const missing = required.filter(field => !data[field]);
+  return {
+    isValid: missing.length === 0,
+    missingFields: missing
+  };
+};
+
+// Digital Signed 7/12 Validation
+const validateDigitalSigned712 = (data) => {
+  const required = ['ownersName', 'village', 'whatsappNumber', 'taluka', 'district', 'surveyNumber', 'utrNumber'];
+  const missing = required.filter(field => !data[field]);
+  return {
+    isValid: missing.length === 0,
+    missingFields: missing
+  };
+};
+
+// Taxation Validation - ADDED
+const validateTaxation = (data) => {
+  const required = ['financialYear', 'applicantName', 'mobileNumber', 'taxPayerNumber', 'address', 'utrNumber'];
   const missing = required.filter(field => !data[field]);
   return {
     isValid: missing.length === 0,
@@ -277,7 +363,6 @@ applicationSchema.methods.getSignedUrls = async function() {
   // Get URLs for uploaded files
   for (const file of this.uploadedFiles) {
     try {
-      // Use getSecureFileUrl instead of getFileDownloadUrl
       const signedUrl = await getSecureFileUrl(file.s3Key || file.filePath);
       urls.push({
         fileName: file.originalName,

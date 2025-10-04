@@ -64,6 +64,7 @@ export default function NoticeBoard() {
           : "/blogs";
 
       const res = await api.get(url);
+      console.log(res)
 
       const blogsWithUrls = res.data.map((blog: any) => ({
         ...blog,
