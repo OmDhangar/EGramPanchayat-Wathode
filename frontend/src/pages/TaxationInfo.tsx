@@ -80,7 +80,7 @@ const TaxationInfo: React.FC = () => {
         setError('पेमेंट रसीद फक्त JPG किंवा PNG फॉरमॅटमध्ये असावी / Payment receipt must be JPG or PNG');
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > 8 * 1024 * 1024) {
         setError('पेमेंट रसीद 5MB पेक्षा कमी असावी / Payment receipt must be less than 5MB');
         return;
       }
@@ -89,111 +89,102 @@ const TaxationInfo: React.FC = () => {
     }
   };
 
-  const handleDocumentsChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (documents.length + files.length > 5) {
-      setError('कमाल 5 अतिरिक्त कागदपत्रे अपलोड करता येतील / Maximum 5 additional documents allowed');
-      return;
-    }
-    setDocuments([...documents, ...files]);
-    setError('');
-  };
-
-  const removeDocument = (index: number) => {
-    setDocuments(documents.filter((_, i) => i !== index));
-  };
-
   const removeReceipt = () => {
     setPaymentReceipt(null);
   };
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSubmitSuccess(false);
+  e.preventDefault();
+  setError('');
+  setSubmitSuccess(false);
+  
+  // Validation
+  if (!formData.financialYear || !formData.applicantName || !formData.mobileNumber || 
+      !formData.taxPayerNumber || !formData.address || !formData.utrNumber) {
+      setError('कृपया सर्व आवश्यक फील्ड भरा / Please fill all required fields');
+      return;
+  }
+
+  if (!/^\d{10}$/.test(formData.mobileNumber)) {
+      setError('मोबाईल नंबर 10 अंकी असावा / Mobile number must be 10 digits');
+      return;
+  }
+
+  if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError('चुकीचा ई-मेल फॉरमॅट / Invalid email format');
+      return;
+  }
+
+  if (!paymentReceipt) {
+      setError('पेमेंट रसीद अपलोड करणे आवश्यक आहे / Payment receipt is required');
+      return;
+  }
+
+  setIsSubmitting(true);
+  
+  try {
+    const formDataToSend = new FormData();
     
-    // Validation
-    if (!formData.financialYear || !formData.applicantName || !formData.mobileNumber || 
-        !formData.taxPayerNumber || !formData.address || !formData.utrNumber) {
-        setError('कृपया सर्व आवश्यक फील्ड भरा / Please fill all required fields');
-        return;
-    }
-
-    if (!/^\d{10}$/.test(formData.mobileNumber)) {
-        setError('मोबाईल नंबर 10 अंकी असावा / Mobile number must be 10 digits');
-        return;
-    }
-
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        setError('चुकीचा ई-मेल फॉरमॅट / Invalid email format');
-        return;
-    }
-
-    if (!paymentReceipt) {
-        setError('पेमेंट रसीद अपलोड करणे आवश्यक आहे / Payment receipt is required');
-        return;
-    }
-
-    setIsSubmitting(true);
     
-    try {
-      const formDataToSend = new FormData();
-      
-      // Append all form fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value) {
-          formDataToSend.append(key, value);
-        }
-      });
-
-      // Append payment receipt
-      formDataToSend.append('paymentReceipt', paymentReceipt);
-
-      // Append additional documents
-      documents.forEach(doc => {
-        formDataToSend.append('documents', doc);
-      });
-
-      // Axios expects FormData as the second argument, not inside 'body'
-      const response = await api.post('/applications/taxation/submit', formDataToSend, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        }
-      });
-
-      if (response.status !== 200 && response.status !== 201) {
-        throw new Error(response.data?.message || 'अर्ज जमा करताना त्रुटी / Submission failed');
+    // Append all form fields - FIXED: Convert to string and ensure proper field names
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formDataToSend.append(key, String(value));
       }
+    });
 
-      // Success
-      setSubmitSuccess(true);
-      
-      // Reset form
-      setFormData({
-        financialYear: '',
-        applicantName: '',
-        mobileNumber: '',
-        email: '',
-        taxPayerNumber: '',
-        address: '',
-        groupName: '',
-        groupType: '',
-        oldTaxNumber: '',
-        newTaxNumber: '',
-        utrNumber: ''
-      });
-      setPaymentReceipt(null);
-      setDocuments([]);
-      
-      // Scroll to success message
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    } catch (err: any) {
-      setError(err.message || 'अर्ज जमा करताना त्रुटी झाली / Failed to submit application');
-    } finally {
-      setIsSubmitting(false);
+    // Append payment receipt - FIXED: Ensure file is properly appended
+    if (paymentReceipt) {
+      formDataToSend.append('paymentReceipt', paymentReceipt);
     }
-  };
+
+    // Append additional documents - FIXED: Use correct field name
+    documents.forEach(doc => {
+      formDataToSend.append('documents', doc);
+    });
+
+    // FIXED: Use correct endpoint and headers
+    const response = await api.post('/applications/taxation/submit', formDataToSend, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+      }
+    });
+
+    if (response.status !== 200 && response.status !== 201) {
+      throw new Error(response.data?.message || 'अर्ज जमा करताना त्रुटी / Submission failed');
+    }
+
+    // Success
+    setSubmitSuccess(true);
+    
+    // Reset form
+    setFormData({
+      financialYear: '',
+      applicantName: '',
+      mobileNumber: '',
+      email: '',
+      taxPayerNumber: '',
+      address: '',
+      groupName: '',
+      groupType: '',
+      oldTaxNumber: '',
+      newTaxNumber: '',
+      utrNumber: ''
+    });
+    setPaymentReceipt(null);
+    setDocuments([]);
+    
+    // Scroll to success message
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (err: any) {
+    console.error('Submission error:', err);
+    setError(err.response?.data?.message || err.message || 'अर्ज जमा करताना त्रुटी झाली / Failed to submit application');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -278,7 +269,7 @@ const TaxationInfo: React.FC = () => {
                                 onError={(e) => {
                                     e.currentTarget.style.display = "none";
                                     const fallback = e.currentTarget.nextSibling;
-                                    if (fallback) fallback.style.display = "flex";
+                                    if (fallback) (fallback as HTMLElement).style.display = "flex";
                                 }}
                             />
                             <div className="hidden w-56 h-56 bg-gray-100 rounded-lg items-center justify-center text-gray-400 text-sm text-center">
@@ -301,7 +292,7 @@ const TaxationInfo: React.FC = () => {
                                 onError={(e) => {
                                     e.currentTarget.style.display = "none";
                                     const fallback = e.currentTarget.nextSibling;
-                                    if (fallback) fallback.style.display = "flex";
+                                    if (fallback) (fallback as HTMLElement).style.display = "flex";
                                 }}
                             />
                             <div className="hidden w-56 h-56 bg-gray-100 rounded-lg items-center justify-center text-gray-400 text-sm text-center">
