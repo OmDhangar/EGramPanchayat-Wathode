@@ -157,7 +157,7 @@ const Footer = () => {
             <p>
               Powered by{" "}
               <span className="font-semibold text-black">
-              Om dhangar and Pushkar Deore
+                Om dhangar and Pushkar Deore
               </span>
             </p>
           </div>
