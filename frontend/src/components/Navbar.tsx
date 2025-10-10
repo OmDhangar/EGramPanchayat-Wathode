@@ -6,7 +6,6 @@ import { useAuthContext } from "../Context/authContext";
 import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
-  const [hovered, setHovered] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileDropdown, setMobileDropdown] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -38,13 +37,14 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    
     {
       label: t("nav.village"),
       icon: "🏡",
       links: [
         { label: t("nav.about"), path: "/About-Vathode" },
         { label: t("nav.gallery"), path: "/gallery" },
+        { label: t("nav.gpInfo"), path: "/grampanchayat-info" }, // Added Route
+        { label: t("nav.depts"), path: "/departments" },       // Added Route
       ],
     },
     {

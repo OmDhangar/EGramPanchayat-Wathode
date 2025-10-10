@@ -9,9 +9,12 @@
     "dashboard": "Dashboard"
   },
   "nav": {
-    "home":"Home",
+    "home": "Home",
     "village": "THE VILLAGE",
     "about": "About Vathode",
+    "gallery": "Gallery",
+    "gpInfo": "Gram Panchayat Info",
+    "depts": "Departments",
     "gp": "GRAM PANCHAYAT",
     "members": "Members",
     "meetings": "Meetings",
