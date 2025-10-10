@@ -2,39 +2,35 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Helmet } from "react-helmet";
 
-// Marathi labels and data
+// Marathi labels and data based on the new image (2011 Census)
 const populationStats = [
-  { name: "एकूण लोकसंख्या", पुरुष: 1053, महिला: 1019 },
-  { name: "बालक (0-6 वर्षे)", पुरुष: 143, महिला: 110 },
-  { name: "अनुसूचित जाती (SC)", पुरुष: 66, महिला: 62 },
-  { name: "अनुसूचित जमाती (ST)", पुरुष: 418, महिला: 411 },
+  { name: "एकूण लोकसंख्या", पुरुष: 1019, महिला: 1053 },
+  { name: "बालक (0-6 वर्षे)", पुरुष: 50, महिला: 53 },
+  { name: "अनुसूचित जाती (SC)", पुरुष: 62, महिला: 66 },
+  { name: " अनुसूचित जमाती (ST)", पुरुष: 411, महिला: 418 },
 ];
 
+// Calculated from percentages: Male Literate = 1019 * 71.42% = 728, Female Literate = 1053 * 51.91% = 547
 const literacyStats = [
-  { name: "साक्षर", पुरुष: 752, महिला: 529 },
-  { name: "अशिक्षित", पुरुष: 301, महिला: 490 },
+  { name: "साक्षर", पुरुष: 728, महिला: 547 },
+  { name: "अशिक्षित", पुरुष: 291, महिला: 506 },
 ];
 
 const genderPie = [
-  { name: "पुरुष", value: 1053 },
-  { name: "महिला", value: 1019 },
-];
-
-const childPie = [
-  { name: "बालक (पुरुष)", value: 143 },
-  { name: "बालक (महिला)", value: 110 },
+  { name: "पुरुष", value: 1019 },
+  { name: "महिला", value: 1053 },
 ];
 
 const castePie = [
   { name: "SC", value: 128 },
   { name: "ST", value: 829 },
-  { name: "इतर", value: 2072 - 128 - 829 },
+  { name: "इतर", value: 2072 - 128 - 829 }, // 1115
 ];
 
 const COLORS = ["#2563eb", "#f59e42", "#22c55e", "#eab308", "#f43f5e"];
 
 const nearbyVillages = [
-  "अधे", "टांडे", "असली", "अहिल्यापूर", "जैतपूर", "भोरखेडा", "गोडी", "ठळनेर", "महादेव डोंडवडे", "मलापूर", "टोंडे"
+ "जैतपूर", "पिंप्री", "आढे", "अहिल्यापुर", "ताजपुरी"
 ];
 
 const AboutVathode = () => {
@@ -42,11 +38,11 @@ const AboutVathode = () => {
     <div className="max-w-4xl mx-auto p-4 font-[Tiro Devanagari Marathi]">
       <Helmet>
         <title>About Wathode Village - Grampanchayat Wathode</title>
-        <meta name="description" content="Detailed information about Wathode village, including population, literacy, caste structure, and connectivity. Grampanchayat Wathode, Shirpur, Dhule, Maharashtra." />
+        <meta name="description" content="Detailed information about Wathode village, including population, literacy, caste structure, and connectivity based on the 2011 census. Grampanchayat Wathode, Shirpur, Dhule, Maharashtra." />
       </Helmet>
       <h1 className="text-3xl font-bold mb-4 text-yellow-800 tiro-header">वाठोडे गावाची माहिती</h1>
       <p className="mb-4 text-gray-700 text-lg">
-        <b>वाठोडे</b> हे महाराष्ट्रातील धुळे जिल्ह्यातील शिरपूर तालुक्यातील एक गाव आहे. हे गाव शिरपूरपासून सुमारे १२ किमी आणि जिल्हा मुख्यालय धुळेपासून ६९ किमी अंतरावर आहे. २००९ नुसार, वाठोडे हे स्वतःचे ग्रामपंचायत आहे. गावाचा भौगोलिक कोड ५२६०७४ आहे आणि एकूण क्षेत्रफळ २९९.१७ हेक्टर आहे. शिरपूर हे गावाच्या जवळचे प्रमुख आर्थिक केंद्र आहे.
+        <b>वाठोडे</b> हे महाराष्ट्रातील धुळे जिल्ह्यातील शिरपूर तालुक्यातील एक गाव आहे. हे गाव शिरपूरपासून सुमारे १२ किमी आणि जिल्हा मुख्यालय धुळेपासून ६९ किमी अंतरावर आहे. <strong>सन २०११ च्या जनगणनेनुसार</strong>, वाठोडे हे स्वतःचे ग्रामपंचायत आहे. गावाचा एकूण लोकसंख्या २०७२ असून एकूण क्षेत्रफळ २९९.१७ हेक्टर आहे. शिरपूर हे गावाच्या जवळचे प्रमुख आर्थिक केंद्र आहे.
       </p>
 
       <div className="mb-8">
@@ -122,22 +118,34 @@ const AboutVathode = () => {
       </div>
 
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2 text-blue-900">गावातील घरे व मुलांची माहिती</h2>
+        <h2 className="text-xl font-semibold mb-2 text-blue-900">गावातील घरे व इतर माहिती</h2>
         <table className="min-w-full bg-white border border-gray-300 rounded shadow text-base">
           <thead>
             <tr className="bg-yellow-100">
-              <th className="py-2 px-4 border-b">एकूण घरे</th>
-              <th className="py-2 px-4 border-b">बालक (0-6)</th>
-              <th className="py-2 px-4 border-b">SC</th>
-              <th className="py-2 px-4 border-b">ST</th>
+              <th className="py-2 px-4 border-b">तपशील</th>
+              <th className="py-2 px-4 border-b">संख्या</th>
             </tr>
           </thead>
           <tbody>
             <tr>
+              <td className="py-2 px-4 border-b">एकूण कुटुंब संख्या</td>
               <td className="py-2 px-4 border-b text-center">४३३</td>
-              <td className="py-2 px-4 border-b text-center">२५३</td>
-              <td className="py-2 px-4 border-b text-center">१२८</td>
-              <td className="py-2 px-4 border-b text-center">८२९</td>
+            </tr>
+             <tr>
+              <td className="py-2 px-4 border-b">दारिद्र रेषेखालील कुटुंब</td>
+              <td className="py-2 px-4 border-b text-center">१५३</td>
+            </tr>
+             <tr>
+              <td className="py-2 px-4 border-b">प्रधानमंत्री आवास योजना प्रतीक्षा यादी</td>
+              <td className="py-2 px-4 border-b text-center">२०५</td>
+            </tr>
+             <tr>
+              <td className="py-2 px-4 border-b">प्रधानमंत्री आवास योजना मंजूर घरकुल</td>
+              <td className="py-2 px-4 border-b text-center">२००</td>
+            </tr>
+             <tr>
+              <td className="py-2 px-4 border-b">स्वस्त धान्य दुकान</td>
+              <td className="py-2 px-4 border-b text-center">१</td>
             </tr>
           </tbody>
         </table>
@@ -149,21 +157,29 @@ const AboutVathode = () => {
           <thead>
             <tr className="bg-yellow-100">
               <th className="py-2 px-4 border-b">सेवा</th>
-              <th className="py-2 px-4 border-b">स्थिती (२०११)</th>
+              <th className="py-2 px-4 border-b">अंतर</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="py-2 px-4 border-b">सार्वजनिक बस सेवा</td>
-              <td className="py-2 px-4 border-b">गावी उपलब्ध</td>
+              <td className="py-2 px-4 border-b">तालुका (शिरपूर)</td>
+              <td className="py-2 px-4 border-b">१२ कि.मी.</td>
             </tr>
             <tr>
-              <td className="py-2 px-4 border-b">खाजगी बस सेवा</td>
-              <td className="py-2 px-4 border-b">गावी उपलब्ध</td>
+              <td className="py-2 px-4 border-b">उपजिल्हा रुग्णालय</td>
+              <td className="py-2 px-4 border-b">१२ कि.मी.</td>
             </tr>
             <tr>
-              <td className="py-2 px-4 border-b">रेल्वे स्थानक</td>
-              <td className="py-2 px-4 border-b">१०+ किमी अंतरावर</td>
+              <td className="py-2 px-4 border-b">पोलीस ठाणे (थाळनेर)</td>
+              <td className="py-2 px-4 border-b">१० कि.मी.</td>
+            </tr>
+            <tr>
+              <td className="py-2 px-4 border-b">रेल्वे स्टेशन</td>
+              <td className="py-2 px-4 border-b">१८ कि.मी.</td>
+            </tr>
+            <tr>
+              <td className="py-2 px-4 border-b">विमान तळ</td>
+              <td className="py-2 px-4 border-b">२९० कि.मी.</td>
             </tr>
           </tbody>
         </table>
@@ -183,7 +199,7 @@ const AboutVathode = () => {
         <div className="rounded-xl overflow-hidden shadow border border-gray-300">
           <iframe
             title="Wathode Village Map"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3757.123456789!2d74.880000!3d21.350000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bdedb1c0b0b0b0b%3A0x0!2z4KS44KSC4KSw4KWA4KSo4KWA4KSw4KWA!5e0!3m2!1sen!2sin!4v1680000000000!5m2!1sen!2sin"
+            src="https://maps.google.com/maps?q=Wathode,Shirpur,Dhule&t=&z=13&ie=UTF8&iwloc=&output=embed"
             width="100%"
             height="320"
             style={{ border: 0 }}
