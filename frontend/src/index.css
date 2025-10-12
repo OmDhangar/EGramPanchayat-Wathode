@@ -91,3 +91,11 @@ html {
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+@keyframes blink {
+  0%, 100% { opacity: 5; }
+  50% { opacity: 0.3; }
+}
+
+.animate-blink {
+  animation: blink 1.5s infinite;
+}
