@@ -207,7 +207,7 @@ export default function Navbar() {
       </div>
 
       {/* Welcome bar */}
-      <div className="bg-gradient-to-r from-green-500 to-green-600 py-0.5 font-tiro-marathi font-bold xs:py-2 text-xs xs:text-sm text-black text-center">
+      <div className="bg-gradient-to-r from-green-500 to-green-600 py-0.5 font-tiro-marathi  xs:py-1 text-xs xs:text-sm text-white text-center">
         {t("header.welcome")}
       </div>
 

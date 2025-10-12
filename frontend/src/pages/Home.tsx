@@ -846,12 +846,12 @@ export default function Home() {
         </div>
       </section>
 
-      <button
+      {/* <button
         onClick={() => scrollToSection("main-content")}
         className="fixed bottom-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg"
       >
-        Back to Top
-      </button>
+        
+      </button> */}
     </div>
   );
 }
