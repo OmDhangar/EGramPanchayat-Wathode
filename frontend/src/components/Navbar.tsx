@@ -59,6 +59,7 @@ export default function Navbar() {
       icon: "👥",
       links: [
         { label: t("nav.apply"), path: "/apply-for-certificates" },
+        { label: t("nav.letters"), path: "/selfdeclareletters" },
         {label: t("nav.taxation"), path: "/taxation-info" }
       ],
     },
