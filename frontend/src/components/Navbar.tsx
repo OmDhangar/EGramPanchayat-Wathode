@@ -50,9 +50,10 @@ export default function Navbar() {
       label: t("nav.gp"),
       icon: "🏛",
       links: [
-       { label: t("nav.gpInfo"), path: "/grampanchayat-info" }, // Added Route
-        { label: t("nav.depts"), path: "/departments" },   
-      ]
+        { label: t("nav.gpInfo"), path: "/grampanchayat-info" }, // Added Route
+        { label: t("nav.depts"), path: "/departments" },       // Added Route
+        { label: t("nav.schemes"), path: "/schemes" },
+      ],
     },
     {
       label: t("nav.citizen"),
