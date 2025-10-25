@@ -19,9 +19,10 @@ const fadeInUp: Variants = {
 export default function Home() {
   
   const imageGrid = [
-    { src: "/images/developed village 2.webp", alt: "Village 1" },
-    { src: "/images/developed village.jpg", alt: "Village 2" },
-    { src: "/images/gpvasardi.jpg", alt: "Village 3" },
+    { src: "/images/33.jpeg", alt: "Village 1" },
+    { src: "/images/1.jpeg", alt: "Village 2" },
+    { src: "/images/3.jpeg", alt: "Village 3" },
+     { src: "/images/26.jpeg", alt: "Village 8" },
     { src: "/images/phu.jpeg", alt: "Village 4" },
     { src: "/images/place.jpeg", alt: "Village 5" },
     { src: "/images/samajmandir.jpeg", alt: "Village 6" },
@@ -845,12 +846,12 @@ export default function Home() {
         </div>
       </section>
 
-      <button
+      {/* <button
         onClick={() => scrollToSection("main-content")}
         className="fixed bottom-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg"
       >
-        Back to Top
-      </button>
+        
+      </button> */}
     </div>
   );
 }
