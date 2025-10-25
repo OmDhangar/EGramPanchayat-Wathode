@@ -43,16 +43,14 @@ export default function Navbar() {
       links: [
         { label: t("nav.about"), path: "/About-Vathode" },
         { label: t("nav.gallery"), path: "/gallery" },
-        { label: t("nav.gpInfo"), path: "/grampanchayat-info" }, // Added Route
-        { label: t("nav.depts"), path: "/departments" },       // Added Route
       ],
     },
     {
       label: t("nav.gp"),
       icon: "🏛",
       links: [
-        { label: t("nav.members"), path: "/members" },
-        { label: t("nav.meetings"), path: "/meetings" },
+        { label: t("nav.gpInfo"), path: "/grampanchayat-info" }, // Added Route
+        { label: t("nav.depts"), path: "/departments" },       // Added Route
         { label: t("nav.schemes"), path: "/schemes" },
       ],
     },

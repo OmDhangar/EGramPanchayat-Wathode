@@ -364,7 +364,7 @@ const LandRecord8AForm = () => {
                 <input
                   type="file"
                   accept="image/png,image/jpeg,image/jpg"
-                  capture="environment"
+                  
                   onChange={e => handleReceiptChange(e.target.files?.[0] || undefined)}
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                 />
