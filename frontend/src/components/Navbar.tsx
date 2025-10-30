@@ -62,16 +62,16 @@ export default function Navbar() {
         {label: t("nav.taxation"), path: "/taxation-info" }
       ],
     },
-    {
-      label: t("nav.public"),
-      icon: "📢",
-      links: [{ label: t("nav.notices"), path: "/notices" }],
-    },
-    {
-      label: t("nav.help"),
-      icon: "❓",
-      links: [{ label: t("nav.contact"), path: "/contact" }],
-    },
+    // {
+    //   label: t("nav.public"),
+    //   icon: "📢",
+    //   links: [{ label: t("nav.notices"), path: "/notices" }],
+    // },
+    // {
+    //   label: t("nav.help"),
+    //   icon: "❓",
+    //   links: [{ label: t("nav.contact"), path: "/contact" }],
+    // },
   ];
 
   const handleMobileDropdown = (idx: number) => {
