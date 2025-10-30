@@ -43,6 +43,7 @@ export default function Navbar() {
       links: [
         { label: t("nav.about"), path: "/About-Vathode" },
         { label: t("nav.gallery"), path: "/gallery" },
+            // Added Route
       ],
     },
     {
@@ -59,6 +60,7 @@ export default function Navbar() {
       icon: "👥",
       links: [
         { label: t("nav.apply"), path: "/apply-for-certificates" },
+        { label: t("nav.letters"), path: "/selfdeclareletters" },
         {label: t("nav.taxation"), path: "/taxation-info" }
       ],
     },
@@ -207,7 +209,7 @@ export default function Navbar() {
       </div>
 
       {/* Welcome bar */}
-      <div className="bg-gradient-to-r from-green-500 to-green-600 py-0.5 xs:py-1 text-xs xs:text-sm text-white text-center">
+      <div className="bg-gradient-to-r from-green-500 to-green-600 py-0.5 font-tiro-marathi  xs:py-1 text-xs xs:text-sm text-white text-center">
         {t("header.welcome")}
       </div>
 
@@ -291,19 +293,19 @@ export default function Navbar() {
                     : "hover:bg-blue-700"
                 }`}
               >
-                <FaHome className="text-sm" />
+                <FaHome className="text-sm font-tiro-marathi" />
                 <span>{t("nav.home")}</span>
               </Link>
             </li>
             {navItems.map((item, idx) => (
               <li key={idx} className="relative group">
-                <div className="flex items-center space-x-1 px-4 py-2 hover:bg-blue-700 cursor-pointer">
+                <div className="flex items-center space-x-1 px-4 py-2 hover:bg-blue-700 font-tiro-marathi cursor-pointer">
                   <span>{item.icon}</span>
                   <span>{item.label}</span>
                   <ChevronDown size={14} />
                 </div>
                 {/* Dropdown */}
-                <div className="absolute left-0 top-full w-44 bg-blue-950 hidden group-hover:block">
+                <div className="absolute left-0 top-full font-tiro-marathi w-44 bg-blue-950 hidden group-hover:block">
                   {item.links.map((link, i) => (
                     <Link
                       key={i}

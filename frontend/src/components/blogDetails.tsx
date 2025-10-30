@@ -85,7 +85,6 @@ export default function BlogDetails() {
           <span className="flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
             <FaTag className="mr-1" /> {blog.category}
           </span>
-          <span>{blog.date}</span>
         </div>
 
         {/* Author & Dates */}

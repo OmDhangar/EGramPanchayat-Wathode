@@ -44,6 +44,7 @@ import CertificateDownload from './pages/certificateDownload';
 import BlogDetails from './components/blogDetails';
 import AboutGramPanchayat from './pages/AboutGram';
 import DepartmentsPage from './pages/Department';
+import SelfDeclareLetters from './pages/selfdeclareletters';
 
 function AppContent() {
   const location = useLocation();
@@ -131,6 +132,7 @@ function AppContent() {
             <Route path="/taxation-info" element={<TaxationInfo />} />
             <Route path="/grampanchayat-info" element={<AboutGramPanchayat />} />
             <Route path="/departments" element={<DepartmentsPage />} />
+            <Route path="/selfdeclareletters" element={<SelfDeclareLetters />} />
           </Routes>
         </main>
         <Footer />
