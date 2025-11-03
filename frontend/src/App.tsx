@@ -117,7 +117,7 @@ function AppContent() {
             //common
             <Route path="/home" element={<Home />} />
             <Route path="/members" element={<Members />} />
-            <Route path="/notices" element={<PublicInfo />} />
+            <Route path="/govtWebsites" element={<PublicInfo />} />
             <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/contact" element={<Help/>} />

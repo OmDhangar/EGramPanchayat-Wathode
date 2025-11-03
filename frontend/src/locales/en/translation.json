@@ -24,7 +24,7 @@
     "letters":"self-letters",
     "taxation": "Taxation",
     "public": "PUBLIC INFORMATION",
-    "notices": "Notices",
+    "govtWebsites": "Government Websites",
     "help": "HELP",
     "contact": "Contact"
   },
@@ -344,7 +344,84 @@
         "title": "अर्जाची स्थिती",
         "desc": "तुमच्या अर्जांची प्रगती तपासा."
       }
-    }
+    },
+    "govLinks": {
+    "header": {
+      "title": "Important Links",
+      "subtitle": "Collection of all important government websites in one place. Use the links below for all services related to Gram Panchayat office."
+    },
+    "stats": {
+      "totalLinks": "Total Links",
+      "govtDepartments": "5+",
+      "departments": "Government Departments",
+      "centralGovt": "2",
+      "central": "Central Government",
+      "onlineServices": "7+",
+      "services": "Online Services"
+    },
+    "categories": {
+      "state": "State Government",
+      "central": "Central Government",
+      "panchayat": "Panchayat Development",
+      "tenders": "Tenders & Procurement",
+      "commerce": "Commerce & Market",
+      "maps": "Maps & Records",
+      "revenue": "Revenue & Land"
+    },
+    "maharashtraGovt": {
+      "name": "Maharashtra Government",
+      "description": "Maharashtra Government Official Portal"
+    },
+    "govtDecisions": {
+      "name": "Government Decisions",
+      "description": "All State Government Department Decisions"
+    },
+    "tenderPortal": {
+      "name": "State Government Tender Portal",
+      "description": "State Government Tender Portal"
+    },
+    "gem": {
+      "name": "GEM (Government e-Marketplace)",
+      "description": "Government e-Marketplace"
+    },
+    "ruralDevelopment": {
+      "name": "Ministry of Rural Development",
+      "description": "Ministry of Rural Development - Central Government"
+    },
+    "gpdp": {
+      "name": "Panchayat Development Plan Portal (GPDP)",
+      "description": "Gram Panchayat Development Plan Portal"
+    },
+    "villageMapping": {
+      "name": "Village Mapping Portal",
+      "description": "Village Mapping Portal"
+    },
+    "landRecords": {
+      "name": "Land Records Department",
+      "description": "Land Records Department"
+    },
+    "clickHere": "Click Here",
+    "usage": {
+      "title": "How to Use?",
+      "clickImage": {
+        "title": "Click on Image",
+        "description": "Click on any card to visit that website"
+      },
+      "colorCode": {
+        "title": "Identify by Colors",
+        "description": "Different colors represent different government departments"
+      },
+      "easySearch": {
+        "title": "Easy to Find",
+        "description": "Images make services easy to identify"
+      }
+    },
+    "footer": {
+      "title": "All government websites and online services in one place",
+      "subtitle": "Click on any card to avail the government service you need"
+    },
+    "developmentNotice": "This page is under development. More services will be available soon"
+  }
   
 }
 
