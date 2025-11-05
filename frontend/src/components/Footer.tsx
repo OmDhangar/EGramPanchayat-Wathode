@@ -15,7 +15,7 @@ const Footer = () => {
             ग्रामपंचायत वाठोडे, ता. शिरपूर, जि. धुळे
           </h2>
           <p className="text-gray-600 text-xs sm:text-sm mt-1">
-            Gram Panchayat Vathode, Shirpur Dist. Dhule — Official Website
+            Gram Panchayat Wathode, Shirpur Dist. Dhule — Official Website
           </p>
         </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaEye } from 'react-icons/fa';
+import { FaArrowLeft, FaArrowRight, FaEye } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { FaFileAlt, FaFilePdf, FaFileImage } from 'react-icons/fa';
 import { api } from '../api/axios';
@@ -34,6 +34,7 @@ interface FormSubmission {
 }
 
 const TABS = ['all', 'pending','approved', 'certificate_generated','rejected', 'completed'];
+const APPLICATIONS_PER_PAGE = 9;
 
 const CertificateApprovals = () => {
   const [forms, setForms] = useState<FormSubmission[]>([]);
@@ -44,28 +45,39 @@ const CertificateApprovals = () => {
   const [urlErrors, setUrlErrors] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
 
-  const filterFormByStatus = (forms:FormSubmission[]):FormSubmission[]=>{
-    if(activeTab === 'all') return forms;
-    return forms.filter(form => form.status === activeTab);
-  }
+  // --- PAGINATION STATE ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalApplications, setTotalApplications] = useState(0);
 
   const fetchForms = async () => {
     try {
-      console.log(localStorage.getItem('accessToken'));
-      console.log(localStorage.getItem('refreshToken'))
       setLoading(true);
-      const res = await api.get(
-        `/applications/admin`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`, 
-          },
-        } 
-      );
-             const filteredForms = filterFormByStatus(res.data.data ||[])
-       console.log('Applications data:', res.data.data);
-       console.log('Filtered forms:', filteredForms);
-       setForms(filteredForms);
+      // --- UPDATED API CALL ---
+      const url = activeTab === 'all'
+        ? `/applications/admin`
+        : `/applications/admin/filter`;
+      
+      const params = {
+        page: currentPage,
+        limit: APPLICATIONS_PER_PAGE,
+        ...(activeTab !== 'all' && { status: activeTab })
+      };
+
+      const res = await api.get(url, {
+        params,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, 
+        },
+      });
+
+      const data = res.data.data;
+      console.log('Applications data:', data);
+      setForms(data.applications || []);
+      setTotalPages(data.totalPages || 0);
+      setTotalApplications(data.totalApplications || 0);
+      setCurrentPage(data.currentPage || 1);
+
     } catch (err) {
       console.error('Error fetching forms:', err);
     } finally {
@@ -76,7 +88,14 @@ const CertificateApprovals = () => {
 
   useEffect(() => {
     fetchForms();
+  }, [activeTab,currentPage]);
+
+
+  // Reset to page 1 when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
   }, [activeTab]);
+
 
   const viewFormDetails = (formId: string) => {
     navigate(`/form-details/${formId}`);
@@ -138,6 +157,19 @@ const CertificateApprovals = () => {
       window.open(url, '_blank');
     } catch (err) {
       console.error('Error opening file:', err);
+    }
+  };
+
+  // --- PAGINATION HANDLERS ---
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
@@ -337,6 +369,32 @@ const CertificateApprovals = () => {
           </div>
         )}
       </div>
+                        {/* --- NEW PAGINATION CONTROLS --- */}
+            {totalPages > 1 && (
+                <div className="mt-8 flex justify-between items-center">
+                  <button
+                    onClick={handlePrevPage}
+                    disabled={currentPage <= 1 || loading}
+                    className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FaArrowLeft />
+                    Previous
+                  </button>
+                  
+                  <span className="text-sm text-gray-700">
+                    Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+                  </span>
+
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage >= totalPages || loading}
+                    className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <FaArrowRight />
+                  </button>
+                </div>
+              )}
     </div>
   );
 };

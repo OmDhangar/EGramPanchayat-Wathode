@@ -8,7 +8,6 @@ import {
   FaUpload, 
   FaCheckCircle,
   FaChevronRight,
-  FaChartLine,
   FaFileAlt
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
@@ -182,8 +181,8 @@ export default function Dashboard() {
                   <ServiceCard
                     to="/user/certificates"
                     icon={<FaCertificate className="text-2xl text-blue-600" />}
-                    title={t("services.viewCertificates.title")}
-                    description={t("services.viewCertificates.desc")}
+                    title={t("services.applicationStatus.title")}
+                    description={t("services.applicationStatus.desc")}
                     color="blue"
                   />
                   <ServiceCard
@@ -200,46 +199,13 @@ export default function Dashboard() {
                     description={t("services.notifications.desc")}
                     color="yellow"
                   />
-                  <ServiceCard
-                    to="/user/status"
-                    icon={<FaChartLine className="text-2xl text-purple-600" />}
-                    title={t("services.applicationStatus.title")}
-                    description={t("services.applicationStatus.desc")}
-                    color="purple"
-                  />
                 </>
               )}
             </motion.div>
           </motion.div>
         </AnimatePresence>
 
-        {/* Quick Stats for Mobile */}
-        {isMobile && (
-          <motion.div 
-            className="bg-white rounded-2xl p-5 mb-8 shadow-sm border border-slate-100"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <h3 className="text-lg font-medium text-slate-800 mb-4">
-              {t("dashboard.quickStats")}
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <p className="text-2xl font-bold text-blue-700">12</p>
-                <p className="text-sm text-blue-600">
-                  {isAdmin ? t("dashboard.pending") : t("dashboard.yourCertificates")}
-                </p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-xl">
-                <p className="text-2xl font-bold text-green-700">5</p>
-                <p className="text-sm text-green-600">
-                  {isAdmin ? t("dashboard.approved") : t("dashboard.active")}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        
       </div>
     </div>
   );

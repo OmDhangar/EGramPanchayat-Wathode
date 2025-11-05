@@ -432,22 +432,62 @@ const submitMarriageCertificateApplication = asyncHandler(async (req, res) => {
   );
 });
 
+// --- UPDATED FOR PAGINATION ---
 // Get user's applications
 const getUserApplications = asyncHandler(async (req, res) => {
-  const userId = req.params.userId;
+  const { userId } = req.params;
+  
+  // Get page and limit from query, with defaults
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 9; // Default to 9 per page
+  const skip = (page - 1) * limit;
 
   if (!mongoose.isValidObjectId(userId)) {
     throw new ApiError(400, "Invalid user ID");
   }
+  
+  // Verify user is fetching their own applications (or is admin, if you add that logic)
+  if (req.user._id.toString() !== userId) {
+      throw new ApiError(403, "Unauthorized to access these applications");
+  }
 
-  const applications = await Application.find({
-    applicantId: userId,
-  });
+  // Create the query
+  const query = { applicantId: userId };
 
+  // Get total number of applications for this user
+  const totalApplications = await Application.countDocuments(query);
+
+  if (totalApplications === 0) {
+    return res.status(200).json(
+      new ApiResponse(200, {
+        applications: [],
+        currentPage: 1,
+        totalPages: 0,
+        totalApplications: 0
+      }, "No applications found")
+    );
+  }
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalApplications / limit);
+
+  // Get the applications for the current page
+  const applications = await Application.find(query)
+    .sort({ createdAt: -1 }) // Show newest first
+    .skip(skip)
+    .limit(limit);
+
+  // Send the paginated response
   return res.status(200).json(
-    new ApiResponse(200, applications, "User applications retrieved successfully")
+    new ApiResponse(200, {
+      applications,
+      currentPage: page,
+      totalPages,
+      totalApplications
+    }, "User applications retrieved successfully")
   );
 });
+// --- END OF PAGINATION UPDATE ---
 
 // Admin Dashboard Functionalities
 const reviewApplication = asyncHandler(async (req, res) => {
@@ -604,6 +644,12 @@ const getApplicationsByStatus = asyncHandler(async (req, res) => {
   }
   
   const { status } = req.query;
+
+  // --- PAGINATION LOGIC ---
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10; // 10 per page
+  const skip = (page - 1) * limit;
+  // --- END PAGINATION ---
   
   // Build filter based on status
   const filter = {};
@@ -611,8 +657,14 @@ const getApplicationsByStatus = asyncHandler(async (req, res) => {
     filter.status = status;
   }
   
+  // Get total count
+  const totalApplications = await Application.countDocuments(filter);
+  const totalPages = Math.ceil(totalApplications / limit);
+
   const applications = await Application.find(filter)
     .sort({ createdAt: -1 })
+    .skip(skip) // Apply skip
+    .limit(limit) // Apply limit
     .populate('applicantId', 'fullName');
 
   // Convert to plain objects and ensure subdocuments are properly serialized
@@ -636,8 +688,13 @@ const getApplicationsByStatus = asyncHandler(async (req, res) => {
   });
   
   return res.status(200).json(
-    new ApiResponse(200, applicationsData, "Applications retrieved successfully")
-  );
+      new ApiResponse(200, {
+        applications: applicationsData,
+        currentPage: page,
+        totalPages,
+        totalApplications
+      }, "Applications retrieved successfully")
+    );
 });
 
 // Get admin's applications
@@ -645,13 +702,24 @@ const getAdminApplications = asyncHandler(async (req, res) => {
   if (req.user.role !== 'admin') {
     throw new ApiError(403, "Unauthorized access");
   }
+  // --- PAGINATION LOGIC ---
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  // --- END PAGINATION ---
+
+  // Get total count
+  const totalApplications = await Application.countDocuments(filter);
+  const totalPages = Math.ceil(totalApplications / limit);
   
   const applications = await Application.find({
     status: {
       $in: ['pending', 'approved', 'certificate_generated', 'rejected', 'completed']
     }
   })
-  .sort({ createdAt: -1 });
+  .sort({ createdAt: -1 })
+  .skip(skip) // Apply skip
+  .limit(limit); // Apply limit
 
   // Convert to plain objects and ensure subdocuments are properly serialized
   const applicationsData = applications.map(app => {
@@ -674,7 +742,12 @@ const getAdminApplications = asyncHandler(async (req, res) => {
   });
 
   return res.status(200).json(
-    new ApiResponse(200, applicationsData, "Admin applications retrieved successfully")
+    new ApiResponse(200, {
+      applications: applicationsData,
+      currentPage: page,
+      totalPages,
+      totalApplications
+    }, "Admin applications retrieved successfully")
   );
 });
 
@@ -983,7 +1056,7 @@ const generatePaymentReceiptSignedUrl = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error('Error generating payment receipt URL:', error);
     if (error.message.includes('File not found') || error.message.includes('NoSuchKey')) {
-      throw new ApiError(404, "Payment receipt file not found in storage");
+      throw new ApiError(44, "Payment receipt file not found in storage");
     }
     throw new ApiError(500, "Failed to generate payment receipt URL");
   }

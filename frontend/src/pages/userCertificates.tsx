@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaDownload, FaSpinner, FaClock, FaFileAlt } from 'react-icons/fa';
-// 'axios' is not needed directly if 'api' is configured
+import { FaDownload, FaSpinner, FaClock, FaFileAlt, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { useAuthContext } from '../Context/authContext';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/axios';
@@ -36,6 +35,13 @@ const UserCertificates = () => {
   const [error, setError] = useState<string | null>(null);
   // State to track which specific file is being downloaded
   const [downloading, setDownloading] = useState<string | null>(null);
+  
+  // --- NEW PAGINATION STATE ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalApplications, setTotalApplications] = useState(0);
+  const applicationsPerPage = 9; // Show 9 per page (3x3 grid)
+  
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
@@ -49,16 +55,24 @@ const UserCertificates = () => {
       
       try {
         setLoading(true);
+        setError(null); // Clear previous errors on new fetch
         const response = await api.get(
-          `/applications/user/${user?._id}`,
+          // --- UPDATED API CALL WITH PAGINATION ---
+          `/applications/user/${user?._id}?page=${currentPage}&limit=${applicationsPerPage}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
             },
           }
         );
+        
         console.log(response.data.data)
-        setCertificates(response.data.data);
+        // --- UPDATE STATE WITH PAGINATION DATA ---
+        setCertificates(response.data.data.applications);
+        setTotalPages(response.data.data.totalPages);
+        setTotalApplications(response.data.data.totalApplications);
+        setCurrentPage(response.data.data.currentPage);
+
       } catch (err) {
         setError('Failed to fetch certificates');
         console.error(err);
@@ -68,8 +82,8 @@ const UserCertificates = () => {
     };
 
     fetchCertificates();
-    // Removed the separate fetchSignedUrls call
-  }, [user]); // Added user as a dependency
+  // --- UPDATE DEPENDENCY ARRAY ---
+  }, [user, currentPage]); // Refetch when user or currentPage changes
 
   // Function to get a secure URL on-demand and open it
   const handleDownload = async (applicationId: string, fileId: string | 'certificate') => {
@@ -118,15 +132,29 @@ const UserCertificates = () => {
     }
   };
 
-  if (loading) return (
+  const viewFormDetails = (formId: string) => {
+    navigate(`/form-details/${formId}`);
+  };
+
+  // --- NEW PAGINATION HANDLERS ---
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
+  // Show loading spinner only on initial load
+  if (loading && totalApplications === 0) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <FaSpinner className="animate-spin text-4xl text-blue-600" />
     </div>
   );
-
-  const viewFormDetails = (formId: string) => {
-    navigate(`/form-details/${formId}`);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -140,99 +168,135 @@ const UserCertificates = () => {
             </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {certificates.map((cert) => (
-            <motion.div
-              key={cert._id}
-              onClick={() => viewFormDetails(cert.applicationId)} // Navigate on card click
-              className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-shadow hover:shadow-lg"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {cert.documentType.replace(/_/g, ' ').toUpperCase()}
-                    </h3>
-                    <p className="text-sm text-gray-600">ID: {cert.applicationId}</p>
+        {/* --- GRID WRAPPER TO SHOW LOADING OVERLAY --- */}
+        <div className="relative">
+          {/* Loading overlay for page changes */}
+          {loading && (
+            <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10 rounded-lg">
+              <FaSpinner className="animate-spin text-3xl text-blue-600" />
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {certificates.map((cert) => (
+              <motion.div
+                key={cert._id}
+                onClick={() => viewFormDetails(cert.applicationId)} // Navigate on card click
+                className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-shadow hover:shadow-lg"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {cert.documentType.replace(/_/g, ' ').toUpperCase()}
+                      </h3>
+                      <p className="text-sm text-gray-600">ID: {cert.applicationId}</p>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(cert.status)}`}>
+                      {cert.status.replace('_', ' ').toUpperCase()}
+                    </span>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(cert.status)}`}>
-                    {cert.status.replace('_', ' ').toUpperCase()}
-                  </span>
+
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600 flex items-center">
+                      <FaClock className="inline-block mr-2 flex-shrink-0" />
+                      Submitted: {new Date(cert.createdAt).toLocaleDateString()}
+                    </p>
+
+                    {/* --- FIXED CERTIFICATE DOWNLOAD BUTTON --- */}
+                    {cert.status === 'certificate_generated' && cert.generatedCertificate && (
+                      <div className="mt-4">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent card navigation
+                            handleDownload(cert.applicationId, 'certificate');
+                          }}
+                          disabled={downloading === `${cert.applicationId}-certificate`}
+                          className="inline-flex w-full justify-center items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        >
+                          {downloading === `${cert.applicationId}-certificate` ? (
+                            <FaSpinner className="animate-spin" />
+                          ) : (
+                            <FaDownload />
+                          )}
+                          Download Certificate
+                        </button>
+                      </div>
+                    )}
+
+                    {/* --- NEW SECTION FOR UPLOADED FILES --- */}
+                    {cert.uploadedFiles && cert.uploadedFiles.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Submitted Files</h4>
+                        <ul className="space-y-2">
+                          {cert.uploadedFiles.map((file) => (
+                            <li key={file._id} className="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-md">
+                              <span className="text-gray-700 truncate pr-2 flex items-center">
+                                <FaFileAlt className="text-gray-400 mr-2 flex-shrink-0" />
+                                {file.isPaymentReceipt ? 'Payment Receipt' : (file.originalName || file.fileName)}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent card navigation
+                                  handleDownload(cert.applicationId, file._id);
+                                }}
+                                disabled={downloading === `${cert.applicationId}-${file._id}`}
+                                className="inline-flex items-center gap-1.5 bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-xs font-medium hover:bg-gray-300 disabled:opacity-50"
+                              >
+                                {downloading === `${cert.applicationId}-${file._id}` ? (
+                                  <FaSpinner className="animate-spin" />
+                                ) : (
+                                  <FaDownload />
+                                )}
+                                Download
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-600 flex items-center">
-                    <FaClock className="inline-block mr-2 flex-shrink-0" />
-                    Submitted: {new Date(cert.createdAt).toLocaleDateString()}
-                  </p>
-
-                  {/* --- FIXED CERTIFICATE DOWNLOAD BUTTON --- */}
-                  {cert.status === 'certificate_generated' && cert.generatedCertificate && (
-                    <div className="mt-4">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent card navigation
-                          handleDownload(cert.applicationId, 'certificate');
-                        }}
-                        disabled={downloading === `${cert.applicationId}-certificate`}
-                        className="inline-flex w-full justify-center items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                      >
-                        {downloading === `${cert.applicationId}-certificate` ? (
-                          <FaSpinner className="animate-spin" />
-                        ) : (
-                          <FaDownload />
-                        )}
-                        Download Certificate
-                      </button>
-                    </div>
-                  )}
-
-                  {/* --- NEW SECTION FOR UPLOADED FILES --- */}
-                  {cert.uploadedFiles && cert.uploadedFiles.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Submitted Files</h4>
-                      <ul className="space-y-2">
-                        {cert.uploadedFiles.map((file) => (
-                          <li key={file._id} className="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-md">
-                            <span className="text-gray-700 truncate pr-2 flex items-center">
-                              <FaFileAlt className="text-gray-400 mr-2 flex-shrink-0" />
-                              {file.isPaymentReceipt ? 'Payment Receipt' : (file.originalName || file.fileName)}
-                            </span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation(); // Prevent card navigation
-                                handleDownload(cert.applicationId, file._id);
-                              }}
-                              disabled={downloading === `${cert.applicationId}-${file._id}`}
-                              className="inline-flex items-center gap-1.5 bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-xs font-medium hover:bg-gray-300 disabled:opacity-50"
-                            >
-                              {downloading === `${cert.applicationId}-${file._id}` ? (
-                                <FaSpinner className="animate-spin" />
-                              ) : (
-                                <FaDownload />
-                              )}
-                              Download
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
 
-        {certificates.length === 0 && (
-          <div className="text-center text-gray-500 mt-8">
+        {/* --- "NO CERTIFICATES" MESSAGE --- */}
+        {totalApplications === 0 && !loading && (
+          <div className="text-center text-gray-500 mt-8 col-span-full">
             No certificates found. Apply for a certificate first.
           </div>
         )}
 
-        {/* --- REMOVED THE OLD FILEURLS.MAP BLOCK --- */}
+        {/* --- NEW PAGINATION CONTROLS --- */}
+        {totalApplications > 0 && (
+          <div className="mt-8 flex justify-between items-center">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1 || loading}
+              className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FaArrowLeft />
+              Previous
+            </button>
+            
+            <span className="text-sm text-gray-700">
+              Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+            </span>
+
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages || loading}
+              className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+              <FaArrowRight />
+            </button>
+          </div>
+        )}
         
       </div>
     </div>
