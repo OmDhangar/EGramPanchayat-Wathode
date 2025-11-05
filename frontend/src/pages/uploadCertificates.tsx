@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaUpload, FaFileAlt, FaCheck, FaSpinner, FaDownload, FaEye } from 'react-icons/fa';
+import { FaUpload, FaFileAlt, FaCheck, FaSpinner, FaDownload, FaEye, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import axios from 'axios';
 import { api } from '../api/axios';
 
@@ -35,14 +35,27 @@ const UploadCertificates = () => {
   const [uploading, setUploading] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const APPLICATIONS_PER_PAGE = 9;
+
+  // --- PAGINATION STATE ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalApplications, setTotalApplications] = useState(0);
 
   const fetchApprovedApplications = async () => {
     try {
       setLoading(true);
+      // --- UPDATED API CALL ---
       const response = await api.get(
-        '/applications/admin/filter?status=approved'
+        `/applications/admin/filter?status=approved&page=${currentPage}&limit=${APPLICATIONS_PER_PAGE}`
       );
-      setApplications(response.data.data);
+
+      const data = response.data.data;
+      setApplications(data.applications || []);
+      setTotalPages(data.totalPages || 0);
+      setTotalApplications(data.totalApplications || 0);
+      setCurrentPage(data.currentPage || 1);
+
     } catch (err) {
       setError('Failed to fetch applications');
       console.error(err);
@@ -53,7 +66,7 @@ const UploadCertificates = () => {
 
   useEffect(() => {
     fetchApprovedApplications();
-  }, []);
+  }, [currentPage]);
 
   const handleCertificateUpload = async (applicationId: string, file: File) => {
     try {
@@ -75,6 +88,8 @@ const UploadCertificates = () => {
     if (response.data.success) {
       // Handle success
       console.log("Certificate uploaded successfully");
+      // Refetch the current page to remove the uploaded item
+        await fetchApprovedApplications();
       return response.data.data;
     }
 
@@ -87,6 +102,18 @@ const UploadCertificates = () => {
       setUploading(null);
     }
   };
+  // --- PAGINATION HANDLERS ---
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   if (loading) return <div className="text-center p-8">Loading...</div>;
   if (error) return <div className="text-center p-8 text-red-600">{error}</div>;
@@ -96,6 +123,13 @@ const UploadCertificates = () => {
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Upload Certificates</h1>
         
+        {/* Loading overlay for page changes */}
+        {loading && (
+          <div className="relative h-64 flex items-center justify-center">
+            <FaSpinner className="animate-spin text-4xl text-blue-600" />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {applications.map((application) => (
             <motion.div
@@ -202,6 +236,32 @@ const UploadCertificates = () => {
           </div>
         )}
       </div>
+      {/* --- NEW PAGINATION CONTROLS --- */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-between items-center">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1 || loading}
+              className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FaArrowLeft />
+              Previous
+            </button>
+            
+            <span className="text-sm text-gray-700">
+              Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+            </span>
+
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages || loading}
+              className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+              <FaArrowRight />
+            </button>
+          </div>
+        )}
     </div>
   );
 };

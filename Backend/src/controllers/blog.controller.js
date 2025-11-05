@@ -2,24 +2,32 @@ import Blog from "../models/blog.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { getFileDownloadUrl, processUploadedFilesS3 } from "../utils/s3Service.js";
-import { S3Client } from "@aws-sdk/client-s3";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
 
-const s3 = new S3Client({
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-});
+// S3Client and GetObjectCommand are not used here, so I've removed them.
 
-export const getBlogs = async (req, res) => {
+export const getBlogs = asyncHandler(async (req, res) => {
   try {
     const { category } = req.query;
-    const filter = category ? { category } : {};
-    
-    const blogs = await Blog.find(filter);
 
+    // --- PAGINATION LOGIC ---
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6; // 6 per page
+    const skip = (page - 1) * limit;
+
+    // Build filter
+    const filter = category && category !== 'सर्व' ? { category } : {};
+    
+    // --- GET TOTALS ---
+    const totalBlogs = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(totalBlogs / limit);
+
+    // --- FETCH PAGINATED BLOGS ---
+    const blogs = await Blog.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // --- SIGNED URL LOGIC ---
     const signedBlogs = await Promise.all(
       blogs.map(async (blog) => {
         const signedImages = await Promise.all(
@@ -40,12 +48,23 @@ export const getBlogs = async (req, res) => {
       })
     );
 
-    res.status(200).json(signedBlogs);
+    // --- RETURN PAGINATED RESPONSE ---
+    res.status(200).json({
+      success: true,
+      message: "Blogs retrieved successfully",
+      data: {
+        blogs: signedBlogs,
+        currentPage: page,
+        totalPages,
+        totalBlogs
+      }
+    });
+
   } catch (error) {
     console.error("Error fetching blogs:", error);
     res.status(500).json({ error: "Failed to fetch blogs" });
   }
-};
+});
 
 export const getBlogById = asyncHandler(async (req, res) => {
   try {
@@ -77,8 +96,7 @@ export const getBlogById = asyncHandler(async (req, res) => {
   }
 });
 
-
-export const createBlog = async (req, res) => {
+export const createBlog = asyncHandler(async (req, res) => { // Added asyncHandler
   try {
     const { title, content, category, folder = "unverified" } = req.body;
 
@@ -101,18 +119,6 @@ export const createBlog = async (req, res) => {
     console.error("Error creating blog:", error);
     res.status(500).json({ error: "Failed to create blog" });
   }
-};
-
-// Get blogs by category
-export const getBlogsByCategory = asyncHandler(async (req, res) => {
-  const { category } = req.params;
-  const blogs = await Blog.find({ category }).sort({ createdAt: -1 });
-  res.status(200).json({ success: true, blogs });
-});
-
-export const getAllBlogs = asyncHandler(async (req, res) => {
-  const blogs = await Blog.find().sort({ createdAt: -1 });
-  res.status(200).json({ success: true, blogs });
 });
 
 export const updateBlog = asyncHandler(async (req, res) => {
@@ -133,3 +139,33 @@ export const deleteBlog = asyncHandler(async (req, res) => {
 
   res.status(200).json({ success: true, message: "Blog deleted successfully" });
 });
+
+
+// Get blogs by category
+
+export const getBlogsByCategory = asyncHandler(async (req, res) => {
+
+  const { category } = req.params;
+
+  const blogs = await Blog.find({ category }).sort({ createdAt: -1 });
+
+  res.status(200).json({ success: true, blogs });
+
+});
+
+
+
+export const getAllBlogs = asyncHandler(async (req, res) => {
+
+  const blogs = await Blog.find().sort({ createdAt: -1 });
+
+  res.status(200).json({ success: true, blogs });
+
+});
+
+
+
+
+
+
+

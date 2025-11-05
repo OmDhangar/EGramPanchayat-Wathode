@@ -4,7 +4,7 @@ import BlogSkeleton from "../components/BlogSkeleton";
 import BlogEmptyState from "../components/BlogEmptyState";
 import { api } from "../api/axios";
 import { toast } from "react-hot-toast";
-import { FaFilter, FaThumbtack } from "react-icons/fa";
+import { FaFilter, FaThumbtack, FaArrowLeft, FaArrowRight, FaSpinner } from "react-icons/fa"; // Added new icons
 
 export interface BlogImage {
   s3Key: string;
@@ -30,7 +30,10 @@ const BLOG_CATEGORIES = [
   "सण उत्सव",
   "नियोजन",
   "शिक्षण",
+  "योजना"
 ];
+
+const NOTICES_PER_PAGE = 6; // Number of notices to show per page
 
 // Redesigned Notice Board Header
 const NoticeBoardHeader = () => (
@@ -55,18 +58,33 @@ export default function NoticeBoard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState("सर्व");
 
-  const fetchBlogs = async (category?: string) => {
+  // --- PAGINATION STATE ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalBlogs, setTotalBlogs] = useState(0);
+
+  const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const url =
-        category && category !== "सर्व"
-          ? `/blogs?category=${encodeURIComponent(category)}`
-          : "/blogs";
+      
+      // --- UPDATED API CALL WITH PARAMS ---
+      const params = {
+        page: currentPage,
+        limit: NOTICES_PER_PAGE,
+        ...(selectedCategory !== "सर्व" && { category: encodeURIComponent(selectedCategory) })
+      };
 
-      const res = await api.get(url);
-      console.log(res)
+      const res = await api.get("/blogs", { params });
+      console.log(res.data); // Log the new response structure
+      
+      // --- PARSE NEW RESPONSE STRUCTURE ---
+      const data = res.data.data;
+      if (!data || !data.blogs) {
+        throw new Error("Invalid API response structure");
+      }
 
-      const blogsWithUrls = res.data.map((blog: any) => ({
+      // Your existing mapping logic, now applied to data.blogs
+      const blogsWithUrls = data.blogs.map((blog: any) => ({
         ...blog,
         images: blog.images.map((img: any) => ({
           ...img,
@@ -83,6 +101,12 @@ export default function NoticeBoard() {
       }));
 
       setBlogs(blogsWithUrls);
+      
+      // --- SET PAGINATION STATE ---
+      setTotalPages(data.totalPages || 0);
+      setTotalBlogs(data.totalBlogs || 0);
+      setCurrentPage(data.currentPage || 1);
+
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch notices");
@@ -91,11 +115,31 @@ export default function NoticeBoard() {
     }
   };
 
+  // Refetch when category or page changes
   useEffect(() => {
-    fetchBlogs(selectedCategory);
+    fetchBlogs();
+  }, [selectedCategory, currentPage]);
+
+  // Reset to page 1 when category changes
+  useEffect(() => {
+    setCurrentPage(1);
   }, [selectedCategory]);
 
-  if (loading)
+  // --- PAGINATION HANDLERS ---
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Show skeleton only on initial load
+  if (loading && totalBlogs === 0)
     return (
       <div className="min-h-screen p-6 font-tiro-marathi bg-gradient-to-br from-[#f9f9ff] via-[#f5f6ff] to-[#f1f4ff]">
         <div className="max-w-6xl mx-auto">
@@ -110,7 +154,7 @@ export default function NoticeBoard() {
       <div className="max-w-6xl mx-auto">
         <NoticeBoardHeader />
 
-        {/* Category Filter */}
+        {/* Category Filter (No changes needed here) */}
         <div className="sticky top-2 z-20 mb-6 rounded-2xl bg-white border border-black shadow-sm p-4">
           <h3 className="text-sm xs:text-base font-semibold mb-3 flex items-center text-indigo-700">
             <FaFilter className="mr-2 text-indigo-500" /> श्रेणी निवडा
@@ -133,8 +177,15 @@ export default function NoticeBoard() {
           </div>
         </div>
 
+        {/* Loading overlay for page changes */}
+        {loading && (
+          <div className="relative h-64 flex items-center justify-center">
+            <FaSpinner className="animate-spin text-4xl text-blue-600" />
+          </div>
+        )}
+
         {/* Blog Grid */}
-        {blogs.length === 0 ? (
+        {!loading && blogs.length === 0 ? (
           <BlogEmptyState />
         ) : (
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -176,6 +227,34 @@ export default function NoticeBoard() {
             ))}
           </div>
         )}
+
+        {/* --- NEW PAGINATION CONTROLS --- */}
+        {!loading && totalPages > 1 && (
+          <div className="mt-8 flex justify-between items-center">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1 || loading}
+              className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FaArrowLeft />
+              मागील
+            </button>
+            
+            <span className="text-sm text-gray-700">
+              पान <strong>{currentPage}</strong> / <strong>{totalPages}</strong>
+            </span>
+
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages || loading}
+              className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              पुढील
+              <FaArrowRight />
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );

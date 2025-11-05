@@ -6,7 +6,7 @@ const blogSchema = new mongoose.Schema({
   content: String,
   category: {
     type: String,
-    enum: ["सार्वजनिक सूचना", "जनसेवा", "कर संग्रह", "सण उत्सव", "नियोजन", "शिक्षण"],
+    enum: ["सार्वजनिक सूचना", "जनसेवा", "कर संग्रह", "सण उत्सव", "नियोजन", "शिक्षण","योजना"],
     default: "सार्वजनिक सूचना"
   },
   images: [

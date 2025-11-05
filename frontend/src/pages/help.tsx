@@ -1,13 +1,11 @@
 import React from "react";
 
 const helplines = [
-  { service: "Gram Panchayat Office", contact: "02563-123456" },
-  { service: "Sarpanch (Sunita Patil)", contact: "9876543210" },
+  { service: "Gram Panchayat Office", contact: "912563353212" },
+  { service: "Sarpanch (Narayan Kondusing Chaudhary)", contact: "8208531941" },
   { service: "Police Station", contact: "100" },
-  { service: "Primary Health Center", contact: "02563-654321" },
   { service: "Fire Brigade", contact: "101" },
   { service: "Electricity Complaint", contact: "1912" },
-  { service: "Water Supply", contact: "02563-112233" },
 ];
 
 const Help = () => (

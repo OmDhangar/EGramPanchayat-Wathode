@@ -5,7 +5,7 @@ import BlogEmptyState from "../components/BlogEmptyState";
 import AdminBlogCreate from "../components/AdminBlogCreate";
 import { api } from "../api/axios";
 import { toast } from "react-hot-toast";
-import { FaPlus, FaFilter } from "react-icons/fa";
+import { FaPlus, FaFilter, FaArrowLeft, FaArrowRight, FaSpinner } from "react-icons/fa"; // Added icons
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../Context/authContext";
 import { Link } from "react-router-dom";
@@ -14,7 +14,7 @@ import { Helmet } from 'react-helmet';
 export interface BlogImage {
   s3Key: string;
   folder: "unverified" | "verified" | "certificate";
-  url: string;
+  url: string; // This is the signedUrl
 }
 
 export interface Blog {
@@ -35,6 +35,8 @@ const BLOG_CATEGORIES = [
   "शिक्षण"
 ];
 
+const BLOGS_PER_PAGE = 6; // 6 blogs per page
+
 export default function Blogs() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -44,25 +46,41 @@ export default function Blogs() {
   const { user } = useAuthContext();
   const navigate =  useNavigate();
 
-  const fetchBlogs = async (category?: string) => {
+  // --- PAGINATION STATE ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalBlogs, setTotalBlogs] = useState(0);
+
+  const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const url = category && category !== "सर्व" 
-        ? `/blogs?category=${encodeURIComponent(category)}`
-        : "/blogs";
       
-      const res = await api.get(url);
+      // --- UPDATED API CALL ---
+      const params = {
+        page: currentPage,
+        limit: BLOGS_PER_PAGE,
+        ...(selectedCategory !== "सर्व" && { category: encodeURIComponent(selectedCategory) })
+      };
+      
+      const res = await api.get("/blogs", { params });
+      const data = res.data.data;
 
       // Map the images to include 'url' for frontend
-      const blogsWithUrls = res.data.map((blog: any) => ({
+      // The backend now sends 'signedUrl'
+      const blogsWithUrls = data.blogs.map((blog: any) => ({
         ...blog,
         images: blog.images.map((img: any) => ({
           ...img,
-          url: img.signedUrl,
+          url: img.signedUrl, // Use the signedUrl from backend
         })),
       }));
 
+      // --- UPDATE PAGINATION STATE ---
       setBlogs(blogsWithUrls);
+      setTotalPages(data.totalPages || 0);
+      setTotalBlogs(data.totalBlogs || 0);
+      setCurrentPage(data.currentPage || 1);
+
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch blogs");
@@ -71,8 +89,14 @@ export default function Blogs() {
     }
   };
 
+  // Refetch when category or page changes
   useEffect(() => {
-    fetchBlogs(selectedCategory);
+    fetchBlogs();
+  }, [selectedCategory, currentPage]);
+
+  // Reset to page 1 when category changes
+  useEffect(() => {
+    setCurrentPage(1);
   }, [selectedCategory]);
 
   const handleDelete = async (blogId: string) => {
@@ -81,7 +105,13 @@ export default function Blogs() {
     try {
       await api.delete(`/blogs/${blogId}`);
       toast.success("Blog deleted successfully");
-      fetchBlogs(selectedCategory);
+      // Refetch current page
+      // If it was the last item on the page, adjust
+      if (blogs.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      } else {
+        fetchBlogs();
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete blog");
@@ -93,14 +123,28 @@ export default function Blogs() {
       await api.put(`/blogs/${blogId}`, updatedData);
       toast.success("Blog updated successfully");
       setEditingBlog(null);
-      fetchBlogs(selectedCategory);
+      fetchBlogs(); // Refetch current page
     } catch (err) {
       console.error(err);
       toast.error("Failed to update blog");
     }
   };
 
-  if (loading) return <BlogSkeleton />;
+  // --- PAGINATION HANDLERS ---
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Show skeleton only on first load
+  if (loading && totalBlogs === 0) return <BlogSkeleton />;
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -108,6 +152,8 @@ export default function Blogs() {
         <title>Blogs - Grampanchayat Wathode</title>
         <meta name="description" content="Read the latest news, announcements, and information from Grampanchayat Wathode. Find articles in public notices, public services, tax collection, and other categories." />
       </Helmet>
+      
+      {/* --- ADMIN CREATE FORM --- */}
       {user?.role === 'admin' && (
         <div className="mb-8">
           {!showCreateForm ? (
@@ -131,7 +177,9 @@ export default function Blogs() {
               <AdminBlogCreate
                 onBlogCreated={() => {
                   setShowCreateForm(false);
-                  fetchBlogs(selectedCategory);
+                  setSelectedCategory("सर्व"); // Go to first page of all blogs
+                  setCurrentPage(1);
+                  fetchBlogs();
                 }}
               />
             </div>
@@ -139,7 +187,7 @@ export default function Blogs() {
         </div>
       )}
 
-      {/* Category Filter */}
+      {/* --- CATEGORY FILTER --- */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-2 flex items-center">
           <FaFilter className="mr-2" /> श्रेणी निवडा
@@ -161,21 +209,57 @@ export default function Blogs() {
         </div>
       </div>
 
-      {blogs.length === 0 ? (
+      {/* --- LOADING & CONTENT --- */}
+      {loading && (
+        <div className="relative h-64 flex items-center justify-center">
+            <FaSpinner className="animate-spin text-4xl text-blue-600" />
+        </div>
+      )}
+
+      {!loading && blogs.length === 0 ? (
         <BlogEmptyState />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {blogs.map((blog) => (
-            <BlogCard
-              key={blog._id}
-              blog={blog}
-              isAdmin={user?.role === 'admin'}
-              onDelete={() => handleDelete(blog._id)}
-              onEdit={() => setEditingBlog(blog)}
-              onView={() => navigate(`/blogs/${blog._id}`)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {blogs.map((blog) => (
+              <BlogCard
+                key={blog._id}
+                blog={blog}
+                isAdmin={user?.role === 'admin'}
+                onDelete={() => handleDelete(blog._id)}
+                onEdit={() => setEditingBlog(blog)}
+                onView={() => navigate(`/blogs/${blog._id}`)}
+              />
+            ))}
+          </div>
+          
+          {/* --- NEW PAGINATION CONTROLS --- */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-between items-center">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage <= 1 || loading}
+                className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <FaArrowLeft />
+                Previous
+              </button>
+              
+              <span className="text-sm text-gray-700">
+                Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+              </span>
+
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage >= totalPages || loading}
+                className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+                <FaArrowRight />
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
