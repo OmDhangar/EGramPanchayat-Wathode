@@ -199,15 +199,7 @@ const BPLCertificateForm = () => {
               </div>
             </div>
 
-            {/* Fee Information */}
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-              <p className="text-yellow-800 font-semibold">
-                📋 {t("forms.common.applicationFee")}: ₹20
-              </p>
-              <p className="text-yellow-700 text-sm mt-1">
-                {t("forms.common.paymentInstructions")}
-              </p>
-            </div>
+            
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Applicant Details Section */}
