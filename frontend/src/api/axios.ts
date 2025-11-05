@@ -1,12 +1,13 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export const api = axios.create({
-  baseURL: "https://api.grampanchayatwathode.com/api",
+  baseURL: "http://localhost:8000/api", //https://api.grampanchayatwathode.com/api
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 80000,
 });
 
 // Global refresh retry counter
@@ -26,12 +27,20 @@ api.interceptors.request.use(
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Show success toast for successful submissions (201 status)
+    if ((response.status === 200 || response.status === 201) && response.config.method === 'post') {
+      const successMessage = response.data?.message || 'Operation completed successfully';
+      toast.success(successMessage);
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 
+    // Handle 401 Unauthorized - Token refresh logic
     if (
-      error.response?.status === 401 &&
+      (error.response?.status === 401 || error.response?.status === 400) &&
       !originalRequest._retry &&
       refreshRetryCount < 3
     ) {
@@ -60,9 +69,30 @@ api.interceptors.response.use(
         refreshRetryCount = 0;
         localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
+        toast.error('Session expired. Please login again.');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
+    }
+
+    // Global error toast handling for all other errors
+    if (error.response) {
+      // Extract error message from backend's ApiResponse structure
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.response?.data?.error ||
+        `Error: ${error.response.status} - ${error.response.statusText}`;
+      
+      // Show error toast (skip for 401 as it's handled above)
+      if (error.response.status !== 401 || error.response.status !== 400) {
+        toast.error(errorMessage);
+      }
+    } else if (error.request) {
+      // Network error - no response received
+      toast.error('Network error. Please check your internet connection.');
+    } else {
+      // Something else happened
+      toast.error(error.message || 'An unexpected error occurred');
     }
 
     // Reject if not 401 or retry limit exceeded

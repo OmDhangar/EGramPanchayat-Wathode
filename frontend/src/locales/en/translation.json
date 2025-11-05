@@ -1,8 +1,8 @@
 {
   "header": {
     "title": "Gram Panchayat Vathode, Shirpur Dist.Dhule",
-    "email":"gpwathode158@gmail.com",
-    "phone":"9876543210",
+    "email": "gpwathode158@gmail.com",
+    "phone": "9876543210",
     "subtitle": "Let's connect digitally",
     "welcome": "🙏🏻 Welcome to Vathoda Gram Panchayat!",
     "login": "Login",
@@ -21,7 +21,7 @@
     "schemes": "Schemes",
     "citizen": "CITIZEN FACILITIES",
     "apply": "Apply for Certificates",
-    "letters":"self-letters",
+    "letters": "self-letters",
     "taxation": "Taxation",
     "public": "PUBLIC INFORMATION",
     "govtWebsites": "Government Websites",
@@ -61,16 +61,6 @@
         "Required documents: Wedding photos, ID proof"
       ]
     },
-    "landRecord8A": {
-      "title": "8A Land Record Digital Signature",
-      "description": "Apply for 8A land record with digital signature",
-      "points": [
-        "Land owner's name and details",
-        "Village and district information",
-        "Account number required",
-        "Fee: Rs. 15/- with payment receipt"
-      ]
-    },
     "noOutstandingDebts": {
       "title": "Certificate of No Outstanding Debts",
       "description": "Apply for certificate of no outstanding debts",
@@ -81,14 +71,34 @@
         "Fee: Rs. 20/- with payment receipt"
       ]
     },
-    "digitalSigned712": {
-      "title": "Digitally Signed 7/12",
-      "description": "Apply for digitally signed 7/12 land record",
+    "housingAssessment8": {
+      "title": "Housing Assessment (Doc 8)",
+      "description": "Apply for housing assessment register (Document 8)",
       "points": [
-        "Land owner's name and details",
-        "Survey number or group number",
-        "Village and taluka information",
-        "Fee: Rs. 15/- with payment receipt"
+        "Property and occupant details",
+        "Property dimensions (Length, Height, Area)",
+        "Applicant's information",
+        "Fee: Rs. 20/- with payment receipt"
+      ]
+    },
+    "bplCertificate": {
+      "title": "Below Poverty Line (BPL) Certificate",
+      "description": "Apply for a Below Poverty Line (BPL) certificate",
+      "points": [
+        "Applicant's name and Aadhaar",
+        "Address and contact details",
+        "BPL list year and serial number",
+        "Fee: Rs. 20/- with payment receipt"
+      ]
+    },
+    "niradharCertificate": {
+      "title": "Niradhar Certificate",
+      "description": "Apply for a Certificate of Niradhar",
+      "points": [
+        "Applicant's name and Aadhaar",
+        "Grampanchayat, Taluka, and District",
+        "Based on local level enquiry",
+        "Fee: Rs. 20/- with payment receipt"
       ]
     },
     "applyNow": "Apply Now",
@@ -139,25 +149,14 @@
       "noQR": "No QR detected",
       "importantNote": "Important Note:",
       "reviewMessage": "Your application will be reviewed by our team. You will receive updates via email and SMS.",
-      "supportMessage": "For any questions, please contact our support team."
-    },
-    "landRecord8A": {
-      "title": "8A Land Record Digital Signature",
-      "description": "Complete the form below to apply for 8A land record with digital signature. All fields marked with * are required.",
-      "ownerInfo": "Land Owner Information",
-      "ownerInfoDesc": "Enter land owner details",
-      "ownersName": "Owner's Name",
-      "village": "Village",
-      "whatsappNumber": "WhatsApp Mobile Number",
-      "email": "Email ID",
-      "taluka": "Taluka",
-      "district": "District",
-      "accountNumber": "Account Number",
-      "paymentInfo": "Payment Information",
-      "paymentInfoDesc": "Payment details for 8A land record (Rs. 15)",
-      "paymentOption": "Payment Option",
+      "supportMessage": "For any questions, please contact our support team.",
+      "financialYear": "Financial Year",
+      "applicantName": "Applicant's Full Name",
+      "whatsappNumber": "WhatsApp Number",
+      "email": "Email (Optional)",
       "utrNumber": "UTR Number",
-      "feeNote": "A fee of Rs. 15/- needs to be paid and payment receipt must be uploaded. Please fill the information marked with (*) carefully."
+      "aadhaarNumber": "Aadhaar Number",
+      "address": "Full Address"
     },
     "noOutstandingDebts": {
       "title": "Certificate of No Outstanding Debts",
@@ -182,22 +181,6 @@
       "paymentInfo": "Payment Information",
       "paymentInfoDesc": "Payment details for certificate (Rs. 20)",
       "certificateNote": "This certificate confirms that there are no outstanding debts on the specified property. No additional documents required - only payment receipt."
-    },
-    "digitalSigned712": {
-      "title": "Digitally Signed 7/12",
-      "description": "Complete the form below to apply for digitally signed 7/12 land record. All fields marked with * are required.",
-      "ownerInfo": "Land Owner Information",
-      "ownerInfoDesc": "Enter land owner details",
-      "ownersName": "Owner's Name",
-      "village": "Village",
-      "whatsappNumber": "WhatsApp Mobile Number",
-      "email": "Email ID",
-      "taluka": "Taluka",
-      "district": "District",
-      "surveyNumber": "Survey Number / Group Number",
-      "paymentInfo": "Payment Information",
-      "paymentInfoDesc": "Payment details for digitally signed 7/12 (Rs. 15)",
-      "feeNote": "A fee of Rs. 15/- needs to be paid and payment receipt must be uploaded. Please fill the information marked with (*) carefully. No additional documents required."
     },
     "birth": {
       "title": "Birth Certificate Application",
@@ -286,6 +269,56 @@
       "paymentInfoDesc": "Payment details for marriage certificate (Rs. 20)",
       "utrNumber": "UTR Number"
     },
+    "housingAssessment8": {
+      "title": "Housing Assessment (Doc 8) Application",
+      "description": "Complete the form below to apply for the housing assessment register (Document 8). All fields marked with * are required.",
+      "applicantInfo": "Applicant Information",
+      "applicantInfoDesc": "Enter your details",
+      "propertyInfo": "Property Information",
+      "propertyInfoDesc": "Enter the details of the property",
+      "propertyNo": "Property No.",
+      "descriptionNo": "Description No.",
+      "propertyName": "Name of the Property",
+      "occupantName": "Occupant's Name",
+      "lengthInFeet": "Length (in feet)",
+      "heightInFeet": "Height (in feet)",
+      "totalAreaSqFt": "Total Area (in sq. ft)",
+      "paymentInfo": "Payment Information",
+      "paymentInfoDesc": "Payment details for housing assessment (Rs. 20)",
+      "supportingDocs": "Supporting Documents (Optional)",
+      "supportingDocsDesc": "Upload any supporting documents (Max 5)"
+    },
+    "bplCertificate": {
+      "title": "Below Poverty Line (BPL) Certificate Application",
+      "description": "Complete the form below to apply for the BPL certificate. All fields marked with * are required.",
+      "applicantInfo": "Applicant Information",
+      "applicantInfoDesc": "Enter the applicant's details",
+      "taluka": "Taluka",
+      "district": "District",
+      "bplInfo": "BPL Information",
+      "bplInfoDesc": "Enter details from the BPL list",
+      "bplYear": "BPL List Year",
+      "bplListSerialNo": "BPL List Serial Number",
+      "paymentInfo": "Payment Information",
+      "paymentInfoDesc": "Payment details for BPL certificate (Rs. 20)",
+      "supportingDocs": "Supporting Documents (Optional)",
+      "supportingDocsDesc": "Upload any supporting documents (Max 5)"
+    },
+    "niradharCertificate": {
+      "title": "Niradhar Certificate Application",
+      "description": "Complete the form below to apply for the Niradhar certificate. All fields marked with * are required.",
+      "applicantInfo": "Applicant Information",
+      "applicantInfoDesc": "Enter the applicant's details",
+      "locationInfo": "Location Information",
+      "locationInfoDesc": "Enter the applicant's location details",
+      "grampanchayatName": "Grampanchayat Name",
+      "taluka": "Taluka",
+      "district": "District",
+      "paymentInfo": "Payment Information",
+      "paymentInfoDesc": "Payment details for Niradhar certificate (Rs. 20)",
+      "supportingDocs": "Supporting Documents (Optional)",
+      "supportingDocsDesc": "Upload any supporting documents (Max 5)"
+    },
     "validation": {
       "required": "This field is required",
       "invalidEmail": "Enter a valid email",
@@ -297,55 +330,54 @@
       "onlyImages": "Only PNG/JPG images are allowed"
     }
   },
-
-    "common": {
-      "logout": "बाहेर पडा",
-      "accessNow": "आता पहा"
+  "common": {
+    "logout": "बाहेर पडा",
+    "accessNow": "आता पहा"
+  },
+  "dashboard": {
+    "adminTitle": "प्रशासक डॅशबोर्ड",
+    "userTitle": "नागरिक डॅशबोर्ड",
+    "welcome": "परत स्वागत आहे, {{name}}",
+    "adminSubtitle": "प्रमाणपत्रे, वापरकर्ते आणि मंजुरी सहज व्यवस्थापित करा.",
+    "userSubtitle": "तुमची प्रमाणपत्रे पहा आणि नवीन अर्ज काही क्लिकमध्ये करा."
+  },
+  "services": {
+    "adminTitle": "प्रशासक सेवा",
+    "userTitle": "वापरकर्ता सेवा",
+    "manageUsers": {
+      "title": "वापरकर्त्यांचे व्यवस्थापन",
+      "desc": "वापरकर्त्यांच्या विनंत्या आणि खाती पहा व व्यवस्थापित करा."
     },
-    "dashboard": {
-      "adminTitle": "प्रशासक डॅशबोर्ड",
-      "userTitle": "नागरिक डॅशबोर्ड",
-      "welcome": "परत स्वागत आहे, {{name}}",
-      "adminSubtitle": "प्रमाणपत्रे, वापरकर्ते आणि मंजुरी सहज व्यवस्थापित करा.",
-      "userSubtitle": "तुमची प्रमाणपत्रे पहा आणि नवीन अर्ज काही क्लिकमध्ये करा."
+    "blogs": {
+      "title": "ब्लॉग्स",
+      "desc": "आमच्या ताज्या अपडेट्स आणि लेख वाचा."
     },
-    "services": {
-      "adminTitle": "प्रशासक सेवा",
-      "userTitle": "वापरकर्ता सेवा",
-      "manageUsers": {
-        "title": "वापरकर्त्यांचे व्यवस्थापन",
-        "desc": "वापरकर्त्यांच्या विनंत्या आणि खाती पहा व व्यवस्थापित करा."
-      },
-      "blogs": {
-        "title": "ब्लॉग्स",
-        "desc": "आमच्या ताज्या अपडेट्स आणि लेख वाचा."
-      },
-      "certificateApprovals": {
-        "title": "प्रमाणपत्र मंजुरी",
-        "desc": "सबमिट केलेले प्रमाणपत्र अर्ज मंजूर किंवा नाकार करा."
-      },
-      "uploadCertificates": {
-        "title": "प्रमाणपत्र अपलोड",
-        "desc": "वापरकर्त्यांसाठी अंतिम प्रमाणपत्रे अपलोड करा."
-      },
-      "viewCertificates": {
-        "title": "प्रमाणपत्रे पहा",
-        "desc": "तुमची प्रमाणपत्रे पहा व डाउनलोड करा."
-      },
-      "applyCertificate": {
-        "title": "प्रमाणपत्रासाठी अर्ज",
-        "desc": "नवीन अधिकृत प्रमाणपत्रांसाठी अर्ज करा."
-      },
-      "notifications": {
-        "title": "सूचना",
-        "desc": "तुमच्या अर्ज स्थितीबद्दल अद्यतने मिळवा."
-      },
-      "applicationStatus": {
-        "title": "अर्जाची स्थिती",
-        "desc": "तुमच्या अर्जांची प्रगती तपासा."
-      }
+    "certificateApprovals": {
+      "title": "प्रमाणपत्र मंजुरी",
+      "desc": "सबमिट केलेले प्रमाणपत्र अर्ज मंजूर किंवा नाकार करा."
     },
-    "govLinks": {
+    "uploadCertificates": {
+      "title": "प्रमाणपत्र अपलोड",
+      "desc": "वापरकर्त्यांसाठी अंतिम प्रमाणपत्रे अपलोड करा."
+    },
+    "viewCertificates": {
+      "title": "प्रमाणपत्रे पहा",
+      "desc": "तुमची प्रमाणपत्रे पहा व डाउनलोड करा."
+    },
+    "applyCertificate": {
+      "title": "प्रमाणपत्रासाठी अर्ज",
+      "desc": "नवीन अधिकृत प्रमाणपत्रांसाठी अर्ज करा."
+    },
+    "notifications": {
+      "title": "सूचना",
+      "desc": "तुमच्या अर्ज स्थितीबद्दल अद्यतने मिळवा."
+    },
+    "applicationStatus": {
+      "title": "अर्जाची स्थिती",
+      "desc": "तुमच्या अर्जांची प्रगती तपासा."
+    }
+  },
+  "govLinks": {
     "header": {
       "title": "Important Links",
       "subtitle": "Collection of all important government websites in one place. Use the links below for all services related to Gram Panchayat office."
@@ -422,7 +454,4 @@
     },
     "developmentNotice": "This page is under development. More services will be available soon"
   }
-  
 }
-
-

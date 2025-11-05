@@ -40,6 +40,9 @@ import MarriageCertificateForm from './pages/MarriageCertificateForm';
 import LandRecord8AForm from './pages/LandRecord8A';
 import NoOutstandingDebtsForm from './pages/NoOutstandingDebts';
 import DigitalSigned712Form from './pages/DigitalSigned712';
+import HousingAssessment8Form from './pages/HousingAssessment8Form';
+import BPLCertificateForm from './pages/BPLCertificateForm';
+import NiradharCertificateForm from './pages/NiradharCertificateForm';
 import CertificateDownload from './pages/certificateDownload';
 import BlogDetails from './components/blogDetails';
 import AboutGramPanchayat from './pages/AboutGram';
@@ -129,6 +132,9 @@ function AppContent() {
             <Route path="/apply-for-certificates/land-record-8a" element={<LandRecord8AForm />} />
             <Route path="/apply-for-certificates/no-outstanding-debts" element={<NoOutstandingDebtsForm />} />
             <Route path="/apply-for-certificates/digital-signed-712" element={<DigitalSigned712Form />} />
+            <Route path="/apply-for-certificates/housing-assessment-8" element={<HousingAssessment8Form />} />
+            <Route path="/apply-for-certificates/bpl-certificate" element={<BPLCertificateForm />} />
+            <Route path="/apply-for-certificates/niradhar-certificate" element={<NiradharCertificateForm />} />
             <Route path="/taxation-info" element={<TaxationInfo />} />
             <Route path="/grampanchayat-info" element={<AboutGramPanchayat />} />
             <Route path="/departments" element={<DepartmentsPage />} />

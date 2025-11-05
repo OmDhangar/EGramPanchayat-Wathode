@@ -10,9 +10,10 @@ import {
   submitDeathCertificateApplication,
   submitMarriageCertificateApplication,
   submitTaxationApplication,
-  submitLandRecord8AApplication,
   submitNoOutstandingDebtsApplication,
-  submitDigitalSigned712Application,
+  submitHousingAssessment8Application,
+  submitBPLCertificateApplication,
+  submitNiradharCertificateApplication,
   getUserApplications,
   getApplicationDetails,
   getFileUrls,
@@ -55,11 +56,13 @@ router.route("/marriage-certificate").post(
   submitMarriageCertificateApplication
 );
 
-router.route("/land-record-8a").post(
+router.route("/taxation/submit").post(
+  verifyJWT,
   upload.fields([
-    { name: "paymentReceipt", maxCount: 1 }
+    { name: 'paymentReceipt', maxCount: 1 },
+    { name: 'documents', maxCount: 5 }
   ]),
-  submitLandRecord8AApplication
+  submitTaxationApplication
 );
 
 router.route("/no-outstanding-debts").post(
@@ -69,20 +72,25 @@ router.route("/no-outstanding-debts").post(
   submitNoOutstandingDebtsApplication
 );
 
-router.route("/digital-signed-712").post(
+router.route("/housing-assessment-8").post(
   upload.fields([
     { name: "paymentReceipt", maxCount: 1 }
   ]),
-  submitDigitalSigned712Application
+  submitHousingAssessment8Application
 );
 
-router.route("/taxation/submit").post(
-  verifyJWT,
+router.route("/bpl-certificate").post(
   upload.fields([
-    { name: 'paymentReceipt', maxCount: 1 },
-    { name: 'documents', maxCount: 5 }
+    { name: "paymentReceipt", maxCount: 1 }
   ]),
-  submitTaxationApplication
+  submitBPLCertificateApplication
+);
+
+router.route("/niradhar-certificate").post(
+  upload.fields([
+    { name: "paymentReceipt", maxCount: 1 }
+  ]),
+  submitNiradharCertificateApplication
 );
 
 // Application retrieval routes
