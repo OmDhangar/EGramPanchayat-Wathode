@@ -14,6 +14,10 @@ import { BirthCertificate } from "../models/birthcertificate.model.js";
 import { DeathCertificate } from "../models/deathcertificate.model.js";
 import { MarriageCertificate } from "../models/marriagecertificate.model.js";
 import { Notification } from "../models/notification.model.js";
+import { HousingAssessment8 } from "../models/housingAssessment8.model.js";
+import { BPLCertificate } from "../models/bplCertificate.model.js";
+import { NiradharCertificate } from "../models/niradharCertificate.model.js";
+import { NoOutstandingDebts } from "../models/noOutstandingDebts.model.js";
 
 // Helper to generate unique application ID
 const generateApplicationId = (prefix) => {
@@ -985,40 +989,38 @@ const generatePaymentReceiptSignedUrl = asyncHandler(async (req, res) => {
   }
 });
 
-// Submit 8A Land Record Digital Signature Application
-const submitLandRecord8AApplication = asyncHandler(async (req, res) => {
+// Submit Taxation Application
+const submitTaxationApplication = asyncHandler(async (req, res) => {
   const { 
-    ownersName,
-    village,
-    whatsappNumber,
+    financialYear,
+    applicantName,
+    mobileNumber,
     email,
-    taluka,
-    district,
-    accountNumber,
-    utrNumber,
-    paymentOption
+    taxPayerNumber,
+    address,
+    groupName,
+    groupType,
+    oldTaxNumber,
+    newTaxNumber,
+    utrNumber
   } = req.body;
   
   // Basic validations
-  if (!ownersName || !village || !whatsappNumber || !taluka || !district || !accountNumber || !utrNumber) {
+  if (!financialYear || !applicantName || !mobileNumber || !taxPayerNumber || 
+      !address || !utrNumber) {
     throw new ApiError(400, "Missing required fields");
   }
 
-  // Validate email
+  // Validate mobile number (10 digits)
+  if (!/^\d{10}$/.test(mobileNumber)) {
+    throw new ApiError(400, "Invalid mobile number. Must be 10 digits");
+  }
+
+  // Validate email if provided
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw new ApiError(400, "Invalid email format");
   }
 
-  // Validate whatsapp number (10 digits)
-  if (!/^\d{10}$/.test(whatsappNumber)) {
-    throw new ApiError(400, "Invalid WhatsApp number. Must be 10 digits");
-  }
-  
-  // Validate payment option
-  if (paymentOption && paymentOption !== 'UPI') {
-    throw new ApiError(400, "Only UPI payment is supported currently");
-  }
-  
   // Require payment receipt image
   const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
   if (receiptFiles.length === 0) {
@@ -1030,63 +1032,81 @@ const submitLandRecord8AApplication = asyncHandler(async (req, res) => {
   if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
     throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
   }
+
+  // Validate file size (max 5MB)
+  if (receiptFiles[0].size > 5 * 1024 * 1024) {
+    throw new ApiError(400, 'Payment receipt must be less than 5MB');
+  }
+
+  // Process uploaded files using S3 (receipt + optional documents) under 'unverified'
+  const documentFiles = req.files && req.files.documents ? req.files.documents : [];
   
-  // Process uploaded files using S3 under 'unverified'
-  const uploadedFiles = await processUploadedFilesS3(receiptFiles, 'unverified');
+  // Validate maximum 5 additional documents
+  if (documentFiles.length > 5) {
+    throw new ApiError(400, 'Maximum 5 additional documents allowed');
+  }
+
+  const allFiles = [
+    ...receiptFiles,
+    ...documentFiles
+  ];
+  const uploadedFiles = await processUploadedFilesS3(allFiles, 'unverified');
 
   // Mark the receipt file for easy identification
   const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
   if (receiptUpload) {
-    receiptUpload.isPaymentReceipt = true;
+    receiptUpload.isPaymentReceipt = true; // Add flag to identify receipt
   }
-  
+
   // Create application with unique ID
-  const applicationId = generateApplicationId('LAND8A');
-  
+  const applicationId = generateApplicationId('TAX');
+
   // Prepare application data
   const applicationData = {
     applicationId,
     applicantId: req.user._id,
-    documentType: 'land_record_8a',
+    documentType: 'taxation',
     uploadedFiles,
     paymentDetails: {
-      amount: 15,
+      amount: 20, // Adjust the amount as per your requirement
       paymentStatus: 'completed',
       utrNumber,
       receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
     }
   };
-  
+
   // Prepare form data
   const formData = {
-    ownersName,
-    village,
-    whatsappNumber,
+    financialYear,
+    applicantName,
+    mobileNumber,
     email,
-    taluka,
-    district,
-    accountNumber,
-    utrNumber,
-    paymentOption: 'UPI'
+    taxPayerNumber,
+    address,
+    groupName,
+    groupType,
+    oldTaxNumber,
+    newTaxNumber,
+    utrNumber
   };
-  
+
   // Create application with form data using the static method
   const application = await Application.createWithFormData(applicationData, formData);
-  
+
   // Create notification for user
   await createNotification(
     req.user._id,
     application._id,
     'application_submitted',
-    '8A Land Record Application Submitted',
-    `Your application for 8A land record digital signature has been submitted successfully.`
+    'Taxation Application Submitted',
+    `Your taxation application has been submitted successfully for ${applicantName}.`
   );
-  
+
   // Notify admin about new application
   await notifyAdminNewApplication(application, req.user.fullName);
-  
+
   return res.status(201).json(
-    new ApiResponse(201, application, "8A land record application submitted successfully")
+    new ApiResponse(201, application, "Taxation application submitted successfully")
   );
 });
 
@@ -1212,31 +1232,150 @@ const submitNoOutstandingDebtsApplication = asyncHandler(async (req, res) => {
   );
 });
 
-// Submit Taxation Application
-const submitTaxationApplication = asyncHandler(async (req, res) => {
+// Submit Housing Assessment 8 Application
+const submitHousingAssessment8Application = asyncHandler(async (req, res) => {
   const { 
     financialYear,
     applicantName,
-    mobileNumber,
+    whatsappNumber,
     email,
-    taxPayerNumber,
-    address,
-    groupName,
-    groupType,
-    oldTaxNumber,
-    newTaxNumber,
-    utrNumber
+    utrNumber,
+    propertyNo,
+    descriptionNo,
+    propertyName,
+    occupantName,
+    lengthInFeet,
+    heightInFeet,
+    totalAreaSqFt
   } = req.body;
   
   // Basic validations
-  if (!financialYear || !applicantName || !mobileNumber || !taxPayerNumber || 
-      !address || !utrNumber) {
+  if (!financialYear || !applicantName || !whatsappNumber || !utrNumber || 
+      !propertyNo || !propertyName || !occupantName || !lengthInFeet || 
+      !heightInFeet || !totalAreaSqFt) {
     throw new ApiError(400, "Missing required fields");
   }
 
-  // Validate mobile number (10 digits)
-  if (!/^\d{10}$/.test(mobileNumber)) {
-    throw new ApiError(400, "Invalid mobile number. Must be 10 digits");
+  // Validate whatsapp number (10 digits)
+  if (!/^\d{10}$/.test(whatsappNumber)) {
+    throw new ApiError(400, "Invalid WhatsApp number. Must be 10 digits");
+  }
+
+  // Validate email if provided
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  // Validate numeric fields
+  if (isNaN(lengthInFeet) || isNaN(heightInFeet) || isNaN(totalAreaSqFt)) {
+    throw new ApiError(400, "Length, height, and total area must be valid numbers");
+  }
+
+  // Require payment receipt image
+  const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
+  if (receiptFiles.length === 0) {
+    throw new ApiError(400, "Payment receipt image is required");
+  }
+
+  // Enforce images-only for receipt
+  const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
+  if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
+    throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
+  }
+
+  // Process uploaded files using S3 under 'unverified'
+  const uploadedFiles = await processUploadedFilesS3(receiptFiles, 'unverified');
+
+  // Mark the receipt file for easy identification
+  const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
+  if (receiptUpload) {
+    receiptUpload.isPaymentReceipt = true;
+  }
+
+  // Create application with unique ID
+  const applicationId = generateApplicationId('HOUSE8');
+
+  // Prepare application data
+  const applicationData = {
+    applicationId,
+    applicantId: req.user._id,
+    documentType: 'housing_assessment_8',
+    uploadedFiles,
+    paymentDetails: {
+      amount: 20,
+      paymentStatus: 'completed',
+      utrNumber,
+      receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
+    }
+  };
+
+  // Prepare form data
+  const formData = {
+    financialYear,
+    applicantName,
+    whatsappNumber,
+    email,
+    utrNumber,
+    propertyNo,
+    descriptionNo,
+    propertyName,
+    occupantName,
+    lengthInFeet: parseFloat(lengthInFeet),
+    heightInFeet: parseFloat(heightInFeet),
+    totalAreaSqFt: parseFloat(totalAreaSqFt)
+  };
+
+  // Create application with form data using the static method
+  const application = await Application.createWithFormData(applicationData, formData);
+
+  // Create notification for user
+  await createNotification(
+    req.user._id,
+    application._id,
+    'application_submitted',
+    'Housing Assessment 8 Application Submitted',
+    `Your housing assessment 8 application has been submitted successfully.`
+  );
+
+  // Notify admin about new application
+  await notifyAdminNewApplication(application, req.user.fullName);
+
+  return res.status(201).json(
+    new ApiResponse(201, application, "Housing assessment 8 application submitted successfully")
+  );
+});
+
+// Submit BPL Certificate Application
+const submitBPLCertificateApplication = asyncHandler(async (req, res) => {
+  const { 
+    financialYear,
+    applicantName,
+    aadhaarNumber,
+    address,
+    taluka,
+    district,
+    whatsappNumber,
+    email,
+    utrNumber,
+    bplYear,
+    bplListSerialNo
+  } = req.body;
+  
+  // Basic validations
+  if (!financialYear || !applicantName || !aadhaarNumber || !address || 
+      !taluka || !district || !whatsappNumber || !utrNumber || 
+      !bplYear || !bplListSerialNo) {
+    throw new ApiError(400, "Missing required fields");
+  }
+
+  // Validate Aadhaar number
+  if (!/^\d{12}$/.test(aadhaarNumber)) {
+    throw new ApiError(400, "Aadhaar number must be 12 digits");
+  }
+
+  // Validate whatsapp number (10 digits)
+  if (!/^\d{10}$/.test(whatsappNumber)) {
+    throw new ApiError(400, "Invalid WhatsApp number. Must be 10 digits");
   }
 
   // Validate email if provided
@@ -1256,42 +1395,26 @@ const submitTaxationApplication = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
   }
 
-  // Validate file size (max 5MB)
-  if (receiptFiles[0].size > 5 * 1024 * 1024) {
-    throw new ApiError(400, 'Payment receipt must be less than 5MB');
-  }
-
-  // Process uploaded files using S3 (receipt + optional documents) under 'unverified'
-  const documentFiles = req.files && req.files.documents ? req.files.documents : [];
-  
-  // Validate maximum 5 additional documents
-  if (documentFiles.length > 5) {
-    throw new ApiError(400, 'Maximum 5 additional documents allowed');
-  }
-
-  const allFiles = [
-    ...receiptFiles,
-    ...documentFiles
-  ];
-  const uploadedFiles = await processUploadedFilesS3(allFiles, 'unverified');
+  // Process uploaded files using S3 under 'unverified'
+  const uploadedFiles = await processUploadedFilesS3(receiptFiles, 'unverified');
 
   // Mark the receipt file for easy identification
   const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
   if (receiptUpload) {
-    receiptUpload.isPaymentReceipt = true; // Add flag to identify receipt
+    receiptUpload.isPaymentReceipt = true;
   }
 
   // Create application with unique ID
-  const applicationId = generateApplicationId('TAX');
+  const applicationId = generateApplicationId('BPL');
 
   // Prepare application data
   const applicationData = {
     applicationId,
     applicantId: req.user._id,
-    documentType: 'taxation',
+    documentType: 'bpl_certificate',
     uploadedFiles,
     paymentDetails: {
-      amount: 20, // Adjust the amount as per your requirement
+      amount: 20,
       paymentStatus: 'completed',
       utrNumber,
       receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
@@ -1302,15 +1425,15 @@ const submitTaxationApplication = asyncHandler(async (req, res) => {
   const formData = {
     financialYear,
     applicantName,
-    mobileNumber,
-    email,
-    taxPayerNumber,
+    aadhaarNumber,
     address,
-    groupName,
-    groupType,
-    oldTaxNumber,
-    newTaxNumber,
-    utrNumber
+    taluka,
+    district,
+    whatsappNumber,
+    email,
+    utrNumber,
+    bplYear,
+    bplListSerialNo
   };
 
   // Create application with form data using the static method
@@ -1321,53 +1444,53 @@ const submitTaxationApplication = asyncHandler(async (req, res) => {
     req.user._id,
     application._id,
     'application_submitted',
-    'Taxation Application Submitted',
-    `Your taxation application has been submitted successfully for ${applicantName}.`
+    'BPL Certificate Application Submitted',
+    `Your BPL certificate application has been submitted successfully.`
   );
 
   // Notify admin about new application
   await notifyAdminNewApplication(application, req.user.fullName);
 
   return res.status(201).json(
-    new ApiResponse(201, application, "Taxation application submitted successfully")
+    new ApiResponse(201, application, "BPL certificate application submitted successfully")
   );
 });
 
-
-// Submit Digitally Signed 7/12 Application
-const submitDigitalSigned712Application = asyncHandler(async (req, res) => {
+// Submit Niradhar Certificate Application
+const submitNiradharCertificateApplication = asyncHandler(async (req, res) => {
   const { 
-    ownersName,
-    village,
+    financialYear,
+    applicantName,
+    aadhaarNumber,
     whatsappNumber,
     email,
-    taluka,
-    district,
-    surveyNumber,
     utrNumber,
-    paymentOption
+    grampanchayatName,
+    taluka,
+    district
   } = req.body;
   
   // Basic validations
-  if (!ownersName || !village || !whatsappNumber || !taluka || !district || !surveyNumber || !utrNumber) {
+  if (!financialYear || !applicantName || !aadhaarNumber || !whatsappNumber || 
+      !utrNumber || !grampanchayatName || !taluka || !district) {
     throw new ApiError(400, "Missing required fields");
   }
 
-  // Validate email
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new ApiError(400, "Invalid email format");
+  // Validate Aadhaar number
+  if (!/^\d{12}$/.test(aadhaarNumber)) {
+    throw new ApiError(400, "Aadhaar number must be 12 digits");
   }
 
   // Validate whatsapp number (10 digits)
   if (!/^\d{10}$/.test(whatsappNumber)) {
     throw new ApiError(400, "Invalid WhatsApp number. Must be 10 digits");
   }
-  
-  // Validate payment option
-  if (paymentOption && paymentOption !== 'UPI') {
-    throw new ApiError(400, "Only UPI payment is supported currently");
+
+  // Validate email if provided
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "Invalid email format");
   }
-  
+
   // Require payment receipt image
   const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
   if (receiptFiles.length === 0) {
@@ -1379,7 +1502,7 @@ const submitDigitalSigned712Application = asyncHandler(async (req, res) => {
   if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
     throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
   }
-  
+
   // Process uploaded files using S3 under 'unverified'
   const uploadedFiles = await processUploadedFilesS3(receiptFiles, 'unverified');
 
@@ -1388,67 +1511,69 @@ const submitDigitalSigned712Application = asyncHandler(async (req, res) => {
   if (receiptUpload) {
     receiptUpload.isPaymentReceipt = true;
   }
-  
+
   // Create application with unique ID
-  const applicationId = generateApplicationId('SIGN712');
-  
+  const applicationId = generateApplicationId('NIRADHAR');
+
   // Prepare application data
   const applicationData = {
     applicationId,
     applicantId: req.user._id,
-    documentType: 'digital_signed_712',
+    documentType: 'niradhar_certificate',
     uploadedFiles,
     paymentDetails: {
-      amount: 15,
+      amount: 20,
       paymentStatus: 'completed',
       utrNumber,
       receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
     }
   };
-  
+
   // Prepare form data
   const formData = {
-    ownersName,
-    village,
+    financialYear,
+    applicantName,
+    aadhaarNumber,
     whatsappNumber,
     email,
-    taluka,
-    district,
-    surveyNumber,
     utrNumber,
-    paymentOption: 'UPI'
+    grampanchayatName,
+    taluka,
+    district
   };
-  
+
   // Create application with form data using the static method
   const application = await Application.createWithFormData(applicationData, formData);
-  
+
   // Create notification for user
   await createNotification(
     req.user._id,
     application._id,
     'application_submitted',
-    'Digitally Signed 7/12 Application Submitted',
-    `Your application for digitally signed 7/12 has been submitted successfully.`
+    'Niradhar Certificate Application Submitted',
+    `Your Niradhar certificate application has been submitted successfully.`
   );
-  
+
   // Notify admin about new application
   await notifyAdminNewApplication(application, req.user.fullName);
-  
+
   return res.status(201).json(
-    new ApiResponse(201, application, "Digitally signed 7/12 application submitted successfully")
+    new ApiResponse(201, application, "Niradhar certificate application submitted successfully")
   );
 });
+
 
 export {
   getAdminApplications,
   submitBirthCertificateApplication,
   submitDeathCertificateApplication,
   submitMarriageCertificateApplication,
-  submitLandRecord8AApplication,
-  submitNoOutstandingDebtsApplication,
-  submitDigitalSigned712Application,
   getUserApplications,
   submitTaxationApplication,
+  submitNoOutstandingDebtsApplication,
+  submitHousingAssessment8Application,
+  submitBPLCertificateApplication,
+  submitNiradharCertificateApplication,
   getApplicationDetails,
   reviewApplication,
   uploadCertificate,

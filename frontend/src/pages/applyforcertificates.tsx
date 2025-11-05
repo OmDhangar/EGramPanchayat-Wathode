@@ -1,7 +1,7 @@
 // src/pages/CertificateForms.tsx
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaBaby, FaSkull, FaHeart, FaFileAlt, FaArrowRight, FaLandmark, FaFileInvoiceDollar, FaFileContract } from "react-icons/fa";
+import { FaBaby, FaSkull, FaHeart, FaFileAlt, FaArrowRight, FaLandmark, FaFileInvoiceDollar, FaFileContract, FaHome, FaUsers, FaCertificate } from "react-icons/fa"; // Added new icons
 import birthLogo from "../../public/utils/birthlogo.png";
 import deathLogo from "../../public/utils/deathlogo.png";
 import marriageLogo from "../../public/utils/marriagelogo.png";
@@ -47,17 +47,6 @@ export default function CertificateForms() {
       iconColor: "text-pink-100"
     },
     {
-      title: t("certificates.landRecord8A.title"),
-      subtitle: "८अ भूमि अभिलेख डिजिटल स्वाक्षरी",
-      description: t("certificates.landRecord8A.description"),
-      points: t("certificates.landRecord8A.points", { returnObjects: true }) as string[],
-      bgColor: "from-green-500 to-green-600",
-      hoverColor: "from-green-600 to-green-700",
-      route: "/apply-for-certificates/land-record-8a",
-      logo: null,
-      iconColor: "text-green-100"
-    },
-    {
       title: t("certificates.noOutstandingDebts.title"),
       subtitle: "थकबाकी नसल्याचा दाखला",
       description: t("certificates.noOutstandingDebts.description"),
@@ -65,20 +54,44 @@ export default function CertificateForms() {
       bgColor: "from-purple-500 to-purple-600",
       hoverColor: "from-purple-600 to-purple-700",
       route: "/apply-for-certificates/no-outstanding-debts",
-      logo: null,
+      logo: null, // You can add a logo if you have one
       iconColor: "text-purple-100"
     },
+    // --- NEW CARDS START HERE ---
     {
-      title: t("certificates.digitalSigned712.title"),
-      subtitle: "डिजिटल स्वाक्षरी ७/१२",
-      description: t("certificates.digitalSigned712.description"),
-      points: t("certificates.digitalSigned712.points", { returnObjects: true }) as string[],
-      bgColor: "from-orange-500 to-orange-600",
-      hoverColor: "from-orange-600 to-orange-700",
-      route: "/apply-for-certificates/digital-signed-712",
-      logo: null,
-      iconColor: "text-orange-100"
+      title: t("certificates.housingAssessment8.title"),
+      subtitle: "घर मूल्यांकन (दस्तऐवज 8)",
+      description: t("certificates.housingAssessment8.description"),
+      points: t("certificates.housingAssessment8.points", { returnObjects: true }) as string[],
+      bgColor: "from-teal-500 to-teal-600",
+      hoverColor: "from-teal-600 to-teal-700",
+      route: "/apply-for-certificates/housing-assessment-8",
+      logo: null, // Add a logo if available
+      iconColor: "text-teal-100"
     },
+    {
+      title: t("certificates.bplCertificate.title"),
+      subtitle: "दारिद्र्यरेषेखालील प्रमाणपत्र",
+      description: t("certificates.bplCertificate.description"),
+      points: t("certificates.bplCertificate.points", { returnObjects: true }) as string[],
+      bgColor: "from-yellow-500 to-yellow-600",
+      hoverColor: "from-yellow-600 to-yellow-700",
+      route: "/apply-for-certificates/bpl-certificate",
+      logo: null, // Add a logo if available
+      iconColor: "text-yellow-100"
+    },
+    {
+      title: t("certificates.niradharCertificate.title"),
+      subtitle: "निराधार प्रमाणपत्र",
+      description: t("certificates.niradharCertificate.description"),
+      points: t("certificates.niradharCertificate.points", { returnObjects: true }) as string[],
+      bgColor: "from-cyan-500 to-cyan-600",
+      hoverColor: "from-cyan-600 to-cyan-700",
+      route: "/apply-for-certificates/niradhar-certificate",
+      logo: null, // Add a logo if available
+      iconColor: "text-cyan-100"
+    },
+    // --- NEW CARDS END HERE ---
   ];
 
   const cardVariants = {
@@ -107,7 +120,7 @@ export default function CertificateForms() {
     <div className="min-h-screen font-tiro-marathi bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4">
       <Helmet>
         <title>Certificate Applications - Grampanchayat Wathode</title>
-        <meta name="description" content="Apply online for birth, death, and marriage certificates. Grampanchayat Wathode, Shirpur, Dhule, Maharashtra." />
+        <meta name="description" content="Apply online for birth, death, marriage, and other certificates. Grampanchayat Wathode, Shirpur, Dhule, Maharashtra." />
       </Helmet>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
@@ -127,7 +140,6 @@ export default function CertificateForms() {
           </p>
         </motion.div>
 
-        {/* Certificate Cards Grid */}
         {/* Certificate Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {cards.map((card, index) => (
@@ -169,7 +181,7 @@ export default function CertificateForms() {
 
                   {/* Points List */}
                   <ul className="space-y-2 mb-6">
-                    {card.points.map((point, idx) => (
+                    {(card.points as string[]).map((point, idx) => ( // Ensure card.points is treated as array
                       <motion.li
                         key={idx}
                         initial={{ opacity: 0, x: -20 }}
@@ -189,8 +201,8 @@ export default function CertificateForms() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate(card.route)}
                     className="w-full bg-white text-gray-800 py-3 px-4 rounded-lg text-sm font-semibold 
-                            hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2
-                            group-hover:shadow-md"
+                              hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2
+                              group-hover:shadow-md"
                   >
                     {t("certificates.applyNow")}
                     <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform duration-300" />

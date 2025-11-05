@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaDownload, FaSpinner, FaClock } from 'react-icons/fa';
-import axios from 'axios';
+import { FaDownload, FaSpinner, FaClock, FaFileAlt } from 'react-icons/fa';
+// 'axios' is not needed directly if 'api' is configured
 import { useAuthContext } from '../Context/authContext';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/axios';
 
+// Interface for individual uploaded files
+interface UploadedFile {
+  _id: string;
+  originalName: string;
+  fileName: string;
+  isPaymentReceipt?: boolean;
+}
+
+// Updated Certificate interface to include uploaded files
 interface Certificate {
   _id: string;
   applicationId: string;
@@ -18,28 +27,28 @@ interface Certificate {
   };
   createdAt: string;
   updatedAt: string;
-}
-
-interface FileURL {
-  fileName: string;
-  url: string;
-  expiresIn: number;
-  type: 'document' | 'certificate';
+  uploadedFiles: UploadedFile[]; // Added this array
 }
 
 const UserCertificates = () => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [fileUrls, setFileUrls] = useState<FileURL[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  // State to track which specific file is being downloaded
+  const [downloading, setDownloading] = useState<string | null>(null);
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCertificates = async () => {
+      if (!user?._id) {
+        setError("User not found. Please log in again.");
+        setLoading(false);
+        return;
+      }
+      
       try {
         setLoading(true);
-        console.log(user);
         const response = await api.get(
           `/applications/user/${user?._id}`,
           {
@@ -58,22 +67,41 @@ const UserCertificates = () => {
       }
     };
 
-    const fetchSignedUrls = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get('/applications/files/urls');
-        setFileUrls(response.data.data);
-      } catch (error) {
-        setError('Failed to load file URLs');
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCertificates();
-    fetchSignedUrls();
-  }, []);
+    // Removed the separate fetchSignedUrls call
+  }, [user]); // Added user as a dependency
+
+  // Function to get a secure URL on-demand and open it
+  const handleDownload = async (applicationId: string, fileId: string | 'certificate') => {
+    const uniqueId = `${applicationId}-${fileId}`;
+    setDownloading(uniqueId);
+    setError(null);
+
+    try {
+      // Determine the correct API endpoint based on file type
+      const url = fileId === 'certificate'
+        ? `/applications/files/${applicationId}/certificate/signed-url`
+        : `/applications/files/${applicationId}/${fileId}/signed-url`;
+
+      const response = await api.get(url, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+
+      const signedUrl = response.data.data.url;
+      if (signedUrl) {
+        window.open(signedUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        throw new Error("No URL returned from API");
+      }
+    } catch (err) {
+      setError('Failed to get download link. Please try again.');
+      console.error(err);
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -96,11 +124,6 @@ const UserCertificates = () => {
     </div>
   );
 
-  if (error) return (
-    <div className="min-h-screen bg-gray-50 p-8 text-center text-red-600">
-      {error}
-    </div>
-  );
   const viewFormDetails = (formId: string) => {
     navigate(`/form-details/${formId}`);
   };
@@ -109,16 +132,20 @@ const UserCertificates = () => {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">My Certificates</h1>
+        
+        {/* Display error message if any download fails */}
+        {error && (
+            <div className="mb-4 p-4 text-center text-red-700 bg-red-100 rounded-lg">
+                {error}
+            </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {certificates.map((cert) => (
             <motion.div
               key={cert._id}
-              onClick={(e)=>{
-                e.stopPropagation();
-                viewFormDetails(cert.applicationId);
-              }}
-              className="bg-white rounded-lg shadow-md overflow-hidden"
+              onClick={() => viewFormDetails(cert.applicationId)} // Navigate on card click
+              className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-shadow hover:shadow-lg"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
@@ -126,32 +153,71 @@ const UserCertificates = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800">
-                      {cert.documentType.replace('_', ' ').toUpperCase()}
+                      {cert.documentType.replace(/_/g, ' ').toUpperCase()}
                     </h3>
                     <p className="text-sm text-gray-600">ID: {cert.applicationId}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(cert.status)}`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(cert.status)}`}>
                     {cert.status.replace('_', ' ').toUpperCase()}
                   </span>
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600">
-                    <FaClock className="inline-block mr-2" />
+                  <p className="text-sm text-gray-600 flex items-center">
+                    <FaClock className="inline-block mr-2 flex-shrink-0" />
                     Submitted: {new Date(cert.createdAt).toLocaleDateString()}
                   </p>
 
-                  {cert.generatedCertificate && (
+                  {/* --- FIXED CERTIFICATE DOWNLOAD BUTTON --- */}
+                  {cert.status === 'certificate_generated' && cert.generatedCertificate && (
                     <div className="mt-4">
-                      <a
-                        href={cert.generatedCertificate.filePath}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card navigation
+                          handleDownload(cert.applicationId, 'certificate');
+                        }}
+                        disabled={downloading === `${cert.applicationId}-certificate`}
+                        className="inline-flex w-full justify-center items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                       >
-                        <FaDownload />
+                        {downloading === `${cert.applicationId}-certificate` ? (
+                          <FaSpinner className="animate-spin" />
+                        ) : (
+                          <FaDownload />
+                        )}
                         Download Certificate
-                      </a>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* --- NEW SECTION FOR UPLOADED FILES --- */}
+                  {cert.uploadedFiles && cert.uploadedFiles.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Submitted Files</h4>
+                      <ul className="space-y-2">
+                        {cert.uploadedFiles.map((file) => (
+                          <li key={file._id} className="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-md">
+                            <span className="text-gray-700 truncate pr-2 flex items-center">
+                              <FaFileAlt className="text-gray-400 mr-2 flex-shrink-0" />
+                              {file.isPaymentReceipt ? 'Payment Receipt' : (file.originalName || file.fileName)}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent card navigation
+                                handleDownload(cert.applicationId, file._id);
+                              }}
+                              disabled={downloading === `${cert.applicationId}-${file._id}`}
+                              className="inline-flex items-center gap-1.5 bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-xs font-medium hover:bg-gray-300 disabled:opacity-50"
+                            >
+                              {downloading === `${cert.applicationId}-${file._id}` ? (
+                                <FaSpinner className="animate-spin" />
+                              ) : (
+                                <FaDownload />
+                              )}
+                              Download
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                 </div>
@@ -166,26 +232,8 @@ const UserCertificates = () => {
           </div>
         )}
 
-        <div className="grid gap-4 mt-8">
-          {fileUrls.map((file, index) => (
-            <div key={index} className="border p-4 rounded-lg shadow">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">{file.fileName}</span>
-                <a
-                  href={file.url}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Download
-                </a>
-              </div>
-              <div className="text-sm text-gray-500 mt-2">
-                Link expires in {Math.floor(file.expiresIn / 60)} minutes
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* --- REMOVED THE OLD FILEURLS.MAP BLOCK --- */}
+        
       </div>
     </div>
   );

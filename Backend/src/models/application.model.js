@@ -15,17 +15,18 @@ const applicationSchema = new mongoose.Schema({
     required: true
   },
   
-  // Document Type - UPDATED to include taxation
+  // Document Type
   documentType: {
     type: String,
     enum: [
       'marriage_certificate', 
       'birth_certificate', 
       'death_certificate',
-      'land_record_8a',
+      'taxation',
       'no_outstanding_debts',
-      'digital_signed_712',
-      'taxation'  // ADDED
+      'housing_assessment_8',
+      'bpl_certificate',
+      'niradhar_certificate'
     ],
     required: true
   },
@@ -48,10 +49,11 @@ const applicationSchema = new mongoose.Schema({
       'BirthCertificate', 
       'DeathCertificate', 
       'MarriageCertificate',
-      'LandRecord8A',
+      'Taxation',
       'NoOutstandingDebts',
-      'DigitalSigned712',
-      'Taxation'  // ADDED
+      'HousingAssessment8',
+      'BPLCertificate',
+      'NiradharCertificate'
     ]
   },
 
@@ -72,7 +74,7 @@ const applicationSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     },
-    isPaymentReceipt: {  // ADDED to identify payment receipt
+    isPaymentReceipt: {  
       type: Boolean,
       default: false
     }
@@ -140,7 +142,7 @@ applicationSchema.methods.getFormData = async function() {
   return await FormModel.findById(this.formDataRef);
 };
 
-// Static method to create application with form data - UPDATED
+// Static method to create application with form data
 applicationSchema.statics.createWithFormData = async function(applicationData, formData) {
   const { documentType } = applicationData;
 
@@ -156,18 +158,23 @@ applicationSchema.statics.createWithFormData = async function(applicationData, f
     case 'marriage_certificate':
       validationResult = validateMarriageCertificate(formData);
       break;
-    case 'land_record_8a':
-      validationResult = validateLandRecord8A(formData);
+    case 'taxation':
+      validationResult = validateTaxation(formData);
       break;
     case 'no_outstanding_debts':
       validationResult = validateNoOutstandingDebts(formData);
       break;
-    case 'digital_signed_712':
-      validationResult = validateDigitalSigned712(formData);
+    case 'housing_assessment_8':
+      validationResult = validateHousingAssessment8(formData);
       break;
-    case 'taxation':  // ADDED
-      validationResult = validateTaxation(formData);
+      
+    case 'bpl_certificate':
+      validationResult = validateBPLCertificate(formData);
       break;
+    case 'niradhar_certificate':
+      validationResult = validateNiradharCertificate(formData);
+      break;
+      
     default:
       throw new Error('Invalid document type');
   }
@@ -197,21 +204,25 @@ applicationSchema.statics.createWithFormData = async function(applicationData, f
       FormModel = mongoose.model('MarriageCertificate');
       formDataModel = 'MarriageCertificate';
       break;
-    case 'land_record_8a':
-      FormModel = mongoose.model('LandRecord8A');
-      formDataModel = 'LandRecord8A';
+    case 'taxation':
+      FormModel = mongoose.model('Taxation');
+      formDataModel = 'Taxation';
       break;
     case 'no_outstanding_debts':
       FormModel = mongoose.model('NoOutstandingDebts');
       formDataModel = 'NoOutstandingDebts';
       break;
-    case 'digital_signed_712':
-      FormModel = mongoose.model('DigitalSigned712');
-      formDataModel = 'DigitalSigned712';
+    case 'housing_assessment_8':
+      FormModel = mongoose.model('HousingAssessment8');
+      formDataModel = 'HousingAssessment8';
       break;
-    case 'taxation':  // ADDED
-      FormModel = mongoose.model('Taxation');
-      formDataModel = 'Taxation';
+    case 'bpl_certificate':
+      FormModel = mongoose.model('BPLCertificate');
+      formDataModel = 'BPLCertificate';
+      break;
+    case 'niradhar_certificate':
+      FormModel = mongoose.model('NiradharCertificate');
+      formDataModel = 'NiradharCertificate';
       break;
     default:
       throw new Error('Invalid document type');
@@ -269,9 +280,9 @@ const validateMarriageCertificate = (data) => {
   };
 };
 
-// Land Record 8A Validation
-const validateLandRecord8A = (data) => {
-  const required = ['ownersName', 'village', 'whatsappNumber', 'taluka', 'district', 'accountNumber', 'utrNumber'];
+// Taxation Validation
+const validateTaxation = (data) => {
+  const required = ['financialYear', 'applicantName', 'mobileNumber', 'taxPayerNumber', 'address', 'utrNumber'];
   const missing = required.filter(field => !data[field]);
   return {
     isValid: missing.length === 0,
@@ -289,9 +300,9 @@ const validateNoOutstandingDebts = (data) => {
   };
 };
 
-// Digital Signed 7/12 Validation
-const validateDigitalSigned712 = (data) => {
-  const required = ['ownersName', 'village', 'whatsappNumber', 'taluka', 'district', 'surveyNumber', 'utrNumber'];
+// Housing Assessment 8 Validation
+const validateHousingAssessment8 = (data) => {
+  const required = ['financialYear', 'applicantName', 'whatsappNumber', 'utrNumber', 'propertyNo', 'propertyName', 'occupantName', 'lengthInFeet', 'heightInFeet', 'totalAreaSqFt'];
   const missing = required.filter(field => !data[field]);
   return {
     isValid: missing.length === 0,
@@ -299,9 +310,19 @@ const validateDigitalSigned712 = (data) => {
   };
 };
 
-// Taxation Validation - ADDED
-const validateTaxation = (data) => {
-  const required = ['financialYear', 'applicantName', 'mobileNumber', 'taxPayerNumber', 'address', 'utrNumber'];
+// BPL Certificate Validation
+const validateBPLCertificate = (data) => {
+  const required = ['financialYear', 'applicantName', 'aadhaarNumber', 'address', 'taluka', 'district', 'whatsappNumber', 'utrNumber', 'bplYear', 'bplListSerialNo'];
+  const missing = required.filter(field => !data[field]);
+  return {
+    isValid: missing.length === 0,
+    missingFields: missing
+  };
+};
+
+// Niradhar Certificate Validation
+const validateNiradharCertificate = (data) => {
+  const required = ['financialYear', 'applicantName', 'aadhaarNumber', 'whatsappNumber', 'utrNumber', 'grampanchayatName', 'taluka', 'district'];
   const missing = required.filter(field => !data[field]);
   return {
     isValid: missing.length === 0,
