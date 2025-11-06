@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api } from "../api/axios";
 import { toast } from "react-hot-toast";
-import { FaArrowLeft, FaTag, FaFlag } from "react-icons/fa";
+import { FaArrowLeft, FaTag } from "react-icons/fa";
 import { Helmet } from 'react-helmet';
+import 'quill-better-table/dist/quill-better-table.css';
+
+
+// Import the CSS for ReactQuill to style the content
+import 'react-quill/dist/quill.snow.css';
 
 interface BlogImage {
   url: string;
@@ -59,11 +64,17 @@ export default function BlogDetails() {
     return <div className="p-6 text-center">Blog not found</div>;
   }
 
+  // Function to strip HTML for meta description
+  const stripHtml = (html: string) => {
+     const doc = new DOMParser().parseFromString(html, 'text/html');
+     return doc.body.textContent || "";
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <Helmet>
         <title>{blog.title} - Grampanchayat Wathode</title>
-        <meta name="description" content={blog.content.substring(0, 160) + "..."} />
+        <meta name="description" content={stripHtml(blog.content).substring(0, 160) + "..."} />
       </Helmet>
       {/* Back Button */}
       <Link
@@ -105,15 +116,19 @@ export default function BlogDetails() {
                 key={idx}
                 src={img.url}
                 alt={blog.title}
-                className="w-full h-64 object-cover rounded-lg shadow-md"
+                className="w-full max-h-[400px] object-cover rounded-lg shadow-md"
               />
             ))}
           </div>
         )}
 
-        {/* Content */}
-        <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
-          {blog.content}
+       {/* --- UPDATED CONTENT DISPLAY --- */}
+        {/* We use 'ql-snow' and 'ql-editor' classes from react-quill to style the content */}
+        <div className="ql-snow">
+          <div 
+            className="ql-editor" // This class applies all the formatting
+            dangerouslySetInnerHTML={{ __html: blog.content }} 
+          />
         </div>
       </div>
     </div>

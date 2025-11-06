@@ -1,9 +1,24 @@
-import { useState, ChangeEvent, FormEvent } from "react";
-import {api} from "../api/axios"; // Adjust the import based on your project structure
-import { toast } from "react-hot-toast"; // Using toast for better feedback
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import { api } from "../api/axios"; 
+import { toast } from "react-hot-toast";
+import ReactQuill from 'react-quill'; // Import ReactQuill
+import 'react-quill/dist/quill.snow.css'; // Import Quill's snow theme CSS
+
+
+
+interface Blog {
+  _id: string;
+  title: string;
+  content: string;
+  category: string;
+  images: any[];
+}
 
 interface AdminBlogCreateProps {
-  onBlogCreated?: () => void; // Optional callback to refresh blog list
+  onBlogCreated?: () => void; 
+  onBlogUpdated?: () => void; 
+  blogToEdit?: Blog | null; 
+  onCancelEdit?: () => void; 
 }
 
 const BLOG_CATEGORIES = [
@@ -16,13 +31,51 @@ const BLOG_CATEGORIES = [
   "योजना"
 ];
 
-const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
+const modules = {
+  toolbar: [
+    [{ 'font': [] }], // Font family
+    [{ 'header': [1, 2, 3, 4, false] }], // Headers
+    ['bold', 'italic', 'underline', 'strike'], // Toggled buttons
+    [{ 'color': [] }, { 'background': [] }], // Text & background color
+    [{ 'align': [] }], // Text alignment
+    [{'list': 'ordered'}, {'list': 'bullet'}],
+    [{ 'indent': '-1'}, { 'indent': '+1' }], // Indent/outdent
+    ['blockquote', 'code-block'],
+    ['link'],
+    ['clean'] // Remove formatting
+  ],
+};
+
+const formats = [
+  'header', 'font', 'color', 'background',
+  'bold', 'italic', 'underline', 'strike',
+  'list', 'bullet', 'indent',
+  'align', 'blockquote', 'code-block',
+  'link',
+];
+
+const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ 
+  onBlogCreated, 
+  onBlogUpdated, 
+  blogToEdit, 
+  onCancelEdit 
+}) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState(BLOG_CATEGORIES[0]);
-  // const [folder, setFolder] = useState<"unverified" | "verified">("unverified"); // Removed folder state
   const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  const isEditing = !!blogToEdit;
+
+  useEffect(() => {
+    if (isEditing) {
+      setTitle(blogToEdit.title);
+      setContent(blogToEdit.content);
+      setCategory(blogToEdit.category);
+      setImages([]);
+    }
+  }, [blogToEdit, isEditing]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -30,11 +83,22 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
     }
   };
 
-  // Update the handleSubmit function
+  const clearForm = () => {
+    setTitle("");
+    setContent("");
+    setCategory(BLOG_CATEGORIES[0]);
+    setImages([]);
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!title || !content || images.length === 0) {
-      toast.error("Please fill all fields and upload at least one image");
+    
+    if (!title || !content) {
+      toast.error("Please fill in the title and content");
+      return;
+    }
+    if (!isEditing && images.length === 0) {
+      toast.error("Please upload at least one image when creating a new blog");
       return;
     }
 
@@ -43,34 +107,33 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
     formData.append("title", title);
     formData.append("content", content);
     formData.append("category", category);
-    // formData.append("folder", folder); // Removed folder from FormData
     
-    // Make sure we're using 'documents' as the field name for files
-    // Your backend createBlog controller uses req.files, which is correct
-    images.forEach((img) => formData.append("documents", img)); 
+    if (images.length > 0) {
+      images.forEach((img) => formData.append("documents", img));
+    }
 
     try {
-      const res = await api.post("/blogs", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
+      let res;
+      if (isEditing) {
+        res = await api.put(`/blogs/${blogToEdit._id}`, formData);
+        
+        if (res.status !== 200) throw new Error("Failed to update blog");
+        toast.success("Blog updated successfully!");
+        if (onBlogUpdated) onBlogUpdated();
 
-      if (res.status !== 201) {
-        throw new Error("Failed to create blog");
+      } else {
+        res = await api.post("/blogs", formData);
+        
+        if (res.status !== 201) throw new Error("Failed to create blog");
+        toast.success("Blog created successfully!");
+        if (onBlogCreated) onBlogCreated();
       }
 
-      toast.success("Blog created successfully!");
-      setTitle("");
-      setContent("");
-      setCategory(BLOG_CATEGORIES[0]);
-      setImages([]);
-      // setFolder("unverified"); // Removed
-      if (onBlogCreated) onBlogCreated();
+      clearForm();
+
     } catch (err) {
       console.error(err);
-      toast.error("Error creating blog");
+      toast.error(`Error: ${isEditing ? 'updating' : 'creating'} blog`);
     } finally {
       setLoading(false);
     }
@@ -79,10 +142,21 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-2xl shadow-md p-6 space-y-4 max-w-2xl mx-auto"
+      className="bg-white rounded-2xl shadow-md p-6 space-y-6 max-w-3xl mx-auto"
     >
-      <h2 className="text-2xl font-bold mb-4">Create New Blog</h2>
-
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold mb-4">{isEditing ? "Edit Blog" : "Create New Blog"}</h2>
+        {isEditing && (
+          <button 
+            type="button" 
+            onClick={onCancelEdit}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+      
       <input
         type="text"
         placeholder="Blog Title"
@@ -91,12 +165,17 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
         className="w-full p-3 border rounded-lg"
       />
 
-      <textarea
-        placeholder="Blog Content"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="w-full p-3 border rounded-lg h-40"
-      />
+      <div className="bg-white" style={{ minHeight: '250px' }}>
+        <ReactQuill
+          theme="snow"
+          value={content}
+          onChange={setContent}
+          modules={modules}   // Use the simplified modules
+          formats={formats}   // Use the simplified formats
+          placeholder="Write your blog content here..."
+          style={{ height: '200px' }}
+        />
+      </div>
 
       <select
         value={category}
@@ -110,6 +189,9 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
         ))}
       </select>
 
+      <label className="block text-sm font-medium text-gray-700">
+        {isEditing ? "Add New Images (Optional)" : "Upload Images (Required)"}
+      </label>
       <input
         type="file"
         multiple
@@ -126,7 +208,7 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({ onBlogCreated }) => {
         disabled={loading}
         className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
       >
-        {loading ? "Uploading..." : "Create Blog"}
+        {loading ? "Saving..." : (isEditing ? "Update Blog" : "Create Blog")}
       </button>
     </form>
   );

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Blog } from "../pages/Blogs";
+import { Blog } from "../pages/Blogs"; // Make sure this path is correct
 import { FaEdit, FaTrash, FaTag } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import 'quill-better-table/dist/quill-better-table.css';
 
 interface BlogCardProps {
   blog: Blog;
@@ -35,14 +36,19 @@ const BlogCard: React.FC<BlogCardProps> = ({
   };
 
   const handleNavigate = () => {
-    navigate(`/blogs/${_id}`);
+    // Use onView if provided (like in NoticeBoard), else navigate
+    if (onView) {
+      onView();
+    } else {
+      navigate(`/blogs/${_id}`);
+    }
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow flex flex-col h-full" // Added flex flex-col h-full
       onClick={handleNavigate} // ✅ whole card clickable
     >
       {/* Image carousel */}
@@ -52,16 +58,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
             src={images[currentImageIndex]?.url || ""}
             alt={title}
             className="w-full h-full object-cover"
-            loading="lazy" // Lazy load images in blog cards
-            // TODO: For further optimization, generate different sizes for these images (e.g., using a build tool or image optimization service)
-            // and update srcset and sizes attributes.
-            // Example srcset (replace with actual generated paths and sizes):
-            // srcset={`${images[currentImageIndex]?.url.replace(/\.(webp|jpg|jpeg|png)$/, '-small.$1')} 640w,
-            //          ${images[currentImageIndex]?.url.replace(/\.(webp|jpg|jpeg|png)$/, '-medium.$1')} 768w,
-            //          ${images[currentImageIndex]?.url.replace(/\.(webp|jpg|jpeg|png)$/, '-large.$1')} 1024w,
-            //          ${images[currentImageIndex]?.url} 1280w`}
-            // sizes="(max-width: 640px) 640px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1280px"
-            // TODO: Consider converting all images to AVIF format for better compression and quality.
+            loading="lazy"
           />
           {images.length > 1 && (
             <>
@@ -82,7 +79,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
         </div>
       )}
 
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-grow"> {/* Added flex flex-col flex-grow */}
         <div className="flex justify-between items-start">
           <h3 className="text-xl font-semibold mb-2">{title}</h3>
           {isAdmin && (
@@ -115,16 +112,23 @@ const BlogCard: React.FC<BlogCardProps> = ({
           <span>{category}</span>
         </div>
 
-        <p className="text-gray-700 line-clamp-3">{content}</p>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleNavigate();
-          }}
-          className="mt-3 text-blue-600 hover:text-blue-800 font-medium"
-        >
-          Read More
-        </button>
+        {/* --- UPDATED CONTENT DISPLAY --- */}
+        <div
+          className="text-gray-700 line-clamp-3"
+          dangerouslySetInnerHTML={{ __html: content }} // Render HTML
+        />
+        
+        <div className="mt-auto pt-3"> {/* Pushes button to bottom */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNavigate();
+            }}
+            className="text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Read More
+          </button>
+        </div>
       </div>
     </motion.div>
   );

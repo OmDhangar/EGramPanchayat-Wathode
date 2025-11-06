@@ -8,7 +8,6 @@ import { toast } from "react-hot-toast";
 import { FaPlus, FaFilter, FaArrowLeft, FaArrowRight, FaSpinner } from "react-icons/fa"; // Added icons
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../Context/authContext";
-import { Link } from "react-router-dom";
 import { Helmet } from 'react-helmet';
 
 export interface BlogImage {
@@ -91,8 +90,10 @@ export default function Blogs() {
 
   // Refetch when category or page changes
   useEffect(() => {
-    fetchBlogs();
-  }, [selectedCategory, currentPage]);
+   if (!editingBlog) {
+      fetchBlogs();
+    }
+  }, [selectedCategory, currentPage,editingBlog]);
 
   // Reset to page 1 when category changes
   useEffect(() => {
@@ -143,6 +144,28 @@ export default function Blogs() {
     }
   };
 
+  // --- Handlers for the form ---
+  const handleShowCreateForm = () => {
+    setEditingBlog(null); // Ensure we are not editing
+    setShowCreateForm(true);
+  }
+
+  const handleEditClick = (blog: Blog) => {
+    setEditingBlog(blog); // Set the blog to edit
+    setShowCreateForm(true); // Show the form
+    window.scrollTo(0, 0); // Scroll to top
+  }
+
+  const handleFormCancel = () => {
+    setEditingBlog(null);
+    setShowCreateForm(false);
+  }
+  
+  const handleFormSuccess = () => {
+    setEditingBlog(null);
+    setShowCreateForm(false);
+  }
+
   // Show skeleton only on first load
   if (loading && totalBlogs === 0) return <BlogSkeleton />;
 
@@ -175,89 +198,90 @@ export default function Blogs() {
                 </button>
               </div>
               <AdminBlogCreate
-                onBlogCreated={() => {
-                  setShowCreateForm(false);
-                  setSelectedCategory("सर्व"); // Go to first page of all blogs
-                  setCurrentPage(1);
-                  fetchBlogs();
-                }}
+                blogToEdit={editingBlog}
+                onBlogCreated={handleFormSuccess}
+                onBlogUpdated={handleFormSuccess}
+                onCancelEdit={handleFormCancel}
               />
             </div>
           )}
         </div>
       )}
 
-      {/* --- CATEGORY FILTER --- */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-2 flex items-center">
-          <FaFilter className="mr-2" /> श्रेणी निवडा
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {BLOG_CATEGORIES.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* --- LOADING & CONTENT --- */}
-      {loading && (
-        <div className="relative h-64 flex items-center justify-center">
-            <FaSpinner className="animate-spin text-4xl text-blue-600" />
-        </div>
-      )}
-
-      {!loading && blogs.length === 0 ? (
-        <BlogEmptyState />
-      ) : (
+      {/* --- Hide filters and list when form is open --- */}
+      {!showCreateForm && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {blogs.map((blog) => (
-              <BlogCard
-                key={blog._id}
-                blog={blog}
-                isAdmin={user?.role === 'admin'}
-                onDelete={() => handleDelete(blog._id)}
-                onEdit={() => setEditingBlog(blog)}
-                onView={() => navigate(`/blogs/${blog._id}`)}
-              />
-            ))}
-          </div>
-          
-          {/* --- NEW PAGINATION CONTROLS --- */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex justify-between items-center">
-              <button
-                onClick={handlePrevPage}
-                disabled={currentPage <= 1 || loading}
-                className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FaArrowLeft />
-                Previous
-              </button>
-              
-              <span className="text-sm text-gray-700">
-                Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
-              </span>
-
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage >= totalPages || loading}
-                className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-                <FaArrowRight />
-              </button>
+          {/* Category Filter */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2 flex items-center">
+              <FaFilter className="mr-2" /> श्रेणी निवडा
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {BLOG_CATEGORIES.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    selectedCategory === category
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
             </div>
+          </div>
+
+          {loading && (
+            <div className="relative h-64 flex items-center justify-center">
+                <FaSpinner className="animate-spin text-4xl text-blue-600" />
+            </div>
+          )}
+
+          {!loading && blogs.length === 0 ? (
+            <BlogEmptyState />
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {blogs.map((blog) => (
+                  <BlogCard
+                    key={blog._id}
+                    blog={blog}
+                    isAdmin={user?.role === 'admin'}
+                    onDelete={() => handleDelete(blog._id)}
+                    onEdit={() => handleEditClick(blog)} // Pass the blog object up
+                    onView={() => navigate(`/blogs/${blog._id}`)}
+                  />
+                ))}
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="mt-8 flex justify-between items-center">
+                  <button
+                    onClick={handlePrevPage}
+                    disabled={currentPage <= 1 || loading}
+                    className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FaArrowLeft />
+                    Previous
+                  </button>
+                  
+                  <span className="text-sm text-gray-700">
+                    Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+                  </span>
+
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage >= totalPages || loading}
+                    className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <FaArrowRight />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </>
       )}
