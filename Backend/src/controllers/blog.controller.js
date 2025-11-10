@@ -48,6 +48,11 @@ export const getBlogs = asyncHandler(async (req, res) => {
       })
     );
 
+    // Validate signed blogs data
+    if (!Array.isArray(signedBlogs)) {
+      throw new ApiError(500, "Invalid blog data format");
+    }
+
     // --- RETURN PAGINATED RESPONSE ---
     res.status(200).json({
       success: true,
@@ -121,15 +126,44 @@ export const createBlog = asyncHandler(async (req, res) => { // Added asyncHandl
   }
 });
 
+// controllers/blog.controller.js
 export const updateBlog = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const updates = req.body;
-  if (req.file) updates.image = `/uploads/${req.file.filename}`;
 
-  const blog = await Blog.findByIdAndUpdate(id, updates, { new: true });
+  const blog = await Blog.findById(id);
   if (!blog) throw new ApiError(404, "Blog not found");
 
-  res.status(200).json({ success: true, blog });
+  // Safe access
+  const title = req.body.title;
+  const content = req.body.content;
+  const category = req.body.category;
+
+  if (title) blog.title = title;
+  if (content) blog.content = content;
+  if (category) blog.category = category;
+
+  // Handle new files
+  if (req.files && req.files.length > 0) {
+    const folder = blog.images[0]?.folder || "unverified";
+    const uploaded = await processUploadedFilesS3(req.files, folder);
+    const newImages = uploaded.map(f => ({ s3Key: f.s3Key, folder: f.folder }));
+    blog.images.push(...newImages);
+  }
+
+  await blog.save();
+
+  // Sign URLs
+  const signedImages = await Promise.all(
+    blog.images.map(async (img) => {
+      const url = await getFileDownloadUrl(img.s3Key, 7 * 24 * 60 * 60);
+      return { ...img.toObject(), signedUrl: url };
+    })
+  );
+
+  res.json({
+    success: true,
+    blog: { ...blog.toObject(), images: signedImages }
+  });
 });
 
 export const deleteBlog = asyncHandler(async (req, res) => {

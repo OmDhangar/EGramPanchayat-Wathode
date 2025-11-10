@@ -2,11 +2,8 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 export const api = axios.create({
-  baseURL: "http://localhost:8000/api", //https://api.grampanchayatwathode.com/api
+  baseURL: "https://api.grampanchayatwathode.com/api", //https://api.grampanchayatwathode.com/api
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
   timeout: 80000,
 });
 
