@@ -13,7 +13,8 @@ import { Helmet } from 'react-helmet';
 export interface BlogImage {
   s3Key: string;
   folder: "unverified" | "verified" | "certificate";
-  url: string; // This is the signedUrl
+  url?: string;
+  signedUrl?: string;
 }
 
 export interface Blog {
@@ -62,27 +63,36 @@ export default function Blogs() {
       };
       
       const res = await api.get("/blogs", { params });
-      const data = res.data.data;
 
-      // Map the images to include 'url' for frontend
-      // The backend now sends 'signedUrl'
-      const blogsWithUrls = data.blogs.map((blog: any) => ({
+      console.log('API Response:', res.data); // Debug
+
+      // Correctly extract from res.data.data
+      const responseData = res.data.data;
+
+      if (!responseData || !Array.isArray(responseData.blogs)) {
+        throw new Error('Invalid response format from server');
+      }
+
+      const blogsWithUrls = responseData.blogs.map((blog: any) => ({
         ...blog,
-        images: blog.images.map((img: any) => ({
-          ...img,
-          url: img.signedUrl, // Use the signedUrl from backend
-        })),
+        images: Array.isArray(blog.images) 
+          ? blog.images.map((img: any) => ({
+              ...img,
+              signedUrl: img.signedUrl || '',
+              url: img.signedUrl || '',
+            }))
+          : [],
       }));
 
-      // --- UPDATE PAGINATION STATE ---
       setBlogs(blogsWithUrls);
-      setTotalPages(data.totalPages || 0);
-      setTotalBlogs(data.totalBlogs || 0);
-      setCurrentPage(data.currentPage || 1);
+      setTotalPages(responseData.totalPages);
+      setTotalBlogs(responseData.totalBlogs);
+      setCurrentPage(responseData.currentPage);
 
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch blogs");
+    } catch (err: any) {
+      console.error('Error fetching blogs:', err);
+      toast.error(err.message || "Failed to fetch blogs");
+      setBlogs([]);
     } finally {
       setLoading(false);
     }

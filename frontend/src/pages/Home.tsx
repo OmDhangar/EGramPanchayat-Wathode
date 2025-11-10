@@ -308,7 +308,7 @@ export default function Home() {
             {/* Google Maps Link */}
             <div className="text-center">
               <a 
-                href="https://goo.gl/maps/your-google-map-link" 
+                href="https://maps.app.goo.gl/K28V13vpQdTZd1ca8" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center font-tiro-marathi justify-center bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"

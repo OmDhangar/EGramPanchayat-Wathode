@@ -73,7 +73,6 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({
       setTitle(blogToEdit.title);
       setContent(blogToEdit.content);
       setCategory(blogToEdit.category);
-      setImages([]);
     }
   }, [blogToEdit, isEditing]);
 
@@ -90,54 +89,49 @@ const AdminBlogCreate: React.FC<AdminBlogCreateProps> = ({
     setImages([]);
   }
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    
-    if (!title || !content) {
-      toast.error("Please fill in the title and content");
-      return;
+ const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault();
+
+  if (!title || !content) {
+    toast.error("Title and content required");
+    return;
+  }
+
+  setLoading(true);
+  const formData = new FormData();
+  formData.append("title", title);
+  formData.append("content", content);
+  formData.append("category", category);
+
+  // Only append new images if user selected any
+  if (images.length > 0) {
+    images.forEach((img) => formData.append("documents", img));
+  }
+
+  // DEBUG
+  console.log("Sending FormData:");
+  for (const [k, v] of formData.entries()) {
+    console.log(k, v instanceof File ? `${v.name} (${v.size} bytes)` : v);
+  }
+
+  try {
+    let res;
+    if (isEditing) {
+      res = await api.put(`/blogs/${blogToEdit._id}`, formData);
+      toast.success("Blog updated!");
+      onBlogUpdated?.();
+    } else {
+      res = await api.post("/blogs", formData);
+      toast.success("Blog created!");
+      onBlogCreated?.();
     }
-    if (!isEditing && images.length === 0) {
-      toast.error("Please upload at least one image when creating a new blog");
-      return;
-    }
-
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
-    formData.append("category", category);
-    
-    if (images.length > 0) {
-      images.forEach((img) => formData.append("documents", img));
-    }
-
-    try {
-      let res;
-      if (isEditing) {
-        res = await api.put(`/blogs/${blogToEdit._id}`, formData);
-        
-        if (res.status !== 200) throw new Error("Failed to update blog");
-        toast.success("Blog updated successfully!");
-        if (onBlogUpdated) onBlogUpdated();
-
-      } else {
-        res = await api.post("/blogs", formData);
-        
-        if (res.status !== 201) throw new Error("Failed to create blog");
-        toast.success("Blog created successfully!");
-        if (onBlogCreated) onBlogCreated();
-      }
-
-      clearForm();
-
-    } catch (err) {
-      console.error(err);
-      toast.error(`Error: ${isEditing ? 'updating' : 'creating'} blog`);
-    } finally {
-      setLoading(false);
-    }
-  };
+    clearForm();
+  } catch (err: any) {
+    toast.error(err.response?.data?.message || "Failed to save");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <form

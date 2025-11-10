@@ -55,7 +55,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
       {images && images.length > 0 && (
         <div className="relative h-48">
           <img
-            src={images[currentImageIndex]?.url || ""}
+            src={images[currentImageIndex]?.signedUrl || images[currentImageIndex]?.url || ""}
             alt={title}
             className="w-full h-full object-cover"
             loading="lazy"

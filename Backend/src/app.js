@@ -27,8 +27,7 @@ app.use(cors({
 
 
 app.use(express.json({limit: '16kb'})) //used to configure json data
-app.use(express.urlencoded({extended: true}))//used to configure url properties
-
+app.use(express.urlencoded({ extended: true, limit: '16kb' }))
 app.use(cookieParser({limit:"16kb"}))// used to configure cookies and their limit 
 app.use(express.static("public"))//used to store images,files publically
 //middlewares 
