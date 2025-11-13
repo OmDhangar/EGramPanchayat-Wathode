@@ -142,13 +142,22 @@ export const updateBlog = asyncHandler(async (req, res) => {
   if (content) blog.content = content;
   if (category) blog.category = category;
 
-  // Handle new files
+
+  // Handle removed images (from frontend)
+  const removedImages = req.body.removedImages ? JSON.parse(req.body.removedImages) : [];
+
+  if (Array.isArray(removedImages) && removedImages.length > 0) {
+    blog.images = blog.images.filter(img => !removedImages.includes(img.s3Key));
+  }
+
+  // Handle new uploads
   if (req.files && req.files.length > 0) {
     const folder = blog.images[0]?.folder || "unverified";
     const uploaded = await processUploadedFilesS3(req.files, folder);
     const newImages = uploaded.map(f => ({ s3Key: f.s3Key, folder: f.folder }));
     blog.images.push(...newImages);
   }
+
 
   await blog.save();
 
