@@ -19,8 +19,8 @@ router.get("/category/:category", getBlogsByCategory);
 router.get("/:id", getBlogById);
 
 // Admin routes
-router.post("/", verifyJWT, verifyAdmin, upload.array("documents"), createBlog);
-router.put("/:id", verifyJWT, verifyAdmin,upload.array("documents"), updateBlog);
+router.post("/", verifyJWT, verifyAdmin, upload.array("images"), createBlog);
+router.put("/:id", verifyJWT, verifyAdmin,upload.array("images"), updateBlog);
 router.delete("/:id", verifyJWT, verifyAdmin, deleteBlog);
 
 export default router;

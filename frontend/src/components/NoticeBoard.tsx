@@ -71,7 +71,7 @@ export default function NoticeBoard() {
       const params = {
         page: currentPage,
         limit: NOTICES_PER_PAGE,
-        ...(selectedCategory !== "सर्व" && { category: encodeURIComponent(selectedCategory) })
+        ...(selectedCategory !== "सर्व" && { category: selectedCategory })
       };
 
       const res = await api.get("/blogs", { params });
