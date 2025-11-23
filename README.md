@@ -2,7 +2,7 @@
 
 # 🌿 EGramPanchayat – Wathode  
 **Digital Platform for Village Governance & Public Services**  
-*ई-ग्रामपंचायत – वठोदे*
+*ई-ग्रामपंचायत वाठोडे*
 
 <br/>
 
