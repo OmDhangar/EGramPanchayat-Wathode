@@ -331,50 +331,56 @@
     }
   },
   "common": {
-    "logout": "बाहेर पडा",
-    "accessNow": "आता पहा"
+    "logout": "logout ",
+    "accessNow": "Access Now"
   },
+
   "dashboard": {
-    "adminTitle": "प्रशासक डॅशबोर्ड",
-    "userTitle": "नागरिक डॅशबोर्ड",
-    "welcome": "परत स्वागत आहे, {{name}}",
-    "adminSubtitle": "प्रमाणपत्रे, वापरकर्ते आणि मंजुरी सहज व्यवस्थापित करा.",
-    "userSubtitle": "तुमची प्रमाणपत्रे पहा आणि नवीन अर्ज काही क्लिकमध्ये करा."
+    "adminTitle": "Admin Dashboard",
+    "userTitle": "Citizen Dashboard",
+    "welcome": "Welcome back, {{name}}",
+    "adminSubtitle": "Manage certificates, users and approvals easily.",
+    "userSubtitle": "View your certificates and apply for new ones with a few clicks."
   },
   "services": {
-    "adminTitle": "प्रशासक सेवा",
-    "userTitle": "वापरकर्ता सेवा",
+    "adminTitle": "Admin Service",
+    "userTitle": "User Service",
     "manageUsers": {
-      "title": "वापरकर्त्यांचे व्यवस्थापन",
-      "desc": "वापरकर्त्यांच्या विनंत्या आणि खाती पहा व व्यवस्थापित करा."
+      "title": "Manage Users",
+      "desc": "View and manage user applications and accounts."
     },
+
     "blogs": {
-      "title": "ब्लॉग्स",
-      "desc": "आमच्या ताज्या अपडेट्स आणि लेख वाचा."
+      "title": "blogs",
+      "desc": "Read our latest updates and articles."
     },
     "certificateApprovals": {
-      "title": "प्रमाणपत्र मंजुरी",
-      "desc": "सबमिट केलेले प्रमाणपत्र अर्ज मंजूर किंवा नाकार करा."
+      "title": "Certificate Approvals",
+      "desc": "Approve or reject submitted certificate applications."
     },
     "uploadCertificates": {
-      "title": "प्रमाणपत्र अपलोड",
-      "desc": "वापरकर्त्यांसाठी अंतिम प्रमाणपत्रे अपलोड करा."
+      "title": "Upload Certificates",
+      "desc": "Upload final certificates for users."
     },
     "viewCertificates": {
-      "title": "प्रमाणपत्रे पहा",
-      "desc": "तुमची प्रमाणपत्रे पहा व डाउनलोड करा."
+      "title": "View Certificates",
+      "desc": "View and download your certificates."
     },
     "applyCertificate": {
-      "title": "प्रमाणपत्रासाठी अर्ज",
-      "desc": "नवीन अधिकृत प्रमाणपत्रांसाठी अर्ज करा."
+      "title": "apply for Certificate ",
+      "desc": "Apply for new authorized certificates."
     },
     "notifications": {
-      "title": "सूचना",
-      "desc": "तुमच्या अर्ज स्थितीबद्दल अद्यतने मिळवा."
+      "title": "Notifications",
+      "desc": "Get updates on your application status."
     },
     "applicationStatus": {
-      "title": "अर्जाची स्थिती",
-      "desc": "तुमच्या अर्जांची प्रगती तपासा."
+      "title": "Application Status",
+      "desc": "Check the progress of your applications."
+    },
+    "galleryManagement": {
+      "title": "Gallery Management",
+      "desc": "Manage photo and video gallery."
     }
   },
   "govLinks": {
