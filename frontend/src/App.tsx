@@ -22,6 +22,7 @@ import Dashboard from './components/dashboard';
 import FormDetails from './pages/FormDetails';
 import CertificateApprovals from './pages/CertificatesApprovals';
 import UploadCertificates from './pages/uploadCertificates';
+// import AdminGallery from './pages/AdminGallery';
 import Register from './pages/register';
 import Login from './pages/Login';
 import ManageUsers from './pages/ManageUsers';
@@ -40,15 +41,13 @@ import MarriageCertificateForm from './pages/MarriageCertificateForm';
 import LandRecord8AForm from './pages/LandRecord8A';
 import NoOutstandingDebtsForm from './pages/NoOutstandingDebts';
 import DigitalSigned712Form from './pages/DigitalSigned712';
-import HousingAssessment8Form from './pages/HousingAssessment8Form';
-import BPLCertificateForm from './pages/BPLCertificateForm';
-import NiradharCertificateForm from './pages/NiradharCertificateForm';
 import CertificateDownload from './pages/certificateDownload';
 import BlogDetails from './components/blogDetails';
 import AboutGramPanchayat from './pages/AboutGram';
 import DepartmentsPage from './pages/Department';
 import SelfDeclareLetters from './pages/selfdeclareletters';
 import AdminGallery from './pages/AdminGallery';
+
 
 function AppContent() {
   const location = useLocation();
@@ -114,15 +113,18 @@ function AppContent() {
             <Route path="/admin/approvals" element={<CertificateApprovals />} />
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/admin/upload" element={<UploadCertificates />} />
+
             <Route path="/admin/gallery" element={<AdminGallery />} />
+
             <Route path="/about-vathode" element={<AboutVathode />} />
             <Route path="/user/certificates" element={<UserCertificates />} />
             <Route path="/user/notifications" element={<UserNotifications />} />
             <Route path="/certificate/:applicationId" element={<CertificateDownload/>}/>
+            <Route path="/media" element={<Media/>} />
             //common
             <Route path="/home" element={<Home />} />
             <Route path="/members" element={<Members />} />
-            <Route path="/govtWebsites" element={<PublicInfo />} />
+            <Route path="/notices" element={<PublicInfo />} />
             <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/contact" element={<Help/>} />
@@ -134,9 +136,6 @@ function AppContent() {
             <Route path="/apply-for-certificates/land-record-8a" element={<LandRecord8AForm />} />
             <Route path="/apply-for-certificates/no-outstanding-debts" element={<NoOutstandingDebtsForm />} />
             <Route path="/apply-for-certificates/digital-signed-712" element={<DigitalSigned712Form />} />
-            <Route path="/apply-for-certificates/housing-assessment-8" element={<HousingAssessment8Form />} />
-            <Route path="/apply-for-certificates/bpl-certificate" element={<BPLCertificateForm />} />
-            <Route path="/apply-for-certificates/niradhar-certificate" element={<NiradharCertificateForm />} />
             <Route path="/taxation-info" element={<TaxationInfo />} />
             <Route path="/grampanchayat-info" element={<AboutGramPanchayat />} />
             <Route path="/departments" element={<DepartmentsPage />} />
