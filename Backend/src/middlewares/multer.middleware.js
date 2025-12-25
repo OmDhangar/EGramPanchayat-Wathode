@@ -117,6 +117,16 @@ export const uploadImages = multer({
   }
 });
 
+// Multiple images upload configuration (for gallery uploads)
+export const uploadMultipleImages = multer({
+  storage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB per file
+    files: 10 // Maximum 10 files per request
+  }
+});
+
 // Certificate upload configuration (for admin generated certificates - goes to 'certificate' folder)
 export const uploadCertificate = multer({ 
   storage: certificateStorage,
@@ -247,6 +257,7 @@ export const validateFileFields = (requiredFields = []) => {
 export default {
   upload,
   uploadImages,
+  uploadMultipleImages,
   uploadPDF,
   uploadCertificate,
   uploadMultiple,

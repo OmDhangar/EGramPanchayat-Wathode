@@ -38,7 +38,7 @@ const getContentType = (fileName) => {
  * Upload file to S3 with specified folder and auto-detect content type
  * @param {string} filePath - Local file path
  * @param {string} fileName - Original file name
- * @param {string} folder - S3 folder ('unverified', 'verified', or 'certificate')
+ * @param {string} folder - S3 folder ('unverified', 'verified', 'certificate', or 'gallery')
  * @returns {Object} Upload result with S3 details
  */
 const uploadToS3 = async (filePath, fileName, folder = 'unverified') => {
@@ -48,7 +48,7 @@ const uploadToS3 = async (filePath, fileName, folder = 'unverified') => {
     }
 
     // Validate folder
-    const allowedFolders = ['unverified', 'verified', 'certificate'];
+    const allowedFolders = ['unverified', 'verified', 'certificate', 'gallery'];
     if (!allowedFolders.includes(folder)) {
       throw new Error(`Invalid folder. Must be one of: ${allowedFolders.join(', ')}`);
     }
@@ -105,7 +105,7 @@ const uploadToS3 = async (filePath, fileName, folder = 'unverified') => {
 const moveFileToFolder = async (currentKey, newFolder) => {
   try {
     // Validate folder
-    const allowedFolders = ['unverified', 'verified', 'certificate'];
+    const allowedFolders = ['unverified', 'verified', 'certificate', 'gallery'];
     if (!allowedFolders.includes(newFolder)) {
       throw new Error(`Invalid folder. Must be one of: ${allowedFolders.join(', ')}`);
     }
@@ -190,7 +190,7 @@ const getFileDownloadUrl = async (fileKey, expiresIn = 3600) => {
 
 /**
  * List files by folder
- * @param {string} folder - Folder name ('unverified', 'verified', 'certificate', or 'all')
+ * @param {string} folder - Folder name ('unverified', 'verified', 'certificate', 'gallery', or 'all')
  * @param {number} limit - Maximum number of files to return
  * @returns {Array} Array of file objects
  */
@@ -203,7 +203,7 @@ const listFilesByFolder = async (folder = 'all', limit = 1000) => {
 
     // Add prefix if specific folder requested
     if (folder !== 'all') {
-      const allowedFolders = ['unverified', 'verified', 'certificate'];
+      const allowedFolders = ['unverified', 'verified', 'certificate', 'gallery'];
       if (!allowedFolders.includes(folder)) {
         throw new Error(`Invalid folder. Must be one of: ${allowedFolders.join(', ')}, or 'all'`);
       }

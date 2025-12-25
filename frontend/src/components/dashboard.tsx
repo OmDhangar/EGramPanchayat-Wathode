@@ -8,7 +8,8 @@ import {
   FaUpload, 
   FaCheckCircle,
   FaChevronRight,
-  FaFileAlt
+  FaFileAlt,
+  FaImages
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -174,6 +175,13 @@ export default function Dashboard() {
                     title={t("services.uploadCertificates.title")}
                     description={t("services.uploadCertificates.desc")}
                     color="blue"
+                  />
+                  <ServiceCard
+                    to="/admin/gallery"
+                    icon={<FaImages className="text-2xl text-purple-600" />}
+                    title={t("services.galleryManagement.title") || "Gallery Management"}
+                    description={t("services.galleryManagement.desc") || "Upload and manage gallery images"}
+                    color="purple"
                   />
                 </>
               ) : (

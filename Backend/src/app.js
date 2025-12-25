@@ -5,6 +5,7 @@ import healthCheckRoutes from "./routes/healthCheck.routes.js"
 import officerRoutes from "./routes/officer.routes.js"
 import blogRoutes from "./routes/blog.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import galleryRoutes from "./routes/gallery.routes.js";
 
 const app = express()
 
@@ -44,6 +45,7 @@ app.use("/api/applications", applicationRouter);
 app.use("/api/officers", officerRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/admin/users", userRoutes);
+app.use("/api/gallery", galleryRoutes);
 
 
 export default app

@@ -46,7 +46,8 @@ import BlogDetails from './components/blogDetails';
 import AboutGramPanchayat from './pages/AboutGram';
 import DepartmentsPage from './pages/Department';
 import SelfDeclareLetters from './pages/selfdeclareletters';
-import Media from './pages/Media';
+import AdminGallery from './pages/AdminGallery';
+
 
 function AppContent() {
   const location = useLocation();
@@ -112,7 +113,9 @@ function AppContent() {
             <Route path="/admin/approvals" element={<CertificateApprovals />} />
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/admin/upload" element={<UploadCertificates />} />
-            {/* <Route path="/admin/gallery" element={<AdminGallery />} /> */}
+
+            <Route path="/admin/gallery" element={<AdminGallery />} />
+
             <Route path="/about-vathode" element={<AboutVathode />} />
             <Route path="/user/certificates" element={<UserCertificates />} />
             <Route path="/user/notifications" element={<UserNotifications />} />

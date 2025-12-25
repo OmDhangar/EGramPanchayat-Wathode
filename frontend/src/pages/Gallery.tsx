@@ -1,85 +1,76 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
+import { api } from '../api/axios';
+import { FaSpinner } from 'react-icons/fa';
 
-// Sample gallery data (replace with your actual gallery data)
-const galleryImages = [
-  { id: 1, src: "/images/1.jpeg", alt: "Village Event 1" },
-  { id: 2, src: "/images/2.jpeg", alt: "Village Event 2" },
-  { id: 3, src: "/images/3.jpeg", alt: "Village Event 3" },
-  { id: 4, src: "/images/4.jpeg", alt: "Village Event 4" },
-  { id: 5, src: "/images/5.jpeg", alt: "Village Event 5" },
-  { id: 6, src: "/images/6.jpeg", alt: "Village Event 6" },
-  { id: 7, src: "/images/7.jpeg", alt: "Village Development Project" },
-  { id: 8, src: "/images/8.jpeg", alt: "Community Meeting" },
-  { id: 9, src: "/images/9.jpeg", alt: "Village Event 9" },
-  { id: 10, src: "/images/10.jpeg", alt: "Village Event 10" },
-  { id: 11, src: "/images/11.jpeg", alt: "Village Event 11" },
-  { id: 12, src: "/images/12.jpeg", alt: "Village Event 12" },
-  { id: 13, src: "/images/13.jpeg", alt: "Village Event 13" },
-  { id: 14, src: "/images/14.jpeg", alt: "Village Event 14" },
-  { id: 15, src: "/images/15.jpeg", alt: "Village Event 15" },
-  { id: 16, src: "/images/16.jpeg", alt: "Village Event 16" },
-  { id: 17, src: "/images/17.jpeg", alt: "Village Event 17" },
-  { id: 18, src: "/images/18.jpeg", alt: "Village Event 18" },
-  { id: 19, src: "/images/19.jpeg", alt: "Village Event 19" },  
-  { id: 20, src: "/images/20.jpeg", alt: "Village Event 20" },
-  { id: 21, src: "/images/21.jpeg", alt: "Village Event 21" },
-  { id: 22, src: "/images/22.jpeg", alt: "Village Event 22" },
-  { id: 23, src: "/images/23.jpeg", alt: "Village Event 23" },
-  { id: 24, src: "/images/24.jpeg", alt: "Village Event 24" },
-  { id: 25, src: "/images/25.jpeg", alt: "Village Event 25" },
-  { id: 26, src: "/images/26.jpeg", alt: "Village Event 26" },
-  { id: 27, src: "/images/27.jpeg", alt: "Village Event 27" },
-  { id: 28, src: "/images/28.jpeg", alt: "Village Event 28" },
-  { id: 29, src: "/images/29.jpg", alt: "Village Event 29" },
-  { id: 30, src: "/images/30.jpeg", alt: "Village Event 30" },
-  { id: 31, src: "/images/31.jpeg", alt: "Village Event 31" },
-  { id: 32, src: "/images/32.jpeg", alt: "Village Event 32" },
-  { id: 33, src: "/images/33.jpeg", alt: "Village Event 33" },
-  { id: 34, src: "/images/34.jpeg", alt: "Village Event 34" },
-  { id: 35, src: "/images/35.jpeg", alt: "Village Event 35" },
-  { id: 36, src: "/images/36.jpeg", alt: "Village Event 36" },
-  { id: 37, src: "/images/37.jpeg", alt: "Village Event 37" },
-  { id: 38, src: "/images/38.jpeg", alt: "Village Event 38" },
-  { id: 39, src: "/images/39.jpeg", alt: "Village Event 39" },
-  { id: 40, src: "/images/40.jpeg", alt: "Village Event 40" },
-  { id: 41, src: "/images/41.jpeg", alt: "Village Event 41" },
-  { id: 42, src: "/images/42.jpeg", alt: "Village Event 42" },
-  { id: 43, src: "/images/43.jpeg", alt: "Village Event 43" },
-  { id: 44, src: "/images/44.jpeg", alt: "Village Event 44" },
-  { id: 45, src: "/images/45.jpeg", alt: "Village Event 45" },
-  { id: 46, src: "/images/46.jpeg", alt: "Village Event 46" },
-  { id: 47, src: "/images/47.jpeg", alt: "Village Event 47" },
-  { id: 48, src: "/images/48.jpeg", alt: "Village Event 48" },
-  { id: 49, src: "/images/49.jpeg", alt: "Village Event 49" },
-  { id: 50, src: "/images/50.jpeg", alt: "Village Event 50" },
-  { id: 51, src: "/images/51.jpeg", alt: "Village Event 51" },
-  { id: 52, src: "/images/52.jpeg", alt: "Village Event 52" },
-  { id: 53, src: "/images/53.jpeg", alt: "Village Event 53" },
-  { id: 54, src: "/images/54.jpeg", alt: "Village Event 54" },
-  { id: 55, src: "/images/55.jpeg", alt: "Village Event 55" },
-  { id: 56, src: "/images/56.jpg", alt: "Village Event 56" },
-  ];
+interface GalleryImage {
+  key: string;
+  originalName: string;
+  fileName: string;
+  size: number;
+  lastModified: string;
+  folder: string;
+  extension: string;
+  signedUrl: string;
+  downloadUrl: string;
+}
 
 const Gallery = () => {
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [visibleImages, setVisibleImages] = useState([]);
+  const [allImages, setAllImages] = useState<GalleryImage[]>([]);
+  const [visibleImages, setVisibleImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const observerRef = useRef(null);
   const lastImageRef = useRef(null);
 
-  // Initialize with first batch of images
+  const IMAGES_PER_BATCH = 12;
+
+  // Fetch gallery images from API
   useEffect(() => {
-    const initialBatch = galleryImages.slice(0, 12);
-    setVisibleImages(initialBatch);
-    setLoading(false);
+    const fetchGalleryImages = async () => {
+      try {
+        setInitialLoading(true);
+        setError(null);
+        const res = await api.get('/gallery');
+        const responseData = res.data.data;
+        
+        if (responseData && Array.isArray(responseData.images)) {
+          // Images are already sorted by lastModified (newest first) from backend
+          const images = responseData.images.map((img: GalleryImage) => ({
+            ...img,
+            id: img.key, // Use key as unique identifier
+            src: img.signedUrl || img.downloadUrl,
+            alt: img.originalName || 'Gallery Image'
+          }));
+          
+          setAllImages(images);
+          // Show first batch
+          setVisibleImages(images.slice(0, IMAGES_PER_BATCH));
+        } else {
+          setAllImages([]);
+          setVisibleImages([]);
+        }
+      } catch (err: any) {
+        console.error('Error fetching gallery images:', err);
+        setError(err.message || 'Failed to load gallery images');
+        setAllImages([]);
+        setVisibleImages([]);
+      } finally {
+        setInitialLoading(false);
+        setLoading(false);
+      }
+    };
+
+    fetchGalleryImages();
   }, []);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
-    if (!loading) {
+    if (!initialLoading && !loading && visibleImages.length < allImages.length) {
       const observer = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting) {
@@ -99,22 +90,22 @@ const Gallery = () => {
         }
       };
     }
-  }, [loading, visibleImages]);
+  }, [initialLoading, loading, visibleImages, allImages]);
 
   const loadMoreImages = () => {
-    if (visibleImages.length >= galleryImages.length) return;
+    if (visibleImages.length >= allImages.length) return;
 
     setLoading(true);
     
-    // Simulate loading delay
+    // Load next batch
     setTimeout(() => {
-      const nextBatch = galleryImages.slice(
+      const nextBatch = allImages.slice(
         visibleImages.length,
-        visibleImages.length + 9
+        visibleImages.length + IMAGES_PER_BATCH
       );
       setVisibleImages(prev => [...prev, ...nextBatch]);
       setLoading(false);
-    }, 500);
+    }, 300);
   };
 
   const openModal = (image) => {
@@ -130,17 +121,17 @@ const Gallery = () => {
 
   const goToNext = () => {
     if (!selectedImage) return;
-    const currentIndex = galleryImages.findIndex(img => img.id === selectedImage.id);
-    const nextIndex = (currentIndex + 1) % galleryImages.length;
-    setSelectedImage(galleryImages[nextIndex]);
+    const currentIndex = allImages.findIndex(img => img.key === selectedImage.key);
+    const nextIndex = (currentIndex + 1) % allImages.length;
+    setSelectedImage(allImages[nextIndex]);
     setZoomLevel(1);
   };
 
   const goToPrevious = () => {
     if (!selectedImage) return;
-    const currentIndex = galleryImages.findIndex(img => img.id === selectedImage.id);
-    const prevIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
-    setSelectedImage(galleryImages[prevIndex]);
+    const currentIndex = allImages.findIndex(img => img.key === selectedImage.key);
+    const prevIndex = (currentIndex - 1 + allImages.length) % allImages.length;
+    setSelectedImage(allImages[prevIndex]);
     setZoomLevel(1);
   };
 
@@ -243,50 +234,101 @@ const Gallery = () => {
           </p>
         </motion.div>
 
+        {/* Loading State */}
+        {initialLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-20"
+          >
+            <FaSpinner className="animate-spin text-4xl text-blue-600 mb-4" />
+            <p className="text-gray-600 text-lg">Loading gallery images...</p>
+          </motion.div>
+        )}
+
+        {/* Error State */}
+        {error && !initialLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-red-50 border border-red-200 rounded-lg p-6 text-center"
+          >
+            <p className="text-red-600 text-lg">{error}</p>
+            <p className="text-red-500 text-sm mt-2">Please try refreshing the page.</p>
+          </motion.div>
+        )}
+
+        {/* Empty State */}
+        {!initialLoading && !error && allImages.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-gray-600 text-xl">No images found in the gallery.</p>
+            <p className="text-gray-500 text-sm mt-2">Check back later for new photos!</p>
+          </motion.div>
+        )}
+
         {/* Masonry Style Gallery with Infinite Scroll */}
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+        {!initialLoading && !error && allImages.length > 0 && (
+          <motion.div
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {visibleImages.map((img, index) => (
             <motion.div
-              key={img.id}
-              ref={index === visibleImages.length - 1 ? lastImageRef : null}
+              key={img.key}
+              ref={
+                index === visibleImages.length - 1 &&
+                visibleImages.length < allImages.length
+                  ? lastImageRef
+                  : null
+              }
               variants={itemVariants}
-              whileHover={{ 
-                scale: 1.03,
-                transition: { duration: 0.3 }
-              }}
-              className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl bg-white cursor-pointer transform-gpu"
+              whileHover={{ scale: 1.02 }}
+              className="rounded-lg overflow-hidden shadow-md hover:shadow-lg bg-white cursor-pointer transform-gpu"
               onClick={() => openModal(img)}
             >
-              <div className="relative overflow-hidden group aspect-square">
+              <div className="relative overflow-hidden group aspect-[4/3] sm:aspect-square">
                 <img
-                  src={img.src}
-                  alt={img.alt}
-                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                  src={img.signedUrl || img.downloadUrl}
+                  alt={img.originalName || 'Gallery Image'}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      'https://via.placeholder.com/400x300?text=Image+Error';
+                  }}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
-                  <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    whileHover={{ scale: 1, opacity: 1 }}
-                    className="bg-white bg-opacity-90 rounded-full p-2"
-                  >
-                    <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3-3H7" />
+                  <div className="bg-white bg-opacity-90 rounded-full p-1.5 sm:p-2">
+                    <svg
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
                     </svg>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
             </motion.div>
           ))}
         </motion.div>
+        
+        )}
 
-        {/* Loading Indicator */}
-        {loading && (
+        {/* Loading Indicator for More Images */}
+        {loading && !initialLoading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -301,7 +343,7 @@ const Gallery = () => {
         )}
 
         {/* End of Gallery Message */}
-        {visibleImages.length === galleryImages.length && (
+        {!initialLoading && !loading && visibleImages.length === allImages.length && allImages.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -353,9 +395,9 @@ const Gallery = () => {
                 {/* Image with Zoom */}
                 <div className="w-full h-full flex items-center justify-center">
                   <motion.img
-                    key={selectedImage.id}
-                    src={selectedImage.src}
-                    alt={selectedImage.alt}
+                    key={selectedImage.key}
+                    src={selectedImage.signedUrl || selectedImage.downloadUrl}
+                    alt={selectedImage.originalName || 'Gallery Image'}
                     className="max-w-full max-h-full object-contain cursor-zoom-in"
                     style={{ scale: zoomLevel }}
                     drag
@@ -366,6 +408,9 @@ const Gallery = () => {
                       bottom: 0
                     }}
                     onClick={handleZoomIn}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x600?text=Image+Error';
+                    }}
                   />
                 </div>
 
@@ -403,7 +448,7 @@ const Gallery = () => {
                 {/* Image Counter */}
                 <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-60 text-white px-4 py-2 rounded-lg backdrop-blur-sm">
                   <p className="text-sm font-medium">
-                    {galleryImages.findIndex(img => img.id === selectedImage.id) + 1} / {galleryImages.length}
+                    {allImages.findIndex(img => img.key === selectedImage.key) + 1} / {allImages.length}
                   </p>
                 </div>
 
