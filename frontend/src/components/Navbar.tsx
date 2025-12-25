@@ -67,7 +67,9 @@ export default function Navbar() {
     {
       label: t("nav.public"),
       icon: "📢",
-      links: [{ label: t("nav.govtWebsites"), path: "/govtWebsites" }],
+      links: [{ label: t("nav.govtWebsites"), path: "/govtWebsites" },
+        { label: t("nav.Media"), path: "/media" }
+      ],
     },
     {
       label: t("nav.help"),
