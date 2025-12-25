@@ -9,6 +9,7 @@ import { Toaster } from 'react-hot-toast';
 // i18n setup
 import '../src/i18n';
 import Loader from './components/loader';
+import Media from './pages/Media';
 
 // Direct imports (no lazy loading)
 import Home from './pages/Home';
