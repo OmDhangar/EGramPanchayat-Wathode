@@ -1,11 +1,13 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import path from "path";
 import healthCheckRoutes from "./routes/healthCheck.routes.js"
 import officerRoutes from "./routes/officer.routes.js"
 import blogRoutes from "./routes/blog.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import galleryRoutes from "./routes/gallery.routes.js";
+import schemeRoutes from "./routes/scheme.routes.js";
 
 const app = express()
 
@@ -31,6 +33,7 @@ app.use(express.json({limit: '16kb'})) //used to configure json data
 app.use(express.urlencoded({ extended: true, limit: '16kb' }))
 app.use(cookieParser({limit:"16kb"}))// used to configure cookies and their limit 
 app.use(express.static("public"))//used to store images,files publically
+app.use("/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
 //middlewares 
 
 // routes imported
@@ -46,6 +49,7 @@ app.use("/api/officers", officerRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/admin/users", userRoutes);
 app.use("/api/gallery", galleryRoutes);
+app.use("/api/schemes", schemeRoutes);
 
 
 export default app

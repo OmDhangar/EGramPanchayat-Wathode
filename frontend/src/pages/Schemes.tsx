@@ -1,25 +1,44 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Filter } from 'lucide-react';
-import { schemeYears } from '../data/schemes';
 import { Helmet } from "react-helmet";
-
-const categories = [
-  { key: 'all', label: 'सर्व योजना', color: 'bg-blue-600 text-white' },
-  { key: '2025', label: '2025', color: 'bg-green-600 text-white' },
-  { key: '2024', label: '2024', color: 'bg-yellow-500 text-white' },
-  { key: '2023', label: '2023', color: 'bg-purple-600 text-white' },
-  { key: '2022', label: '2022', color: 'bg-pink-600 text-white' },
-];
+import { getSchemes } from '../api/schemes';
 
 const Schemes = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [years, setYears] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Filter schemes by selected year/category
-  const filteredSchemes =
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await getSchemes({ limit: 100 });
+        const yearSet = new Set(response.schemes.map((scheme) => scheme.year));
+        setYears(Array.from(yearSet).sort((a, b) => b - a));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const categories = useMemo(
+    () => [
+      { key: 'all', label: 'सर्व योजना', color: 'bg-blue-600 text-white' },
+      ...years.map((year) => ({
+        key: String(year),
+        label: String(year),
+        color: 'bg-green-600 text-white',
+      })),
+    ],
+    [years]
+  );
+
+  const filteredYears =
     selectedCategory === 'all'
-      ? schemeYears
-      : schemeYears.filter((year) => year.year === selectedCategory);
+      ? years
+      : years.filter((year) => String(year) === selectedCategory);
 
   return (
     <div className="bg-gray-50 py-14 min-h-screen">
@@ -66,25 +85,30 @@ const Schemes = () => {
 
         {/* वर्षनिहाय योजनांची यादी */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredSchemes.length === 0 && (
+          {loading && (
+            <div className="col-span-full text-center text-gray-500 py-10">
+              योजना लोड होत आहेत...
+            </div>
+          )}
+          {!loading && filteredYears.length === 0 && (
             <div className="col-span-full text-center text-gray-500 py-10">
               कोणतीही योजना उपलब्ध नाही.
             </div>
           )}
-          {filteredSchemes.map((year) => (
+          {filteredYears.map((year) => (
             <div
-              key={year.id}
+              key={year}
               className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition p-6 flex flex-col justify-between border-t-4 border-blue-500"
             >
               <div>
                 <div className="flex items-center mb-3">
                   <Calendar className="h-7 w-7 text-blue-600 mr-2" />
-                  <h3 className="text-xl font-tiro-marathi text-blue-800">{year.year} च्या योजना</h3>
+                  <h3 className="text-xl font-tiro-marathi text-blue-800">{year} च्या योजना</h3>
                 </div>
-                <p className="text-gray-700 mb-4">{year.description}</p>
+                <p className="text-gray-700 mb-4">या वर्षासाठी उपलब्ध योजनांची माहिती पाहा.</p>
               </div>
               <Link
-                to={`/schemes/${year.year}`}
+                to={`/schemes/${year}`}
                 className="mt-4 inline-flex items-center justify-center px-5 py-2 rounded-full bg-blue-600 text-white font-tiro-marathi hover:bg-blue-700 transition"
               >
                 योजना पहा <ArrowRight className="h-4 w-4 ml-2" />

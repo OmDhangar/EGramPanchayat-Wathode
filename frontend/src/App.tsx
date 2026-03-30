@@ -16,6 +16,7 @@ import Home from './pages/Home';
 import Schemes from './pages/Schemes';
 import Gallery from './pages/Gallery';
 import SchemeDetails from './pages/SchemeDetails';
+import SchemeFullDetails from './pages/SchemeFullDetails';
 import YearGallery from './pages/YearGallery';
 import Blogs from './pages/Blogs';
 import NotFound from './pages/NotFound';
@@ -48,6 +49,7 @@ import AboutGramPanchayat from './pages/AboutGram';
 import DepartmentsPage from './pages/Department';
 import SelfDeclareLetters from './pages/selfdeclareletters';
 import AdminGallery from './pages/AdminGallery';
+import AdminSchemes from './pages/AdminSchemes';
 
 
 function AppContent() {
@@ -101,6 +103,7 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/schemes" element={<Schemes />} />
             <Route path="/schemes/:year" element={<SchemeDetails />} />
+            <Route path="/schemes/details/:idOrSlug" element={<SchemeFullDetails />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/gallery/:year" element={<YearGallery />} />
             <Route path="/register" element={<Register />} />
@@ -116,6 +119,7 @@ function AppContent() {
             <Route path="/admin/upload" element={<UploadCertificates />} />
 
             <Route path="/admin/gallery" element={<AdminGallery />} />
+            <Route path="/admin/schemes" element={<AdminSchemes />} />
 
             <Route path="/about-vathode" element={<AboutVathode />} />
             <Route path="/user/certificates" element={<UserCertificates />} />

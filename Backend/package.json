@@ -4,7 +4,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
+    "migrate:schemes": "node scripts/migrate-schemes-from-frontend.js",
+    "migrate:schemes:dry": "node scripts/migrate-schemes-from-frontend.js --dry-run"
   },
   "keywords": [],
   "author": "",

@@ -183,6 +183,13 @@ export default function Dashboard() {
                     description={t("services.galleryManagement.desc") || "Upload and manage gallery images"}
                     color="purple"
                   />
+                  <ServiceCard
+                    to="/admin/schemes"
+                    icon={<FaFileAlt className="text-2xl text-cyan-600" />}
+                    title={i18n.language?.startsWith("mr") ? "योजना व्यवस्थापन" : "Scheme Management"}
+                    description={i18n.language?.startsWith("mr") ? "योजना तयार करा, संपादित करा आणि प्रकाशित करा" : "Create, edit, and publish government schemes"}
+                    color="cyan"
+                  />
                 </>
               ) : (
                 <>

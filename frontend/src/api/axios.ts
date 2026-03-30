@@ -1,8 +1,17 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const isLocalhost =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const defaultBaseURL = isLocalhost
+  ? 'http://localhost:8000/api'
+  : 'https://api.grampanchayatwathode.com/api';
+
+  
 export const api = axios.create({
-  baseURL: "https://api.grampanchayatwathode.com/api", //https://api.grampanchayatwathode.com/api
+  baseURL: import.meta.env.VITE_API_BASE_URL || defaultBaseURL,
   withCredentials: true,
   timeout: 80000,
 });
@@ -36,11 +45,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Handle 401 Unauthorized - Token refresh logic
-    if (
-      (error.response?.status === 401 || error.response?.status === 400) &&
-      !originalRequest._retry &&
-      refreshRetryCount < 3
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry && refreshRetryCount < 3) {
       originalRequest._retry = true;
       refreshRetryCount += 1;
 
@@ -81,7 +86,7 @@ api.interceptors.response.use(
         `Error: ${error.response.status} - ${error.response.statusText}`;
       
       // Show error toast (skip for 401 as it's handled above)
-      if (error.response.status !== 401 || error.response.status !== 400) {
+      if (error.response.status !== 401 && error.response.status !== 400) {
         toast.error(errorMessage);
       }
     } else if (error.request) {

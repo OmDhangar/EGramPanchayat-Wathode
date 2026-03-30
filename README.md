@@ -101,6 +101,8 @@ The system supports **English and Marathi (मराठी)** languages and is d
 | **User Detail View** | View individual citizen applications and history |
 | **Blog Management** | Create, edit, and delete news and blog posts via rich text editor |
 | **Gallery Management** | Upload and manage photo gallery by year |
+| **Scheme Management** | Create, edit, publish/unpublish, and delete government schemes from admin panel |
+| **Scheme Thumbnail Upload** | Upload scheme thumbnail images (served from `/uploads/schemes`) |
 | **Email Notifications** | Automated emails sent to citizens on every status update |
 
 ---
@@ -177,6 +179,7 @@ EGramPanchayat-Wathode/
 │       │   ├── auth.controllers.js          # Register/Login/Logout/Refresh
 │       │   ├── blog.controller.js           # Blog CRUD operations
 │       │   ├── gallery.controller.js        # Gallery image management
+│       │   ├── scheme.controller.js         # Scheme CRUD + publish + thumbnail upload
 │       │   ├── healthcheck.controllers.js   # Health check endpoint
 │       │   ├── officer.controller.js        # Panchayat officer management
 │       │   ├── payment.controller.js        # Razorpay payment handling
@@ -192,6 +195,7 @@ EGramPanchayat-Wathode/
 │       │   ├── noOutstandingDebts.model.js
 │       │   ├── housingAssessment8.model.js
 │       │   ├── blog.model.js
+│       │   ├── scheme.model.js
 │       │   ├── notification.model.js
 │       │   ├── officer.model.js
 │       │   ├── payment.model.js
@@ -205,6 +209,7 @@ EGramPanchayat-Wathode/
 │       │   ├── healthCheck.routes.js
 │       │   ├── officer.routes.js
 │       │   ├── payment.routes.js
+│       │   ├── scheme.routes.js
 │       │   └── user.routes.js
 │       ├── middlewares/            # Express middleware
 │       │   ├── auth.middleware.js  # verifyJWT, verifyAdmin
@@ -217,6 +222,8 @@ EGramPanchayat-Wathode/
 │           ├── emailService.js     # Nodemailer + Mailgen email templates
 │           ├── cloudinary.js       # Cloudinary integration (legacy/avatar)
 │           └── constants.js        # Shared constants
+│   ├── scripts/
+│   │   └── migrate-schemes-from-frontend.js  # One-time migration: static schemes -> MongoDB
 │
 └── frontend/
     ├── Dockerfile                  # Multi-stage Docker build with Nginx
@@ -234,7 +241,8 @@ EGramPanchayat-Wathode/
         ├── Context/
         │   └── authContext.tsx     # Auth state (user, login, logout)
         ├── api/
-        │   └── axios.ts            # Configured Axios instance
+        │   ├── axios.ts            # Configured Axios instance
+        │   └── schemes.ts          # Schemes API service + asset URL resolver
         ├── types/                  # TypeScript type definitions
         ├── data/                   # Static data files
         ├── locales/
@@ -248,6 +256,7 @@ EGramPanchayat-Wathode/
         │   ├── FormComponents.tsx  # Shared form input components
         │   ├── NoticeBoard.tsx     # Announcement/notice board
         │   ├── AdminBlogCreate.tsx # Rich-text blog editor
+        │   ├── AdminSchemeForm.tsx # Admin create/edit form for schemes
         │   ├── BlogCard.tsx
         │   ├── blogDetails.tsx
         │   ├── taxation.tsx        # Taxation table component
@@ -270,7 +279,7 @@ EGramPanchayat-Wathode/
             ├── userCertificates.tsx      # Citizen: my certificates
             ├── certificateDownload.tsx   # Secure certificate download
             ├── TaxationInfo.tsx
-            ├── Schemes.tsx / SchemeDetails.tsx
+            ├── Schemes.tsx / SchemeDetails.tsx / SchemeFullDetails.tsx
             ├── Gallery.tsx / YearGallery.tsx
             ├── AdminGallery.tsx
             ├── Blogs.tsx
@@ -380,7 +389,7 @@ npm install
 npm run dev
 ```
 
-The backend will start at `http://localhost:3000`.
+The backend will start at `http://localhost:8000`.
 
 The dev script uses `nodemon` with `dotenv/config` loaded automatically:
 ```bash
@@ -408,7 +417,7 @@ The frontend will start at `http://localhost:5173`.
 
 - Open [http://localhost:5173](http://localhost:5173) in your browser
 - You should see the Gram Panchayat homepage
-- The health check endpoint at `http://localhost:3000/api/health` should return `200 OK`
+- The health check endpoint at `http://localhost:8000/api/health` should return `200 OK`
 
 ---
 
@@ -472,7 +481,7 @@ docker-compose up --build
 
 ## API Reference
 
-All API endpoints are prefixed with `/api`. The backend runs on port `3000`.
+All API endpoints are prefixed with `/api`. The backend runs on port `8000` in local development.
 
 ### 🔐 Authentication Routes (`/api/users`)
 
@@ -521,6 +530,19 @@ All API endpoints are prefixed with `/api`. The backend runs on port `3000`.
 | `GET`  | `/api/gallery` | ❌ | Get all gallery images |
 | `POST` | `/api/gallery` | ✅ Admin | Upload gallery images |
 | `DELETE`| `/api/gallery/:id` | ✅ Admin | Delete gallery image |
+
+### 🧾 Scheme Routes (`/api/schemes`)
+
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|:---:|-------------|
+| `GET`  | `/api/schemes` | ❌ | Get published schemes (supports `year`, `category`, `page`, `limit`) |
+| `GET`  | `/api/schemes/:idOrSlug` | ❌ | Get single scheme by Mongo `_id` or `slug` |
+| `GET`  | `/api/schemes/admin/all` | ✅ Admin | Get all schemes including unpublished |
+| `POST` | `/api/schemes` | ✅ Admin | Create a scheme |
+| `PUT`  | `/api/schemes/:id` | ✅ Admin | Update a scheme |
+| `PATCH`| `/api/schemes/:id/publish` | ✅ Admin | Publish/unpublish scheme |
+| `DELETE`| `/api/schemes/:id` | ✅ Admin | Delete a scheme |
+| `POST` | `/api/schemes/upload-thumbnail` | ✅ Admin | Upload scheme thumbnail image |
 
 ### 👮 Officer Routes (`/api/officers`)
 
@@ -613,6 +635,7 @@ All certificate models reference the parent `Application`:
 | Model | Purpose |
 |---|---|
 | **Blog** | News articles / blog posts with title, content, images, author |
+| **Scheme** | Government scheme records with year/category/benefits/publish status/thumbnail |
 | **Notification** | In-app notifications for users linked to applications |
 | **Officer** | Gram Panchayat staff/officer records |
 | **Payment** | Razorpay payment records |
@@ -633,7 +656,8 @@ All certificate models reference the parent `Application`:
 | `/login` | `Login.tsx` | Public | Login page (no layout/navbar) |
 | `/register` | `register.tsx` | Public | Citizen registration |
 | `/schemes` | `Schemes.tsx` | Public | Government schemes list |
-| `/schemes/:year` | `SchemeDetails.tsx` | Public | Scheme details view |
+| `/schemes/:year` | `SchemeDetails.tsx` | Public | Year-wise schemes list |
+| `/schemes/details/:idOrSlug` | `SchemeFullDetails.tsx` | Public | Single scheme full details page |
 | `/gallery` | `Gallery.tsx` | Public | Photo gallery (by year) |
 | `/gallery/:year` | `YearGallery.tsx` | Public | Year-specific gallery |
 | `/blogs/:id` | `blogDetails.tsx` | Public | Single blog post view |
@@ -665,6 +689,7 @@ All certificate models reference the parent `Application`:
 | `/admin/user/:userId` | `UserDetails.tsx` | 🛡️ Admin | Citizen detail view |
 | `/admin/blogs` | `Blogs.tsx` | 🛡️ Admin | Manage blog posts |
 | `/admin/gallery` | `AdminGallery.tsx` | 🛡️ Admin | Manage gallery |
+| `/admin/schemes` | `AdminSchemes.tsx` | 🛡️ Admin | Manage schemes (CRUD + publish toggle) |
 
 ---
 
@@ -844,6 +869,28 @@ After approval:
 2. Find the approved application
 3. Upload the generated/digitally signed certificate (PDF)
 4. The certificate is stored in S3 and the citizen is notified
+
+### Managing Government Schemes
+
+1. Go to `/admin/schemes`
+2. Create a scheme with title, slug, year, category, benefits, eligibility, and process
+3. Upload a thumbnail image (stored at `/uploads/schemes`)
+4. Use **Publish** toggle to control whether it appears in public routes
+5. Edit or delete schemes any time from the same admin page
+
+### Scheme Data Migration (Static -> MongoDB)
+
+Use the backend script to migrate old frontend static schemes into MongoDB:
+
+```bash
+cd Backend
+
+# Preview records without writing to DB
+npm run migrate:schemes:dry
+
+# Execute migration
+npm run migrate:schemes
+```
 
 ---
 
