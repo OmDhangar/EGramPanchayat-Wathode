@@ -6,6 +6,7 @@ import { notifyAdminNewApplication, notifyUserStatusUpdate } from "../utils/emai
 import mongoose from "mongoose";
 import crypto from "crypto";
 import { Taxation } from "../models/taxation.model.js";
+import { Payment } from "../models/payment.model.js";
 
 // Import models
 import { User } from "../models/user.model.js";
@@ -1075,13 +1076,21 @@ const submitTaxationApplication = asyncHandler(async (req, res) => {
     groupType,
     oldTaxNumber,
     newTaxNumber,
-    utrNumber
+    utrNumber,
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature
   } = req.body;
   
   // Basic validations
-  if (!financialYear || !applicantName || !mobileNumber || !taxPayerNumber || 
-      !address || !utrNumber) {
+  if (!financialYear || !applicantName || !mobileNumber || !taxPayerNumber || !address) {
     throw new ApiError(400, "Missing required fields");
+  }
+
+  const isRazorpayFlow = Boolean(razorpay_order_id && razorpay_payment_id && razorpay_signature);
+
+  if (!isRazorpayFlow && !utrNumber) {
+    throw new ApiError(400, "UTR number is required for manual payment submissions");
   }
 
   // Validate mobile number (10 digits)
@@ -1094,41 +1103,62 @@ const submitTaxationApplication = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid email format");
   }
 
-  // Require payment receipt image
-  const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
-  if (receiptFiles.length === 0) {
-    throw new ApiError(400, "Payment receipt image is required");
-  }
+  let uploadedFiles = [];
+  let receiptUrl = '';
 
-  // Enforce images-only for receipt
-  const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
-  if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
-    throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
-  }
+  if (!isRazorpayFlow) {
+    // Legacy manual payment path with receipt image upload.
+    const receiptFiles = (req.files && (req.files.paymentReceipt || [])) || [];
+    if (receiptFiles.length === 0) {
+      throw new ApiError(400, "Payment receipt image is required");
+    }
 
-  // Validate file size (max 5MB)
-  if (receiptFiles[0].size > 5 * 1024 * 1024) {
-    throw new ApiError(400, 'Payment receipt must be less than 5MB');
-  }
+    const allowedImageTypes = ['image/jpeg','image/jpg','image/png'];
+    if (!allowedImageTypes.includes(receiptFiles[0].mimetype)) {
+      throw new ApiError(400, 'Payment receipt must be a JPG or PNG image');
+    }
 
-  // Process uploaded files using S3 (receipt + optional documents) under 'unverified'
-  const documentFiles = req.files && req.files.documents ? req.files.documents : [];
-  
-  // Validate maximum 5 additional documents
-  if (documentFiles.length > 5) {
-    throw new ApiError(400, 'Maximum 5 additional documents allowed');
-  }
+    if (receiptFiles[0].size > 5 * 1024 * 1024) {
+      throw new ApiError(400, 'Payment receipt must be less than 5MB');
+    }
 
-  const allFiles = [
-    ...receiptFiles,
-    ...documentFiles
-  ];
-  const uploadedFiles = await processUploadedFilesS3(allFiles, 'unverified');
+    const documentFiles = req.files && req.files.documents ? req.files.documents : [];
+    if (documentFiles.length > 5) {
+      throw new ApiError(400, 'Maximum 5 additional documents allowed');
+    }
 
-  // Mark the receipt file for easy identification
-  const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
-  if (receiptUpload) {
-    receiptUpload.isPaymentReceipt = true; // Add flag to identify receipt
+    const allFiles = [
+      ...receiptFiles,
+      ...documentFiles
+    ];
+    uploadedFiles = await processUploadedFilesS3(allFiles, 'unverified');
+
+    const receiptUpload = uploadedFiles.find(f => f.originalName === receiptFiles[0].originalname) || uploadedFiles[0];
+    if (receiptUpload) {
+      receiptUpload.isPaymentReceipt = true;
+      receiptUrl = receiptUpload.filePath || receiptUpload.s3Key || '';
+    }
+  } else {
+    const signaturePayload = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(signaturePayload)
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
+      throw new ApiError(400, 'Invalid Razorpay signature');
+    }
+
+    const payment = await Payment.findOne({
+      orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+      userId: req.user._id,
+      status: 'completed'
+    });
+
+    if (!payment) {
+      throw new ApiError(400, 'Verified Razorpay payment not found for this user');
+    }
   }
 
   // Create application with unique ID
@@ -1141,10 +1171,11 @@ const submitTaxationApplication = asyncHandler(async (req, res) => {
     documentType: 'taxation',
     uploadedFiles,
     paymentDetails: {
-      amount: 20, // Adjust the amount as per your requirement
+      amount: 20,
       paymentStatus: 'completed',
       utrNumber,
-      receiptUrl: receiptUpload?.filePath || receiptUpload?.s3Key || ''
+      paymentId: razorpay_payment_id,
+      receiptUrl
     }
   };
 
@@ -1160,7 +1191,10 @@ const submitTaxationApplication = asyncHandler(async (req, res) => {
     groupType,
     oldTaxNumber,
     newTaxNumber,
-    utrNumber
+    utrNumber,
+    paymentMethod: isRazorpayFlow ? 'razorpay' : 'manual_upi',
+    razorpayOrderId: razorpay_order_id,
+    razorpayPaymentId: razorpay_payment_id
   };
 
   // Create application with form data using the static method

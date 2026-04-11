@@ -18,6 +18,68 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+// Create payment order for taxation flow (pre-application payment)
+const createTaxationOrder = async (req, res) => {
+  try {
+    const userId = req.user._id?.toString() || req.user.id;
+    const amount = Number(req.body?.amount || 20);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized request'
+      });
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid amount provided'
+      });
+    }
+
+    const options = {
+      amount: Math.round(amount * 100),
+      currency: 'INR',
+      receipt: `TAX_${Date.now()}`.slice(0, 40),
+      notes: {
+        purpose: 'taxation',
+        userId
+      }
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    await Payment.create({
+      userId,
+      orderId: order.id,
+      amount,
+      currency: order.currency,
+      status: 'pending',
+      paymentMethod: 'razorpay',
+      metadata: {
+        purpose: 'taxation'
+      }
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        keyId: process.env.RAZORPAY_KEY_ID,
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency
+      }
+    });
+  } catch (error) {
+    console.error('Error creating taxation payment order:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to create taxation payment order'
+    });
+  }
+};
+
 // Create payment order
 const createOrder = async (req, res) => {
   try {
@@ -116,7 +178,7 @@ const verifyPayment = async (req, res) => {
       applicationId
     } = req.body;
 
-    const userId = req.user.id;
+    const userId = req.user._id?.toString() || req.user.id;
 
     // Generate signature
     const body = razorpay_order_id + '|' + razorpay_payment_id;
@@ -152,20 +214,22 @@ const verifyPayment = async (req, res) => {
     payment.paidAt = new Date();
     await payment.save();
 
-    // Update application payment status only
-    const application = await Application.findOne({
-      applicationId,
-      applicantId: userId
-    });
+    // Update application only when applicationId is provided.
+    if (applicationId) {
+      const application = await Application.findOne({
+        applicationId,
+        applicantId: userId
+      });
 
-    if (application) {
-      application.paymentDetails = {
-        ...application.paymentDetails,
-        paymentStatus: 'completed',
-        paymentId: razorpay_payment_id,
-        paymentDate: new Date()
-      };
-      await application.save();
+      if (application) {
+        application.paymentDetails = {
+          ...application.paymentDetails,
+          paymentStatus: 'completed',
+          paymentId: razorpay_payment_id,
+          paymentDate: new Date()
+        };
+        await application.save();
+      }
     }
 
     res.status(200).json({
@@ -229,6 +293,7 @@ const getPaymentStatus = async (req, res) => {
 };
 
 export {
+  createTaxationOrder,
   createOrder,
   verifyPayment,
   getPaymentStatus

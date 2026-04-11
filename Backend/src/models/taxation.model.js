@@ -41,9 +41,15 @@ const taxationSchema = new mongoose.Schema({
   oldTaxNumber: String,
   newTaxNumber: String,
   utrNumber: {
+    type: String
+  },
+  paymentMethod: {
     type: String,
-    required: true
-  }
+    enum: ['manual_upi', 'razorpay'],
+    default: 'manual_upi'
+  },
+  razorpayOrderId: String,
+  razorpayPaymentId: String
 }, {
   timestamps: true
 });

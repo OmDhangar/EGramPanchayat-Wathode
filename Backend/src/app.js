@@ -8,6 +8,7 @@ import blogRoutes from "./routes/blog.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import galleryRoutes from "./routes/gallery.routes.js";
 import schemeRoutes from "./routes/scheme.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 
 const app = express()
 
@@ -50,6 +51,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/admin/users", userRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/schemes", schemeRoutes);
+app.use("/api", paymentRoutes);
 
 
 export default app
