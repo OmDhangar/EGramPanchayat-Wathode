@@ -633,7 +633,7 @@ export default function Home() {
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
                 <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">श्री. नारायण कोंडुसिंग चौधरी </h3>
-                <p className="text-red-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">लोकनियुक्त सरपंच</p>
+                <p className="text-red-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">प्रशासक </p>
                 <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत, वाठोडे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
                   <button className="bg-red-100 text-red-700 p-1.5 xs:p-2 rounded-full hover:bg-red-200 transition-colors">
@@ -672,7 +672,7 @@ export default function Home() {
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
                 <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">श्रीमती. वंदनाबाई देविदास सावळे </h3>
-                <p className="text-green-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">उपसरपंच</p>
+                <p className="text-green-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">प्र.समिती सदस्य</p>
                 <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत वाठोडे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
                   <button className="bg-green-100 text-green-700 p-1.5 xs:p-2 rounded-full hover:bg-green-200 transition-colors">

@@ -61,6 +61,7 @@ export default function Navbar() {
       links: [
         { label: t("nav.apply"), path: "/apply-for-certificates" },
         { label: t("nav.letters"), path: "/selfdeclareletters" },
+        { label: t("nav.variousDocuments"), path: "/various-documents" },
         {label: t("nav.taxation"), path: "/taxation-info" }
       ],
     },

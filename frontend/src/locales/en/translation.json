@@ -22,12 +22,25 @@
     "citizen": "CITIZEN FACILITIES",
     "apply": "Apply for Certificates",
     "letters": "self-letters",
+    "variousDocuments": "Various Documents",
     "taxation": "Taxation",
     "public": "PUBLIC INFORMATION",
     "govtWebsites": "Government Websites",
     "Media": "Media",
     "help": "HELP",
     "contact": "Contact"
+  },
+  "variousDocumentsPage": {
+    "title": "Various Documents",
+    "previewOf": "Preview of",
+    "downloadExcelFile": "Download Excel File",
+    "sheet": "Sheet",
+    "totalRows": "Total Rows",
+    "totalColumns": "Total Columns",
+    "loading": "Loading spreadsheet data...",
+    "failedToLoad": "Failed to load document",
+    "noData": "No data found in this spreadsheet.",
+    "unknownError": "An unknown error occurred while reading the workbook."
   },
   "certificates": {
     "title": "Certificate Applications",
