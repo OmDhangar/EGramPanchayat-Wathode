@@ -48,6 +48,7 @@ import BlogDetails from './components/blogDetails';
 import AboutGramPanchayat from './pages/AboutGram';
 import DepartmentsPage from './pages/Department';
 import SelfDeclareLetters from './pages/selfdeclareletters';
+import VariousDocuments from './pages/VariousDocuments';
 import AdminGallery from './pages/AdminGallery';
 import AdminSchemes from './pages/AdminSchemes';
 import HousingAssessment8Form from './pages/HousingAssessment8Form';
@@ -149,6 +150,7 @@ function AppContent() {
             <Route path="/grampanchayat-info" element={<AboutGramPanchayat />} />
             <Route path="/departments" element={<DepartmentsPage />} />
             <Route path="/selfdeclareletters" element={<SelfDeclareLetters />} />
+            <Route path="/various-documents" element={<VariousDocuments />} />
           </Routes>
         </main>
         <Footer />

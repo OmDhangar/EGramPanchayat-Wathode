@@ -1,5 +1,5 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { FileText, ExternalLink, User, Phone, Mail, Hash, Building, MapPin, Tag, Upload, X, CheckCircle } from 'lucide-react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import { FileText, ExternalLink, User, Phone, Mail, Hash, Building, MapPin, Tag, CheckCircle } from 'lucide-react';
 import { api } from '../api/axios';
 
 interface TaxationFormData {
@@ -13,7 +13,20 @@ interface TaxationFormData {
   groupType: string;
   oldTaxNumber: string;
   newTaxNumber: string;
-  utrNumber: string;
+}
+
+interface RazorpayPaymentState {
+    orderId: string;
+    paymentId: string;
+    signature: string;
+}
+
+declare global {
+    interface Window {
+        Razorpay?: new (options: Record<string, unknown>) => {
+            open: () => void;
+        };
+    }
 }
 
 // Reusable form input component
@@ -51,12 +64,12 @@ const TaxationInfo: React.FC = () => {
     groupName: '',
     groupType: '',
     oldTaxNumber: '',
-    newTaxNumber: '',
-    utrNumber: ''
+        newTaxNumber: ''
   });
 
-  const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
-  const [documents, setDocuments] = useState<File[]>([]);
+    const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'paid'>('idle');
+    const [paymentDetails, setPaymentDetails] = useState<RazorpayPaymentState | null>(null);
+        const [isGatewayReady, setIsGatewayReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -72,26 +85,102 @@ const TaxationInfo: React.FC = () => {
     setError('');
   };
 
-  const handleReceiptChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-      if (!allowedTypes.includes(file.type)) {
-        setError('पेमेंट रसीद फक्त JPG किंवा PNG फॉरमॅटमध्ये असावी / Payment receipt must be JPG or PNG');
-        return;
-      }
-      if (file.size > 8 * 1024 * 1024) {
-        setError('पेमेंट रसीद 5MB पेक्षा कमी असावी / Payment receipt must be less than 5MB');
-        return;
-      }
-      setPaymentReceipt(file);
-      setError('');
-    }
-  };
+    const loadRazorpayScript = async () => {
+        if (window.Razorpay) return true;
 
-  const removeReceipt = () => {
-    setPaymentReceipt(null);
-  };
+        return new Promise<boolean>((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.async = true;
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
+    useEffect(() => {
+        const prepareGateway = async () => {
+            const loaded = await loadRazorpayScript();
+            setIsGatewayReady(loaded);
+        };
+
+        prepareGateway();
+    }, []);
+
+    const handleStartPayment = async () => {
+        setError('');
+
+        if (!formData.financialYear || !formData.applicantName || !formData.mobileNumber || !formData.taxPayerNumber || !formData.address) {
+            setError('पेमेंटपूर्वी आवश्यक फील्ड भरा / Please fill required fields before payment');
+            return;
+        }
+
+        if (!/^\d{10}$/.test(formData.mobileNumber)) {
+            setError('मोबाईल नंबर 10 अंकी असावा / Mobile number must be 10 digits');
+            return;
+        }
+
+        setPaymentStatus('processing');
+
+        try {
+            const scriptLoaded = isGatewayReady || await loadRazorpayScript();
+            if (!scriptLoaded || !window.Razorpay) {
+                throw new Error('Razorpay SDK failed to load');
+            }
+            if (!isGatewayReady) {
+                setIsGatewayReady(true);
+            }
+
+            const { data: orderResponse } = await api.post('/payments/taxation/create-order', { amount: 20 });
+            const orderData = orderResponse?.data;
+
+            if (!orderData?.orderId || !orderData?.keyId) {
+                throw new Error('Unable to initialize payment');
+            }
+
+            const razorpay = new window.Razorpay({
+                key: orderData.keyId,
+                amount: orderData.amount,
+                currency: orderData.currency,
+                name: 'Gram Panchayat Wathode',
+                description: 'Taxation Payment (2025-26)',
+                order_id: orderData.orderId,
+                prefill: {
+                    name: formData.applicantName,
+                    contact: formData.mobileNumber,
+                    email: formData.email
+                },
+                theme: {
+                    color: '#1d4ed8'
+                },
+                handler: async (response: Record<string, string>) => {
+                    await api.post('/payments/verify', {
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature
+                    });
+
+                    setPaymentDetails({
+                        orderId: response.razorpay_order_id,
+                        paymentId: response.razorpay_payment_id,
+                        signature: response.razorpay_signature
+                    });
+                    setPaymentStatus('paid');
+                },
+                modal: {
+                    ondismiss: () => {
+                        setPaymentStatus(prev => (prev === 'paid' ? prev : 'idle'));
+                    }
+                }
+            });
+
+            razorpay.open();
+        } catch (err: any) {
+            console.error('Payment initialization error:', err);
+            setPaymentStatus('idle');
+            setError(err.response?.data?.message || err.message || 'पेमेंट सुरू करण्यात त्रुटी / Failed to start payment');
+        }
+    };
 
   const handleSubmit = async (e: FormEvent) => {
   e.preventDefault();
@@ -100,7 +189,7 @@ const TaxationInfo: React.FC = () => {
   
   // Validation
   if (!formData.financialYear || !formData.applicantName || !formData.mobileNumber || 
-      !formData.taxPayerNumber || !formData.address || !formData.utrNumber) {
+      !formData.taxPayerNumber || !formData.address) {
       setError('कृपया सर्व आवश्यक फील्ड भरा / Please fill all required fields');
       return;
   }
@@ -115,41 +204,26 @@ const TaxationInfo: React.FC = () => {
       return;
   }
 
-  if (!paymentReceipt) {
-      setError('पेमेंट रसीद अपलोड करणे आवश्यक आहे / Payment receipt is required');
+  if (!paymentDetails) {
+      setError('कृपया आधी Razorpay पेमेंट पूर्ण करा / Please complete Razorpay payment first');
       return;
   }
 
   setIsSubmitting(true);
   
   try {
-    const formDataToSend = new FormData();
-    
-    
-    // Append all form fields - FIXED: Convert to string and ensure proper field names
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        formDataToSend.append(key, String(value));
-      }
-    });
+        const payload = {
+            ...formData,
+            razorpay_order_id: paymentDetails.orderId,
+            razorpay_payment_id: paymentDetails.paymentId,
+            razorpay_signature: paymentDetails.signature
+        };
 
-    // Append payment receipt - FIXED: Ensure file is properly appended
-    if (paymentReceipt) {
-      formDataToSend.append('paymentReceipt', paymentReceipt);
-    }
-
-    // Append additional documents - FIXED: Use correct field name
-    documents.forEach(doc => {
-      formDataToSend.append('documents', doc);
-    });
-
-    // FIXED: Use correct endpoint and headers
-    const response = await api.post('/applications/taxation/submit', formDataToSend, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-      }
-    });
+        const response = await api.post('/applications/taxation/submit', payload, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            }
+        });
 
     if (response.status !== 200 && response.status !== 201) {
       throw new Error(response.data?.message || 'अर्ज जमा करताना त्रुटी / Submission failed');
@@ -169,11 +243,10 @@ const TaxationInfo: React.FC = () => {
       groupName: '',
       groupType: '',
       oldTaxNumber: '',
-      newTaxNumber: '',
-      utrNumber: ''
+            newTaxNumber: ''
     });
-    setPaymentReceipt(null);
-    setDocuments([]);
+        setPaymentDetails(null);
+        setPaymentStatus('idle');
     
     // Scroll to success message
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -438,49 +511,61 @@ const TaxationInfo: React.FC = () => {
                         />
                     </div>
 
-                    {/* UTR Number */}
-                    <FormInput 
-                        icon={Hash}
-                        label="UTR क्रमांक *"
-                        name="utrNumber"
-                        value={formData.utrNumber}
-                        onChange={handleInputChange}
-                        placeholder="पेमेंट UTR नंबर"
-                        required
-                    />
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-5">
+                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                            <div>
+                                <h3 className="font-tiro-marathi text-lg text-blue-900 font-bold">Razorpay Payment Gateway</h3>
+                                <p className="text-sm font-tiro-marathi text-gray-700">
+                                    {isGatewayReady
+                                        ? 'Gateway ready. You can pay now.'
+                                        : 'Loading payment gateway...'}
+                                </p>
+                            </div>
+                            <span className={`text-xs px-3 py-1 rounded-full font-semibold ${isGatewayReady ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                {isGatewayReady ? 'READY' : 'LOADING'}
+                            </span>
+                        </div>
 
-                    {/* Payment Receipt Upload */}
-                    <div>
-                        <label className="block text-sm font-tiro-marathi text-gray-700 mb-2">
-                            पेमेंट रसीद अपलोड करा * (JPG/PNG फक्त, कमाल 5MB)
-                        </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                            {!paymentReceipt ? (
-                                <label className="flex flex-col items-center cursor-pointer">
-                                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                                    <span className="text-sm text-gray-600 font-tiro-marathi">पेमेंट रसीद अपलोड करण्यासाठी क्लिक करा</span>
-                                    <input
-                                        type="file"
-                                        accept="image/jpeg,image/jpg,image/png"
-                                        onChange={handleReceiptChange}
-                                        className="hidden"
-                                    />
-                                </label>
-                            ) : (
-                                <div className="flex items-center justify-between bg-gray-50 p-3 rounded">
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="w-5 h-5 text-blue-600" />
-                                        <span className="text-sm text-gray-700">{paymentReceipt.name}</span>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={removeReceipt}
-                                        className="text-red-600 hover:text-red-700"
-                                    >
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            )}
+                        {paymentDetails && (
+                            <div className="mt-3 text-sm bg-green-50 border border-green-200 rounded-lg p-3 font-tiro-marathi">
+                                <p className="text-green-800"><strong>Payment ID:</strong> {paymentDetails.paymentId}</p>
+                                <p className="text-green-800"><strong>Order ID:</strong> {paymentDetails.orderId}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h3 className="font-tiro-marathi text-blue-900 font-bold">Razorpay ऑनलाइन पेमेंट (रु. 20)</h3>
+                                <p className="text-sm text-blue-800 font-tiro-marathi">
+                                    अर्ज सबमिट करण्यापूर्वी Razorpay द्वारे पेमेंट पूर्ण करा.
+                                </p>
+                                {paymentStatus === 'paid' && (
+                                    <p className="text-sm text-green-700 font-tiro-marathi mt-2 font-semibold">
+                                        पेमेंट यशस्वी झाले आहे. आता अर्ज सबमिट करा.
+                                    </p>
+                                )}
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleStartPayment}
+                                disabled={paymentStatus === 'processing' || paymentStatus === 'paid'}
+                                className={`px-5 py-3 rounded-md font-tiro-marathi font-semibold text-white transition-colors ${
+                                  paymentStatus === 'paid'
+                                    ? 'bg-green-600 cursor-not-allowed'
+                                    : paymentStatus === 'processing'
+                                      ? 'bg-gray-400 cursor-not-allowed'
+                                      : 'bg-blue-700 hover:bg-blue-800'
+                                }`}
+                            >
+                                {paymentStatus === 'paid'
+                                  ? 'पेमेंट पूर्ण झाले'
+                                  : paymentStatus === 'processing'
+                                    ? 'पेमेंट सुरू आहे...'
+                                    : 'Razorpay ने पेमेंट करा'}
+                            </button>
                         </div>
                     </div>
 

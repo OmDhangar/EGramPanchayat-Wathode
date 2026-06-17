@@ -4,7 +4,6 @@ import mongoose from 'mongoose';
 const paymentSchema = new mongoose.Schema({
   applicationId: {
     type: String,
-    required: true,
     index: true
   },
   userId: {

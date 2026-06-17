@@ -282,7 +282,7 @@ const validateMarriageCertificate = (data) => {
 
 // Taxation Validation
 const validateTaxation = (data) => {
-  const required = ['financialYear', 'applicantName', 'mobileNumber', 'taxPayerNumber', 'address', 'utrNumber'];
+  const required = ['financialYear', 'applicantName', 'mobileNumber', 'taxPayerNumber', 'address'];
   const missing = required.filter(field => !data[field]);
   return {
     isValid: missing.length === 0,

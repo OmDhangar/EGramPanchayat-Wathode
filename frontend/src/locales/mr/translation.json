@@ -28,12 +28,25 @@
     "citizen": "नागरिक",
     "apply": "प्रमाणपत्रासाठी अर्ज करा",
     "letters": "स्वयंघोषणापत्रे",
+    "variousDocuments": "विविध कागदपत्रे",
     "taxation": "कर आकारणी",
     "public": "सार्वजनिक",
     "govtWebsites": "सरकारी वेबसाइट्स",
     "Media": "प्रसार माध्यमे",
     "help": "मदत",
     "contact": "संपर्क"
+  },
+  "variousDocumentsPage": {
+    "title": "विविध कागदपत्रे",
+    "previewOf": "याचा पूर्वावलोकन",
+    "downloadExcelFile": "एक्सेल फाइल डाउनलोड करा",
+    "sheet": "शीट",
+    "totalRows": "एकूण पंक्तीं",
+    "totalColumns": "एकूण स्तंभ",
+    "loading": "स्प्रेडशीट डेटा लोड हो रहा है...",
+    "failedToLoad": "दस्तावेज़ लोड करने में विफल",
+    "noData": "इस स्प्रेडशीट में कोई डेटा नहीं मिला।",
+    "unknownError": "कार्यपुस्तिका पढ़ते समय एक अज्ञात त्रुटि हुई।"
   },
   "certificates": {
     "title": "प्रमाणपत्र अर्ज",
