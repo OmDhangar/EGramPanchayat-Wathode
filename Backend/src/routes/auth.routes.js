@@ -42,8 +42,12 @@ router.post("/refresh-token", asyncHandler(async (req, res) => {
       throw new ApiError(401, "Invalid refresh token");
     }
 
-    const { accessToken, refreshToken: newRefreshToken } = 
-      await user.generateAuthTokens();
+    const accessToken = user.generateAccessToken();
+    const newRefreshToken = user.generateRefreshToken();
+
+    // Update user's refresh token in the database
+    user.refreshToken = newRefreshToken;
+    await user.save();
 
     const options = {
       httpOnly: true,

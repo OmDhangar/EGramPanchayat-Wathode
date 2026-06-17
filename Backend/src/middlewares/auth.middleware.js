@@ -33,8 +33,11 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         }
 
         // Generate new tokens
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = 
-          await user.generateAuthTokens();
+        const newAccessToken = user.generateAccessToken();
+        const newRefreshToken = user.generateRefreshToken();
+
+        user.refreshToken = newRefreshToken;
+        await user.save();
 
         // Set new cookies
         res.cookie("refreshToken", newRefreshToken, {
@@ -126,101 +129,3 @@ export const verifyAdmin = asyncHandler(async (req, res, next) => {
      throw error;
    }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import {asyncHandler} from "../utils/asyncHandler.js"
-// import {ApiError} from '../utils/ApiError.js'
-// import jwt from "jsonwebtoken"
-// import { User } from "../models/user.model.js"
-
-// export const verifyJWT = asyncHandler(async (req,res,next) => {
-//    try {
-//      const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","");
-//      console.log(token);
-//      if(!token){
-//             throw new ApiError(401,"Unauthorized request-No token provided");
-//         }
-     
-//      try {
-        
-//         const decodedToken = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
-//         const user = await User.findById(decodedToken?._id).select(
-//             "-password -refreshToken"
-//         )
-//         if(!user){
-//             throw new ApiError(401,"Invalid Access Token - user Not Found")
-//         }
-        
-//         req.user = user;
-//         next();
-//      } catch (error) {
-//         if (tokenError.name === 'TokenExpiredError') {
-//              throw new ApiError(401, "Access token has expired");
-//          }
-        
-//      }
-//    } catch (error) {
-//     throw new ApiError(401, "Invalid access token");
-//     next();
-//    }
-// })
-
-// export const verifyAdmin = asyncHandler(async (req,res,next) => {
-//       const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
-      
-//       if(!token){
-//           throw new ApiError(401,"Unauthorized request - No token provided ")
-//       }
-//       const decodedToken = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
-//       const user = await User.findById(decodedToken?._id).select(
-//           "-password -refreshToken"
-//       )
-//       if(!user){
-//           throw new ApiError(401,"Invalid Access Token - user Not Found")
-//       }
-//       if(user.role !== "admin"){
-//         throw new ApiError(401,"Unauthorized request You need to be admin to access this ")
-//       }
-//       req.user = user;
-//       next();
-    
-//  })

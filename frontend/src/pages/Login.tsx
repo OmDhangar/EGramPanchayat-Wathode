@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../Context/authContext';
 import { api } from '../api/axios';
 import { Helmet } from 'react-helmet';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [resetEmail, setResetEmail] = useState('');
   const [isForgotMode, setIsForgotMode] = useState(false);
   const [message, setMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { setIsAuthenticated, setUser } = useAuthContext();
 
@@ -119,16 +121,23 @@ function Login() {
               />
             </div>
 
-            <div className="mb-2">
+            <div className="mb-2 relative">
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 placeholder="पासवर्ड"
                 value={form.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none flex items-center justify-center"
+              >
+                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              </button>
             </div>
 
             <div className="text-right text-sm mb-4">

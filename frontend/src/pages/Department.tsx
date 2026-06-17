@@ -8,7 +8,7 @@ const departments = [
     name: "ग्रामपंचायत सदस्य",
     icon: FaUsers,
     members: [
-      { name: "श्री. नारायण कोंडूसिंग चौधरी", position: "सरपंच", ward: "२" },
+      { name: "श्री. नारायण कोंडूसिंग चौधरी", position: "प्रशासक", ward: "२" },
       { name: "सौ. वंदनाबाई देविदास सावळे", position: "उपसरपंच", ward: "२" },
       { name: "श्री. देविदास बारकू भिल", position: "सदस्य", ward: "१" },
       { name: "सौ. जयश्री नारायण शिरसाठ", position: "सदस्या", ward: "१" },
@@ -23,33 +23,33 @@ const departments = [
     name: "ग्रामीण पाणीपुरवठा व स्वच्छता समिती",
     icon: FaWater,
     members: [
-        { name: "श्री. नारायण कोंडूसिंग चौधरी", position: "अध्यक्ष" },
-        { name: "सौ. वंदनाबाई देविदास सावळे", position: "उपाध्यक्ष" },
-        { name: "श्री. देविदास बारकू भिल", position: "सदस्य" },
-        { name: "सौ. जयश्री नारायण शिरसाठ", position: "सदस्या" },
-        { name: "सौ. संगीता प्रकाशसिंग चौधरी", position: "सदस्या" },
-        { name: "सौ. सकूबाई भिका भिल", position: "सदस्या" },
-        { name: "श्री. संग्राम जयराम भिल", position: "सदस्य" },
-        { name: "सौ. भिकूबाई फुलसिंग भिल", position: "सदस्या" },
-        { name: "सौ. सरलाबाई आसाराम भोई", position: "सदस्या" },
-        { name: "श्री. एस पी. कोळी", position: "सचिव" },
+      { name: "श्री. नारायण कोंडूसिंग चौधरी", position: "प्रशासक" },
+      { name: "सौ. वंदनाबाई देविदास सावळे", position: "प्रशासकीय समिती सदस्य" },
+      { name: "श्री. देविदास बारकू भिल", position: "सदस्य" },
+      { name: "सौ. जयश्री नारायण शिरसाठ", position: "सदस्या" },
+      { name: "सौ. संगीता प्रकाशसिंग चौधरी", position: "सदस्या" },
+      { name: "सौ. सकूबाई भिका भिल", position: "सदस्या" },
+      { name: "श्री. संग्राम जयराम भिल", position: "सदस्य" },
+      { name: "सौ. भिकूबाई फुलसिंग भिल", position: "सदस्या" },
+      { name: "सौ. सरलाबाई आसाराम भोई", position: "सदस्या" },
+      { name: "श्री. एस पी. कोळी", position: "सचिव" },
     ],
   },
   {
     name: "संत गाडगेबाबा ग्राम स्वच्छता अभियान समिती",
     icon: FaBroom,
     members: [
-        { name: "श्री. नारायण कोंडूसिंग चौधरी", position: "अध्यक्ष" },
-        { name: "सौ. वंदनाबाई देविदास सावळे", position: "उपसरपंच" },
-        { name: "सौ. चंद्रकला जगन्नाथ भदाणे", position: "मुख्याध्यापक" },
-        { name: "सौ. जयश्री नारायण शिरसाठ", position: "ग्रा पं सदस्या" },
-        { name: "सौ. संगीता प्रकाशसिंग चौधरी", position: "ग्रा पं सदस्या" },
-        { name: "श्रीमती. कल्पना मच्छिंद्र चौधरी", position: "अंगणवाडी सेविका" },
-        { name: "श्री. संग्राम जयराम भिल", position: "ग्रा पं. सदस्य" },
-        { name: "श्रीमती प्रतिभा राजेंद्र वाडीले", position: "आशा" },
-        { name: "श्रीमती वैशाली आनंदा शिरसाठ", position: "आशा" },
-        { name: "श्री. बापु बारकू भिल", position: "पा पु कर्मचारी" },
-        { name: "श्री. एस पी. कोळी", position: "सचिव" },
+      { name: "श्री. नारायण कोंडूसिंग चौधरी", position: "प्रशासक" },
+      { name: "सौ. वंदनाबाई देविदास सावळे", position: "प्रशासकीय समिती सदस्य" },
+      { name: "सौ. चंद्रकला जगन्नाथ भदाणे", position: "मुख्याध्यापक" },
+      { name: "सौ. जयश्री नारायण शिरसाठ", position: "ग्रा पं सदस्या" },
+      { name: "सौ. संगीता प्रकाशसिंग चौधरी", position: "ग्रा पं सदस्या" },
+      { name: "श्रीमती. कल्पना मच्छिंद्र चौधरी", position: "अंगणवाडी सेविका" },
+      { name: "श्री. संग्राम जयराम भिल", position: "ग्रा पं. सदस्य" },
+      { name: "श्रीमती प्रतिभा राजेंद्र वाडीले", position: "आशा" },
+      { name: "श्रीमती वैशाली आनंदा शिरसाठ", position: "आशा" },
+      { name: "श्री. बापु बारकू भिल", position: "पा पु कर्मचारी" },
+      { name: "श्री. एस पी. कोळी", position: "सचिव" },
     ],
   },
 ];
@@ -76,11 +76,10 @@ const DepartmentsPage = () => {
                 <li key={dept.name} className="mb-2">
                   <button
                     onClick={() => setActiveDept(dept)}
-                    className={`w-full text-left flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 ${
-                      activeDept.name === dept.name
-                        ? 'bg-red-600 text-white shadow'
-                        : 'hover:bg-yellow-100 text-gray-700'
-                    }`}
+                    className={`w-full text-left flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 ${activeDept.name === dept.name
+                      ? 'bg-red-600 text-white shadow'
+                      : 'hover:bg-yellow-100 text-gray-700'
+                      }`}
                   >
                     <dept.icon className="text-xl" />
                     <span className="font-tiro-marathi">{dept.name}</span>

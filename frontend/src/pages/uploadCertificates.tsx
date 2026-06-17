@@ -10,7 +10,7 @@ interface Application {
   applicantId: {
     _id: string;
     fullName: string;
-  };
+  } | null;
   documentType: string;
   status: string;
   uploadedFiles: Array<{
@@ -154,11 +154,11 @@ const UploadCertificates = () => {
               {/* Applicant Details */}
               <div className="mb-4">
                 <p className="text-sm">
-                  <span className="font-medium">Applicant:</span> {application.applicantId.fullName}
+                  <span className="font-medium">Applicant:</span> {application.applicantId?.fullName || 'N/A'}
                 </p>
                 <p className="text-sm">
                   <span className="font-medium">Reviewed:</span>{' '}
-                  {new Date(application.reviewedAt!).toLocaleDateString()}
+                  {application.reviewedAt ? new Date(application.reviewedAt).toLocaleDateString() : 'N/A'}
                 </p>
                 {application.adminRemarks && (
                   <p className="text-sm mt-2">

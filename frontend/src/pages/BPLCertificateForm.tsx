@@ -47,7 +47,7 @@ const BPLCertificateForm = () => {
     bplYear: "",
     bplListSerialNo: ""
   });
-  
+
   const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -57,7 +57,7 @@ const BPLCertificateForm = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
@@ -66,7 +66,7 @@ const BPLCertificateForm = () => {
 
   const handleReceiptChange = (file?: File) => {
     if (!file) return;
-    if (!['image/jpeg','image/jpg','image/png'].includes(file.type)) {
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
       setErrors(prev => ({ ...prev, paymentReceipt: t("forms.validation.onlyImages") }));
       return;
     }
@@ -77,18 +77,18 @@ const BPLCertificateForm = () => {
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-    
+
     // Required field validations
     if (!formData.financialYear) newErrors.financialYear = t("forms.validation.required");
     if (!formData.applicantName) newErrors.applicantName = t("forms.validation.required");
-    if (!formData.aadhaarNumber || !/^\d{12}$/.test(formData.aadhaarNumber)) 
+    if (!formData.aadhaarNumber || !/^\d{12}$/.test(formData.aadhaarNumber))
       newErrors.aadhaarNumber = "Aadhaar must be 12 digits";
     if (!formData.address) newErrors.address = t("forms.validation.required");
     if (!formData.taluka) newErrors.taluka = t("forms.validation.required");
     if (!formData.district) newErrors.district = t("forms.validation.required");
-    if (!formData.whatsappNumber || !/^\d{10}$/.test(formData.whatsappNumber)) 
+    if (!formData.whatsappNumber || !/^\d{10}$/.test(formData.whatsappNumber))
       newErrors.whatsappNumber = t("forms.validation.invalidPhone");
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) 
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       newErrors.email = t("forms.validation.invalidEmail");
     if (!formData.utrNumber) newErrors.utrNumber = t("forms.validation.required");
     if (!formData.bplYear) newErrors.bplYear = t("forms.validation.required");
@@ -101,16 +101,16 @@ const BPLCertificateForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setLoading(true);
-    
+
     try {
       const formDataToSend = new FormData();
-      
+
       // Append form fields
       Object.entries(formData).forEach(([key, value]) => {
         formDataToSend.append(key, value);
@@ -199,11 +199,11 @@ const BPLCertificateForm = () => {
               </div>
             </div>
 
-            
+
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Applicant Details Section */}
-              <FormSection 
+              <FormSection
                 title={t("forms.bplCertificate.applicantInfo")}
                 description={t("forms.bplCertificate.applicantInfoDesc")}
               >
@@ -269,7 +269,7 @@ const BPLCertificateForm = () => {
               </FormSection>
 
               {/* Location Details Section */}
-              <FormSection 
+              <FormSection
                 title={t("forms.bplCertificate.bplInfo")}
                 description=""
               >
@@ -296,7 +296,7 @@ const BPLCertificateForm = () => {
               </FormSection>
 
               {/* BPL Details Section */}
-              <FormSection 
+              <FormSection
                 title={t("forms.bplCertificate.bplInfo")}
                 description={t("forms.bplCertificate.bplInfoDesc")}
               >
@@ -323,7 +323,7 @@ const BPLCertificateForm = () => {
               </FormSection>
 
               {/* Payment Details Section */}
-              <FormSection 
+              <FormSection
                 title={t("forms.bplCertificate.paymentInfo")}
                 description={t("forms.bplCertificate.paymentInfoDesc")}
               >
@@ -337,28 +337,28 @@ const BPLCertificateForm = () => {
                     required
                     error={errors.utrNumber}
                   />
-                  
+
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       {t("forms.common.paymentReceipt")} (PNG/JPG) - Rs. 20 *
                     </label>
                     {/* QR Code for Payment */}
                     <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex flex-col md:flex-row items-center gap-4">
+                      <div className="flex flex-col md:flex-row items-center gap-4">
                         <div className="flex-shrink-0">
-                        <img 
-                            src="/images/QR.jpg" 
-                            alt="Payment QR Code" 
-                            className="w-82 h-82 object-contain border border-gray-300 rounded-lg"
-                        />
+                          <img
+                            src="/images/QR.jpg"
+                            alt="Payment QR Code"
+                            className="w-96 h-96 object-contain border border-gray-300 rounded-lg"
+                          />
                         </div>
                         <div className="text-sm text-blue-800">
-                        <p className="font-semibold mb-2">{t("forms.common.scanQR")}</p>
-                        <p className="mb-1">{t("forms.common.useUPI")}</p>
-                        <p className="mb-1">{t("forms.common.uploadScreenshot")}</p>
-                        <p className="text-blue-600 font-medium">{t("forms.common.enterUTR")}</p>
+                          <p className="font-semibold mb-2">{t("forms.common.scanQR")}</p>
+                          <p className="mb-1">{t("forms.common.useUPI")}</p>
+                          <p className="mb-1">{t("forms.common.uploadScreenshot")}</p>
+                          <p className="text-blue-600 font-medium">{t("forms.common.enterUTR")}</p>
                         </div>
-                    </div>
+                      </div>
                     </div>
                     <input
                       type="file"

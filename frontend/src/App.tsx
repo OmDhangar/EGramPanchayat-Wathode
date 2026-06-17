@@ -50,6 +50,9 @@ import DepartmentsPage from './pages/Department';
 import SelfDeclareLetters from './pages/selfdeclareletters';
 import AdminGallery from './pages/AdminGallery';
 import AdminSchemes from './pages/AdminSchemes';
+import HousingAssessment8Form from './pages/HousingAssessment8Form';
+import NiradharCertificateForm from './pages/NiradharCertificateForm';
+import BPLCertificateForm from './pages/BPLCertificateForm';
 
 
 function AppContent() {
@@ -124,23 +127,24 @@ function AppContent() {
             <Route path="/about-vathode" element={<AboutVathode />} />
             <Route path="/user/certificates" element={<UserCertificates />} />
             <Route path="/user/notifications" element={<UserNotifications />} />
-            <Route path="/certificate/:applicationId" element={<CertificateDownload/>}/>
-            <Route path="/media" element={<Media/>} />
+            <Route path="/certificate/:applicationId" element={<CertificateDownload />} />
+            <Route path="/media" element={<Media />} />
             //common
             <Route path="/home" element={<Home />} />
             <Route path="/members" element={<Members />} />
             <Route path="/notices" element={<PublicInfo />} />
             <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="*" element={<NotFound />} />
-            <Route path="/contact" element={<Help/>} />
+            <Route path="/contact" element={<Help />} />
             //certificates
-            <Route path="/apply-for-certificates" element={<FormsPage/>} />
+            <Route path="/apply-for-certificates" element={<FormsPage />} />
             <Route path="/apply-for-certificates/birth-certificate" element={<BirthCertificate />} />
             <Route path="/apply-for-certificates/death-certificate" element={<DeathCertificate />} />
             <Route path="/apply-for-certificates/marriage-certificate" element={<MarriageCertificateForm />} />
-            <Route path="/apply-for-certificates/land-record-8a" element={<LandRecord8AForm />} />
-            <Route path="/apply-for-certificates/no-outstanding-debts" element={<NoOutstandingDebtsForm />} />
             <Route path="/apply-for-certificates/digital-signed-712" element={<DigitalSigned712Form />} />
+            <Route path="/apply-for-certificates/housing-assessment-8" element={<HousingAssessment8Form />} />
+            <Route path="/apply-for-certificates/bpl-certificate" element={<BPLCertificateForm />} />
+            <Route path="/apply-for-certificates/niradhar-certificate" element={<NiradharCertificateForm />} />
             <Route path="/taxation-info" element={<TaxationInfo />} />
             <Route path="/grampanchayat-info" element={<AboutGramPanchayat />} />
             <Route path="/departments" element={<DepartmentsPage />} />

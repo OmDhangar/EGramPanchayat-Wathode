@@ -25,9 +25,9 @@ interface FormSubmission {
     filePath: string;
     generatedAt: string;
   };
-  paymentDetails: {
+  paymentDetails?: {
     paymentStatus: string;
-  };
+  } | null;
   createdAt: string;
   updatedAt: string;
   adminRemarks?: string;
@@ -240,9 +240,9 @@ const CertificateApprovals = () => {
                     <div className="flex items-center justify-between">
                       <span>Payment Status:</span>
                       <span className={`font-medium ${
-                        form.paymentDetails.paymentStatus === 'pending' ? 'text-yellow-600' : 'text-green-600'
+                        (form.paymentDetails?.paymentStatus || 'pending') === 'pending' ? 'text-yellow-600' : 'text-green-600'
                       }`}>
-                        {form.paymentDetails.paymentStatus.toUpperCase()}
+                        {(form.paymentDetails?.paymentStatus || 'N/A').toUpperCase()}
                       </span>
                     </div>
                     

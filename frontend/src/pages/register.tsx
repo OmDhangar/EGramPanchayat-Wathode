@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../Context/authContext';
 import { api } from '../api/axios';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -12,6 +13,8 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const { setIsAuthenticated, setUser } = useAuthContext();
 
@@ -81,24 +84,38 @@ const Register = () => {
 
           <div className="input-group">
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               name="password"
               placeholder="पासवर्ड"
               value={form.password}
               onChange={handleChange}
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="eye-btn"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
 
           <div className="input-group">
             <input
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               name="confirmPassword"
               placeholder="पासवर्डची पुष्टी करा"
               value={form.confirmPassword}
               onChange={handleChange}
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="eye-btn"
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
 
           <motion.button
@@ -161,10 +178,12 @@ const StyledWrapper = styled.div`
 
   .input-group {
     margin-bottom: 1rem;
+    position: relative;
 
     input {
       width: 100%;
       padding: 0.75rem;
+      padding-right: 2.5rem;
       border: 1px solid #E5E7EB;
       border-radius: 8px;
       outline: none;
@@ -176,6 +195,30 @@ const StyledWrapper = styled.div`
 
       &::placeholder {
         color: #9CA3AF;
+      }
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #6B7280;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 1.2rem;
+
+      &:hover {
+        color: #374151;
+      }
+
+      &:focus {
+        outline: none;
       }
     }
   }

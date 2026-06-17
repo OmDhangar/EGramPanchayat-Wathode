@@ -27,7 +27,7 @@ interface FormDetails {
   documentType: 'birth_certificate' | 'death_certificate' | 'marriage_certificate'| string; // Added 'death_certificate'
   status: 'pending' | 'approved' | 'rejected' | 'certificate_generated'; // Added new status
   uploadedFiles: UploadedFile[];
-  paymentDetails: {
+  paymentDetails?: {
     paymentStatus: 'pending' | 'completed' | 'failed'; // Expanded based on your data
     paymentId?: string;
     paymentAmount?: number;
@@ -35,7 +35,7 @@ interface FormDetails {
     amount?: number;
     utrNumber?: string;
     receiptUrl?: string; // Added receipt URL
-  };
+  } | null;
   createdAt: string;
   updatedAt: string;
   formDataModel: string;
@@ -728,11 +728,11 @@ const renderUserActions = () => {
                 >
                   <label className="text-sm text-gray-600">Payment Status</label>
                   <p className={`font-semibold capitalize ${
-                    formDetails.paymentDetails.paymentStatus === 'pending' ? 'text-yellow-600' :
-                    formDetails.paymentDetails.paymentStatus === 'completed' ? 'text-green-600' :
+                    (formDetails.paymentDetails?.paymentStatus || 'pending') === 'pending' ? 'text-yellow-600' :
+                    formDetails.paymentDetails?.paymentStatus === 'completed' ? 'text-green-600' :
                     'text-red-600'
                   }`}>
-                    {formDetails.paymentDetails.paymentStatus}
+                    {formDetails.paymentDetails?.paymentStatus || 'N/A'}
                   </p>
                 </motion.div>
               </div>

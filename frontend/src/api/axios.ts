@@ -5,11 +5,9 @@ const isLocalhost =
   typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-const defaultBaseURL = isLocalhost
-  ? 'http://localhost:8000/api'
-  : 'https://api.grampanchayatwathode.com/api';
+const defaultBaseURL = 'http://localhost:8000/api'
 
-  
+
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || defaultBaseURL,
   withCredentials: true,
@@ -80,11 +78,11 @@ api.interceptors.response.use(
     // Global error toast handling for all other errors
     if (error.response) {
       // Extract error message from backend's ApiResponse structure
-      const errorMessage = 
-        error.response?.data?.message || 
+      const errorMessage =
+        error.response?.data?.message ||
         error.response?.data?.error ||
         `Error: ${error.response.status} - ${error.response.statusText}`;
-      
+
       // Show error toast (skip for 401 as it's handled above)
       if (error.response.status !== 401 && error.response.status !== 400) {
         toast.error(errorMessage);

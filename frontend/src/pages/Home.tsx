@@ -17,12 +17,12 @@ const fadeInUp: Variants = {
 };
 
 export default function Home() {
-  
+
   const imageGrid = [
     { src: "/images/33.jpeg", alt: "Village 1" },
     { src: "/images/1.jpeg", alt: "Village 2" },
     { src: "/images/3.jpeg", alt: "Village 3" },
-     { src: "/images/26.jpeg", alt: "Village 8" },
+    { src: "/images/26.jpeg", alt: "Village 8" },
     { src: "/images/phu.jpeg", alt: "Village 4" },
     { src: "/images/place.jpeg", alt: "Village 5" },
     { src: "/images/samajmandir.jpeg", alt: "Village 6" },
@@ -93,11 +93,11 @@ export default function Home() {
       </Helmet>
       {/* Background grid */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]" />
-      
+
       {/* Full Screen Slideshow Overlay */}
       {isFullScreen && (
         <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center">
-          <button 
+          <button
             onClick={toggleFullScreen}
             className="absolute top-4 right-4 text-white bg-black/50 p-2 rounded-full z-10"
           >
@@ -105,7 +105,7 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          
+
           {/* Slideshow Container - Responsive height */}
           <div className="
             relative w-full 
@@ -124,31 +124,30 @@ export default function Home() {
                   alt={img.alt}
                   className="w-full h-full max-h-[50vh]  object-cover flex-shrink-0"
                   loading="lazy" // Lazy load images in the full-screen slideshow
-                  // TODO: For further optimization, generate different sizes for these images (e.g., using a build tool or image optimization service)
-                  // and update srcset and sizes attributes.
-                  // Example srcset (replace with actual generated paths and sizes):
-                  // srcset={`${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-small.$1')} 640w,
-                  //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-medium.$1')} 768w,
-                  //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-large.$1')} 1024w,
-                  //          ${img.src} 1280w`}
-                  // sizes="(max-width: 640px) 640px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1280px"
-                  // TODO: Consider converting all images to AVIF format for better compression and quality.
+                // TODO: For further optimization, generate different sizes for these images (e.g., using a build tool or image optimization service)
+                // and update srcset and sizes attributes.
+                // Example srcset (replace with actual generated paths and sizes):
+                // srcset={`${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-small.$1')} 640w,
+                //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-medium.$1')} 768w,
+                //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-large.$1')} 1024w,
+                //          ${img.src} 1280w`}
+                // sizes="(max-width: 640px) 640px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1280px"
+                // TODO: Consider converting all images to AVIF format for better compression and quality.
                 />
               ))}
             </div>
           </div>
 
 
-          
+
           <div className="absolute bottom-10 flex justify-center space-x-2">
             {imageGrid.map((_, idx) => (
               <button
                 key={idx}
-                className={`w-4 h-4 rounded-full mx-1 border-2 border-white transition-all duration-300 ${
-                  idx === currentIndex ? "bg-white scale-110 shadow" : "bg-white/60"
-                }`}
+                className={`w-4 h-4 rounded-full mx-1 border-2 border-white transition-all duration-300 ${idx === currentIndex ? "bg-white scale-110 shadow" : "bg-white/60"
+                  }`}
                 onClick={() => setCurrentIndex(idx)}
-                  aria-label={`Go to slide ${idx + 1}`}
+                aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
           </div>
@@ -170,27 +169,26 @@ export default function Home() {
                   key={index}
                   src={img.src}
                   alt={img.alt}
-                  className={`w-full flex-shrink-0 object-cover h-full transition-transform duration-[2000ms] ease-in-out ${
-                    index === currentIndex ? "scale-105 opacity-100" : "scale-100 opacity-60"
-                  }`}
+                  className={`w-full flex-shrink-0 object-cover h-full transition-transform duration-[2000ms] ease-in-out ${index === currentIndex ? "scale-105 opacity-100" : "scale-100 opacity-60"
+                    }`}
                   style={{
                     transition: "transform 2s cubic-bezier(0.4,0,0.2,1), opacity 1.2s",
                   }}
                   loading={index === 0 ? "eager" : "lazy"} // Eager load the first image, lazy load the rest
                   fetchPriority={index === 0 ? "high" : undefined} // High priority for the first image
-                  // TODO: For further optimization, generate different sizes for these images (e.g., using a build tool or image optimization service)
-                  // and update srcset and sizes attributes.
-                  // Example srcset (replace with actual generated paths and sizes):
-                  // srcset={`${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-small.$1')} 640w,
-                  //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-medium.$1')} 768w,
-                  //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-large.$1')} 1024w,
-                  //          ${img.src} 1280w`}
-                  // sizes="(max-width: 640px) 640px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1280px"
-                  // TODO: Consider converting all images to AVIF format for better compression and quality.
+                // TODO: For further optimization, generate different sizes for these images (e.g., using a build tool or image optimization service)
+                // and update srcset and sizes attributes.
+                // Example srcset (replace with actual generated paths and sizes):
+                // srcset={`${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-small.$1')} 640w,
+                //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-medium.$1')} 768w,
+                //          ${img.src.replace(/\.(webp|jpg|jpeg|png)$/, '-large.$1')} 1024w,
+                //          ${img.src} 1280w`}
+                // sizes="(max-width: 640px) 640px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1280px"
+                // TODO: Consider converting all images to AVIF format for better compression and quality.
                 />
               ))}
             </div>
-            
+
             {/* Full Screen Button */}
             {/* <button 
               onClick={toggleFullScreen}
@@ -201,7 +199,7 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
               </svg>
             </button> */}
-            
+
             {/* Swacch Sundar Harit Vathode Title (left, overlay, visible on all screens) */}
             <div className="absolute left-2 top-2 sm:left-6 sm:top-6 bg-black/40 rounded-lg px-2 py-1 sm:px-4 sm:py-2 shadow">
               <p className="text-sm xs:text-base sm:text-2xl font-tiro-marathi leading-tight text-green-200">स्वच्छ सुंदर</p>
@@ -220,9 +218,8 @@ export default function Home() {
               {imageGrid.map((_, idx) => (
                 <button
                   key={idx}
-                  className={`w-2.5 h-2.5 rounded-full mx-1 border-2 border-yellow-200 transition-all duration-300 ${
-                    idx === currentIndex ? "bg-white-300 scale-110 shadow" : "bg-white/60"
-                  }`}
+                  className={`w-2.5 h-2.5 rounded-full mx-1 border-2 border-yellow-200 transition-all duration-300 ${idx === currentIndex ? "bg-white-300 scale-110 shadow" : "bg-white/60"
+                    }`}
                   onClick={() => setCurrentIndex(idx)}
                   aria-label={`Go to slide ${idx + 1}`}
 
@@ -291,15 +288,15 @@ export default function Home() {
               <div className="absolute -inset-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
               <div className="relative bg-white rounded-2xl p-5 shadow-xl">
                 <div className="overflow-hidden rounded-xl">
-                  <img 
-                    src="/images/wathodesatelliteimg.jpg" 
-                    alt="वाठोडे सॅटेलाईट नकाशा" 
+                  <img
+                    src="/images/wathodesatelliteimg.jpg"
+                    alt="वाठोडे सॅटेलाईट नकाशा"
                     className="map-image w-full h-64 object-cover rounded-xl transform transition-transform duration-700"
                   />
                 </div>
                 <div className="mt-4 text-center">
                   <h3 className="text-xl font-tiro-marathi font-bold text-blue-900">वाठोडे नकाशा सॅटेलाईट दृश्य</h3>
-                  
+
                 </div>
               </div>
             </div>
@@ -307,9 +304,9 @@ export default function Home() {
 
             {/* Google Maps Link */}
             <div className="text-center">
-              <a 
-                href="https://maps.app.goo.gl/K28V13vpQdTZd1ca8" 
-                target="_blank" 
+              <a
+                href="https://maps.app.goo.gl/K28V13vpQdTZd1ca8"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center font-tiro-marathi justify-center bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
               >
@@ -326,9 +323,9 @@ export default function Home() {
               <div className="absolute -inset-3 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
               <div className="relative bg-white rounded-2xl p-5 shadow-xl">
                 <div className="overflow-hidden rounded-xl">
-                  <img 
-                    src="/images/wathodesatelliteimg2.jpg.png" 
-                    alt="वाठोडे गावाचा नकाशा" 
+                  <img
+                    src="/images/wathodesatelliteimg2.jpg.png"
+                    alt="वाठोडे गावाचा नकाशा"
                     className="map-image w-full h-64 object-cover rounded-xl transform transition-transform duration-700"
                   />
                 </div>
@@ -342,7 +339,7 @@ export default function Home() {
 
           {/* Right Side: Village Information */}
           <div className="w-full lg:w-3/5 relative">
-             {/* Statistics Cards */}
+            {/* Statistics Cards */}
             <div className="grid grid-cols-2 mb-5 gap-4">
               <div className="stat-card bg-white rounded-xl p-5 shadow-lg border border-blue-100 text-center">
                 <div className="text-3xl font-tiro-marathi font-bold text-blue-800 mb-2">२,०७२</div>
@@ -364,7 +361,7 @@ export default function Home() {
             {/* Decorative elements */}
             <div className="decoration-circle w-64 h-64 -top-16 -right-16 bg-blue-400"></div>
             <div className="decoration-circle w-32 h-32 -bottom-8 -left-8 bg-cyan-300"></div>
-            
+
             <div className="info-palette relative rounded-2xl p-8 text-white overflow-hidden">
               {/* Corner decorative elements */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-900 opacity-10 rounded-bl-full"></div>
@@ -372,18 +369,18 @@ export default function Home() {
 
               <h2 className="text-3xl font-tiro-marathi font-bold mb-6 text-center relative z-10"> ◆ ग्रामपंचायत वाठोडे माहिती  ◆</h2>
               <div className="w-20 h-1 bg-red-400 mx-auto mb-8 rounded-full"></div>
-              
+
               <div className="space-y-2 relative z-10">
                 <div className="bg-blue-900 bg-opacity-50 p-5 rounded-xl hover:bg-opacity-70 transition-all duration-300">
                   <h3 className="text-xl font-tiro-marathi font-bold mb-3 flex items-center">
                     <i className="fas fa-users mr-3 text-cyan-300"></i>
-                      ➤  लोकसंख्या आणि समाजरचना
+                    ➤  लोकसंख्या आणि समाजरचना
                   </h3>
                   <p className="text-blue-100 font-tiro-marathi">
                     वाठोडे हे महाराष्ट्रातील धुळे जिल्ह्याच्या शिरपूर तालुक्यातील एक छोटेखानी पण महत्वाचे गाव आहे. 2011 च्या जनगणनेनुसार, या गावात एकूण 433 कुटुंबे राहतात आणि एकूण लोकसंख्या 2,072 इतकी आहे.
                   </p>
                 </div>
-                
+
                 <div className="bg-blue-900 bg-opacity-50 p-5 rounded-xl hover:bg-opacity-70 transition-all duration-300">
                   <h3 className="text-xl font-tiro-marathi font-bold mb-3 flex items-center">
                     <i className="fas fa-graduation-cap mr-3 text-cyan-300"></i>
@@ -393,7 +390,7 @@ export default function Home() {
                     शिक्षणाच्या दृष्टीने पाहता, वाठोडे गावाचा एकूण साक्षरता दर 70.42% आहे, ज्यामध्ये पुरुष साक्षरता 82.64% आणि स्त्री साक्षरता 58.20% इतकी आहे. हा साक्षरता दर राज्याच्या तुलनेत समाधानकारक मानला जातो.
                   </p>
                 </div>
-                
+
                 <div className="bg-blue-900 bg-opacity-50 p-5 rounded-xl hover:bg-opacity-70 transition-all duration-300">
                   <h3 className="text-xl font-tiro-marathi font-bold mb-3 flex items-center">
                     <i className="fas fa-industry mr-3 text-cyan-300"></i>
@@ -403,11 +400,11 @@ export default function Home() {
                     कामाच्या बाबतीत, एकूण 1,206 नागरिक काम करतात, यामध्ये 957 जण मुख्य व्यवसायात गुंतलेले आहेत. मुख्य काम करणाऱ्यांमध्ये 226 शेतकरी, 652 कृषी मजूर, 14 घरगुती उद्योगात कार्यरत, आणि उर्वरित 65 जण इतर व्यवसाय करतात.
                   </p>
                 </div>
-                
+
                 <div className="bg-blue-900 bg-opacity-50 p-5 rounded-xl hover:bg-opacity-70 transition-all duration-300">
                   <h3 className="text-xl font-tiro-marathi font-bold mb-3 flex items-center">
                     <i className="fas fa-map-marked-alt mr-3 text-cyan-300"></i>
-                   ➤ भौगोलिक माहिती
+                    ➤ भौगोलिक माहिती
                   </h3>
                   <p className="text-blue-100 font-tiro-marathi">
                     गावाचे एकूण क्षेत्रफळ सुमारे 299.17 हेक्टर (3.0 चौ.कि.मी.) आहे. वाठोडे ग्रामपंचायतीचा कारभार स्थानिक पातळीवर थेट सरपंच निवडणुकीद्वारे चालवला जातो. गावात प्राथमिक शैक्षणिक संस्था, पाणीपुरवठा योजना, वीजपुरवठा आणि काही मूलभूत नागरी सुविधा उपलब्ध आहेत.
@@ -421,9 +418,9 @@ export default function Home() {
 
       {/* Rest of the components remain the same */}
       {/* Officers Section */}
-      
-        {/* Officers Section */}
-       <section className="py-14 px-2 sm:px-8 bg-gradient-to-b from-blue-50 to-indigo-50">
+
+      {/* Officers Section */}
+      <section className="py-14 px-2 sm:px-8 bg-gradient-to-b from-blue-50 to-indigo-50">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-12 text-center">
@@ -455,7 +452,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
-                <h3 className="text-base xs:text-xl font-tiro-marathi font-bold text-gray-800 mb-1"> मा.श्री. अजीज करीम शेख </h3>
+                <h3 className="text-base xs:text-xl font-tiro-marathi font-bold text-gray-800 mb-1">मा.श्री.बाबासाहेब बेलदार</h3>
                 <p className="text-blue-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">मुख्य कार्यकारी अधिकारी (IAS)</p>
                 <p className="text-gray-600 font-tiro-marathi text-xs xs:text-sm mb-3 xs:mb-4">जिल्हा परिषद, धुळे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
@@ -610,7 +607,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            
+
 
             {/* Officer 4 */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl group border-2 border-blue-100">
@@ -633,7 +630,7 @@ export default function Home() {
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
                 <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">श्री. नारायण कोंडुसिंग चौधरी </h3>
-                <p className="text-red-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">लोकनियुक्त सरपंच</p>
+                <p className="text-red-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3"> प्रशासक</p>
                 <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत, वाठोडे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
                   <button className="bg-red-100 text-red-700 p-1.5 xs:p-2 rounded-full hover:bg-red-200 transition-colors">
@@ -672,7 +669,7 @@ export default function Home() {
               </div>
               <div className="pt-10 xs:pt-16 pb-4 xs:pb-6 px-4 xs:px-6 text-center">
                 <h3 className="text-base xs:text-xl font-bold font-tiro-marathi  text-gray-800 mb-1">श्रीमती. वंदनाबाई देविदास सावळे </h3>
-                <p className="text-green-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">उपसरपंच</p>
+                <p className="text-green-600 font-tiro-marathi text-sm xs:text-base mb-2 xs:mb-3">प्रशासकीय समिती सदस्य</p>
                 <p className="text-gray-600 text-xs xs:text-sm font-tiro-marathi  mb-3 xs:mb-4">ग्रामपंचायत वाठोडे</p>
                 <div className="flex justify-center space-x-2 xs:space-x-3">
                   <button className="bg-green-100 text-green-700 p-1.5 xs:p-2 rounded-full hover:bg-green-200 transition-colors">
@@ -731,7 +728,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      
+
 
       {/* Notice Board / Current News Section */}
       <section className="py-14 px-2 sm:px-8 bg-[#ececff]">
