@@ -1,5 +1,9 @@
 <div align="center">
 
+Contributor of the repo: 
+1. Pushkar Deore
+2. Om Dhangar
+
 # 🌿 EGramPanchayat – Wathode
 ### ई-ग्रामपंचायत वाठोडे
 **A Full-Stack Digital Governance Platform for Village Administration**
