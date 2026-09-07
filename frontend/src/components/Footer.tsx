@@ -113,41 +113,50 @@ const Footer = () => {
         <div className="mt-6 border-t border-black pt-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-gray-700 text-center sm:text-left">
             <div>ही ग्रामपंचायत वाठोडे ची अधिकृत वेबसाईट आहे.</div>
-            <div>शेवटचे अद्ययावत: {new Date().toLocaleDateString("en-IN")}</div> 
+            <div>शेवटचे अद्ययावत: {new Date().toLocaleDateString("en-IN")}</div>
             {/* <div className="flex flex-wrap justify-center sm:justify-start gap-x-3 gap-y-1">
               <Link to="/privacy" className="hover:underline">गोपनीयता धोरण</Link>
               <Link to="/terms" className="hover:underline">अटी व नियम</Link>
               <Link to="/accessibility" className="hover:underline">अॅक्सेसीबिलिटी</Link>
               <Link to="/sitemap" className="hover:underline">साइटमॅप</Link>
             </div> */}
-           
+
           </div>
 
           {/* Copyright */}
           <div className="mt-4 flex flex-col sm:flex-row items-center font-bold justify-between text-gray-600 gap-1">
             <p>&copy; {new Date().getFullYear()} ग्रामपंचायत वाठोडे — सर्व हक्क राखीव.</p>
             <p className="animate-blink">
-  Developed by{" "}
-  <span className="font-semibold  text-red">
-    <a
-      href="https://www.linkedin.com/in/pushkar-deore-a58506237/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:underline"
-    >
-      Pushkar
-    </a>{" "}
-    &amp;{" "}
-    <a
-      href="https://www.linkedin.com/in/om-dhangar-21219627a/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:underline"
-    >
-      Om
-    </a>
-  </span>
-</p>
+              Developed by{" "}
+              <span className="font-semibold text-red">
+                <a
+                  href="https://www.linkedin.com/in/pushkar-deore-a58506237/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  Pushkar Deore
+                </a>
+                {", "}
+                <a
+                  href="https://www.linkedin.com/in/om-dhangar-21219627a/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  Om Dhangar
+                </a>
+                {" & "}
+                <a
+                  href="https://www.linkedin.com/in/kulvanshrajput369/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  Kulvansh Rajput
+                </a>
+              </span>
+            </p>
 
           </div>
         </div>
